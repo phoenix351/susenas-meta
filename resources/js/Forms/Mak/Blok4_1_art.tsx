@@ -12,11 +12,12 @@ import { useEffect, useRef, useState } from "react";
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 
-const EntriIntiForm: React.FC<{
+const Blok4_1_art: React.FC<{
     form: any;
     onFinish: (values: any) => void;
+    tabContentStyle: React.CSSProperties;
     // record: any;
-}> = ({ form, onFinish }) => {
+}> = ({ form, onFinish, tabContentStyle }) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -91,10 +92,10 @@ const EntriIntiForm: React.FC<{
     }, []);
 
     return (
-        <>
+        <Space style={tabContentStyle}>
             <Form
                 form={form}
-                name="EntriIntiForm"
+                name="Blok4_1_art"
                 onFinish={onFinish}
                 autoComplete="off"
                 layout="vertical"
@@ -136,8 +137,8 @@ const EntriIntiForm: React.FC<{
                     Refresh
                 </Button>
             </Form>
-        </>
+        </Space>
     );
 };
 
-export default EntriIntiForm;
+export default Blok4_1_art;

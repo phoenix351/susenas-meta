@@ -1,7 +1,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-import { useEffect } from "react";
-import { Head } from "@inertiajs/react";
+import { useEffect, useState } from "react";
+import { Head, router } from "@inertiajs/react";
 import { PageProps, User, KondisiSummary, Summary } from "@/types";
 import BarChart from "@/Components/Grafik/BarChart";
 import {
@@ -10,20 +10,152 @@ import {
     ReactFragment,
     ReactPortal,
 } from "react";
-import { Card, Col, Form, Row, Space, Statistic } from "antd";
+import {
+    Button,
+    Card,
+    Col,
+    Form,
+    Row,
+    Space,
+    Statistic,
+    Table,
+    message,
+} from "antd";
 import {
     WarningOutlined,
     StopOutlined,
     CheckCircleOutlined,
 } from "@ant-design/icons";
 import EntriIntiForm from "@/Forms/EntriIntiSearch";
+import axios from "axios";
 
 const Dashboard = () => {
     useEffect(() => {}, []);
     const [cariForm] = Form.useForm();
-    const cariFinish = () => {};
+    const [daftarSampel, setDaftarSampel] = useState([]);
+    const [messageApi, contextHolder] = message.useMessage();
+    const Status = {
+        3: (
+            <Button type="primary" danger>
+                Error
+            </Button>
+        ),
+        2: <Button type="default">Warning</Button>,
+        1: (
+            <Button type="primary" style={{ backgroundColor: "green" }}>
+                Success
+            </Button>
+        ),
+    };
+    const cariFinish = async (values: any) => {
+        console.log({ values });
+        messageApi.open({
+            type: "loading",
+            key: "cari",
+            content: "Memuat Data",
+        });
+        try {
+            const url = route("api.entri.inti", values);
+            const { data } = await axios.get(url);
+            console.log({ data });
+            setDaftarSampel(data.data);
+            messageApi.open({
+                type: "success",
+                key: "cari",
+                content: "Berhasil mengambil data",
+            });
+        } catch (error) {
+            messageApi.open({
+                type: "error",
+                key: "cari",
+                content: "Oops terjadi kesalahan, silahkan hubungi admin",
+            });
+        }
+    };
+    const dataSource = [
+        {
+            key: "1",
+            name: "Mike",
+            age: 32,
+            address: "10 Downing Street",
+        },
+        {
+            key: "2",
+            name: "John",
+            age: 42,
+            address: "10 Downing Street",
+        },
+    ];
+
+    const columns = [
+        {
+            title: "Nomor",
+            dataIndex: "id",
+            key: "id",
+        },
+        {
+            title: "Kecamatan",
+            dataIndex: "kec",
+            key: "kec",
+            render: (_: any, record: any) =>
+                `[${record.kode_kec}] ${record.nama_kecamatan}`,
+        },
+        {
+            title: "Desa",
+            dataIndex: "desa",
+            key: "desa",
+            render: (_: any, record: any) =>
+                `[${record.kode_desa}] ${record.nama_desa}`,
+        },
+        {
+            title: "Blok Sensus",
+            dataIndex: "kode_bs4",
+            key: "kode_bs4",
+        },
+        {
+            title: "No Urut Sampel",
+            dataIndex: "id_dsrt",
+            key: "id_dsrt",
+        },
+        {
+            title: "Nama KRT",
+            dataIndex: "nama_krt",
+            key: "nama_krt",
+        },
+        {
+            title: "Alamat",
+            dataIndex: "alamat",
+            key: "alamat",
+        },
+        {
+            title: "Status",
+            dataIndex: "status",
+            key: "status",
+            render: (value: number) => {
+                const statusElement = Status[value as keyof typeof Status];
+                return statusElement || <span>No Status</span>;
+            },
+        },
+        {
+            title: "Entri",
+            dataIndex: "entri",
+            key: "entri",
+            render: (_: any, record: any) => (
+                <Button
+                    type="primary"
+                    onClick={() =>
+                        router.get(route("entri.mak", { id_dsrt: record.id }))
+                    }
+                >
+                    Entri
+                </Button>
+            ),
+        },
+    ];
+
     return (
         <>
+            {contextHolder}
             <Head title="Entri Kuesioner Inti" />
             <Space
                 style={{
@@ -35,6 +167,7 @@ const Dashboard = () => {
                 direction="vertical"
             >
                 <EntriIntiForm form={cariForm} onFinish={cariFinish} />
+                <Table dataSource={daftarSampel} columns={columns} />;
             </Space>
         </>
     );

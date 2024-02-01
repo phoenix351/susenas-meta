@@ -2,14 +2,18 @@
 
 use App\Http\Controllers\MasterJabatanController;
 use App\Http\Controllers\ProfileController;
-
+use App\Models\Kabkot;
 use App\Models\MasterBarang;
 use App\Models\MasterJabatan;
+use App\Models\Nks;
+use App\Models\Provinsi;
+use App\Models\SusenasInti;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 /*
@@ -60,21 +64,58 @@ Route::middleware('auth')->group(function () {
     })->name('admin.master.jabatan.tingkat');
 
     route::get('/api/entri/provinsi', function () {
-        $data = [];
+        $data = Provinsi::get();
         return response()->json(['data' => $data]);
     })->name('api.entri.provinsi');
     route::get('/api/entri/kabkot', function () {
-        $data = [];
+        $data = Kabkot::get();
         return response()->json(['data' => $data]);
     })->name('api.entri.kabkot');
     route::get('/api/entri/semester', function () {
         $data = [];
         return response()->json(['data' => $data]);
     })->name('api.entri.semester');
-    route::get('/api/entri/nks', function () {
-        $data = [];
-        return response()->json(['data' => $data]);
+
+    route::get('/api/entri/nks', function (Request $request) {
+        $kabkot = $request->query('kodeKabkot');
+        $semester = $request->query('semester');
+
+        $data = Nks::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
+        return response()->json(['data' => $data, 'semester' => $semester, 'kabkot' => $kabkot]);
     })->name('api.entri.nks');
+
+    route::get('/entri/mak', function (Request $request) {
+        $kabkot = $request->query('id_dsrt');
+
+
+        // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
+        return Inertia::render("Entri/Mak");
+    })->name('entri.mak');
+
+    route::get('/api/entri/inti', function (Request $request) {
+        $kabkot = $request->query('kode_kab');
+        $semester = $request->query('semester');
+        $provinsi = $request->query('kode_prov');
+        $nks = $request->query('nks');
+
+        $query = "
+    SELECT susenas_inti.*, master_kecamatan.nama AS nama_kecamatan, master_desa.nama as nama_desa
+    FROM susenas_inti
+    LEFT JOIN master_kecamatan ON master_kecamatan.kab = susenas_inti.kode_kab
+                               AND master_kecamatan.kec = susenas_inti.kode_kec
+    LEFT JOIN master_desa ON master_desa.kab = susenas_inti.kode_kab
+                               AND master_desa.kec = susenas_inti.kode_kec
+                               AND master_desa.desa = susenas_inti.kode_desa
+
+    WHERE susenas_inti.kode_kab = ?
+      AND susenas_inti.semester = ?
+      AND susenas_inti.kode_prov = ?
+      AND susenas_inti.nks = ?
+";
+
+        $data = DB::select($query, [$kabkot, $semester, $provinsi, $nks]);
+        return response()->json(['data' => $data, 'semester' => $semester, 'kabkot' => $kabkot, 'provinsi' => $provinsi, 'nks' => $nks]);
+    })->name('api.entri.inti');
 
 
     route::get('/dashboard', function () {
