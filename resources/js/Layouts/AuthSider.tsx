@@ -36,16 +36,10 @@ const AuthSider: React.FC<AuthSiderProps> = ({
         },
 
         {
-            key: "barang",
-            icon: <ShoppingOutlined />,
-            onClick: () => handleMenuClick("barang"),
-            label: "Daftar Barang",
-        },
-        {
-            key: "pengajuan",
-            icon: <FileOutlined />,
-            onClick: () => handleMenuClick("pengajuan"),
-            label: "Daftar Pengajuan",
+            key: "entri",
+            icon: <EditOutlined />,
+            onClick: () => handleMenuClick("entri"),
+            label: "Entri",
         },
     ];
     if (user.role !== "basic") {

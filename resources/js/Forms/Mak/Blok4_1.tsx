@@ -93,75 +93,63 @@ const Blok4_1: React.FC<{
     }
 
     return (
-        <Space
-            style={{
-                // backgroundColor: "blue",
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-            }}
-        >
-            {/* {contextHolder} */}
-            {/* Blok I  */}
-            {/* <Space style={{ width: "100%", backgroundColor: "red" }}> */}
-            <Tabs
-                onChange={handleChange}
-                type="card"
-                items={[
-                    {
-                        label: "Hal 2",
-                        key: "1",
-                        children: (
-                            <Blok4_1_hal2
-                                form={blok4_1_hal2Form}
-                                onFinish={blok4_1_hal2Finish}
-                            />
-                        ),
-                    },
-                    {
-                        label: "Hal 4",
-                        key: "2",
-                        children: (
-                            <Blok4_1_hal4
-                                form={blok4_1_hal4Form}
-                                onFinish={blok4_1_hal4Finish}
-                            />
-                        ),
-                    },
-                    {
-                        label: "Hal 6",
-                        key: "3",
-                        children: (
-                            <Blok4_1_hal6
-                                form={blok4_1_hal6Form}
-                                onFinish={blok4_1_hal6Finish}
-                            />
-                        ),
-                    },
-                    {
-                        label: "Blok 8",
-                        key: "4",
-                        children: (
-                            <Blok4_1_hal8
-                                form={blok4_1_hal8Form}
-                                onFinish={blok4_1_hal8Finish}
-                            />
-                        ),
-                    },
-                    {
-                        label: "Blok 8",
-                        key: "4",
-                        children: (
-                            <Blok4_1_hal10
-                                form={blok4_1_hal10Form}
-                                onFinish={blok4_1_hal10Finish}
-                            />
-                        ),
-                    },
-                ]}
-            />
-            {/* </Space>s */}
-        </Space>
+        <Tabs
+            onChange={handleChange}
+            type="line"
+            style={{ backgroundColor: "#fff", padding: "10px" }}
+            items={[
+                {
+                    label: "Hal 2",
+                    key: "1",
+                    children: (
+                        <Blok4_1_hal2
+                            form={blok4_1_hal2Form}
+                            onFinish={blok4_1_hal2Finish}
+                        />
+                    ),
+                },
+                {
+                    label: "Hal 4",
+                    key: "2",
+                    children: (
+                        <Blok4_1_hal4
+                            form={blok4_1_hal4Form}
+                            onFinish={blok4_1_hal4Finish}
+                        />
+                    ),
+                },
+                {
+                    label: "Hal 6",
+                    key: "3",
+                    children: (
+                        <Blok4_1_hal6
+                            form={blok4_1_hal6Form}
+                            onFinish={blok4_1_hal6Finish}
+                        />
+                    ),
+                },
+                {
+                    label: "Blok 8",
+                    key: "4",
+                    children: (
+                        <Blok4_1_hal8
+                            form={blok4_1_hal8Form}
+                            onFinish={blok4_1_hal8Finish}
+                        />
+                    ),
+                },
+                {
+                    label: "Blok 10",
+                    key: "5",
+                    children: (
+                        <Blok4_1_hal10
+                            form={blok4_1_hal10Form}
+                            onFinish={blok4_1_hal10Finish}
+                        />
+                    ),
+                },
+            ]}
+        />
     );
 };
 
