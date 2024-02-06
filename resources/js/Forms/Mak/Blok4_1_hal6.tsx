@@ -1,575 +1,273 @@
-import {
-    Button,
-    Divider,
-    Form,
-    Image,
-    Input,
-    InputNumber,
-    Select,
-    Space,
-    Table,
-    Typography,
-    message,
-} from "antd";
-import { useEffect, useRef, useState } from "react";
+import { Form, InputNumber, Space, Typography } from "antd";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
-import axios from "axios";
+import TabelBlok from "@/Components/TabelBlok";
 
 const { Text, Title } = Typography;
 
-const Blok4_1_hal2: React.FC<{
+const Blok4_1_hal6: React.FC<{
     form: any;
     onFinish: (values: any) => void;
     // record: any;
 }> = ({ form, onFinish }) => {
-    const formItemLayout = {
-        // wrapperCol: { span: 24 },
-    };
-    const imageProps = {
-        width: "70px",
-        height: "auto",
-        preview: false,
-    };
-    const tableStyle: React.CSSProperties = {
-        borderCollapse: "collapse",
-        width: "100%",
-    };
-    const cellStyle = {
-        borderStyle: "solid",
-        border: "solid 1px black",
-        // width: "100%",
-        padding: "5px",
-    };
-    const formItemStyle = {
-        margin: "auto",
-        padding: "5px",
-    };
-    // konstanta
-    const daftarKlas: any[] | undefined = [
-        { label: "Desa", value: "1" },
-        { label: "Kelurahan", value: "2" },
-    ];
-    const [messageApi, contextHolder] = message.useMessage();
-    const [daftarProv, setDaftarProv] = useState([
-        { label: "[71] SULAWESI UTARA", value: "71" },
-    ]);
-    const [daftarKabKot, setDaftarKabKot] = useState([]);
-    const [daftarKecamatan, setDaftarKecamatan] = useState([]);
-    const [daftarDesa, setDaftarDesa] = useState([]);
-    const [daftarSemester, setDaftarSemester] = useState([]);
-
-    const [daftarNks, setDaftarNks] = useState([]);
-
-    const [kabkotDisable, setKabkotDisable] = useState(true);
-    const [semesterDisable, setSemesterDisable] = useState(true);
-    const [nksDisable, setNksDisable] = useState(true);
-
-    const fetchProvinsi = async () => {
-        const url = route("api.entri.provinsi");
-
-        const { data } = await axios.get(url);
-
-        const daftarProvinsi = data.data.map((item: any) => ({
-            label: `[${item.kode}] ${item.nama}`,
-            value: item.kode,
-        }));
-        setDaftarProv(daftarProvinsi);
-    };
-
-    const fetchKabkot = async () => {
-        const url = route("api.entri.kabkot");
-
-        const { data } = await axios.get(url);
-        const daftarKabkot = data.data.map((item: any) => ({
-            label: `[${item.kode}] ${item.nama}`,
-            value: item.kode,
-        }));
-        setDaftarKabKot(daftarKabkot);
-    };
-    const fetchSemester = async () => {
-        const url = route("api.entri.semester");
-
-        const { data } = await axios.get(url);
-        const daftarKabkot = data.map((item: any) => ({
-            label: item.label,
-            value: item.value,
-        }));
-        setDaftarKabKot(daftarKabkot);
-    };
-    const fetchNks = async () =>
-        // kodeProv: string,
-        // kodeKabkot: string,
-        // semester: string
+    //    const konten =
+    const konten = [
         {
-            const url = route("api.entri.nks", {
-                kodeKabkot: form.getFieldValue("kode_kab"),
-                semester: form.getFieldValue("semester"),
-            });
-
-            const { data } = await axios.get(url);
-            // console.log("====================================");
-            // console.log(url);
-            // console.log("====================================");
-            const daftarNks = data.data.map((item: any) => ({
-                label: item.kode_nks,
-                value: item.kode_nks,
-            }));
-            setDaftarNks(daftarNks);
-        };
-    useEffect(() => {
-        try {
-            // fetchProvinsi();
-            fetchKabkot();
-            // fetchSemester();
-        } catch (error) {}
-    }, []);
+            nomor: 63,
+            kode_coicop: "01121005",
+            rincian: "Tetelan, sandung lamur",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 64,
+            kode_coicop: "01127",
+            rincian: "Lainnya ( hati, jeroan, iga, kaki, buntut, kepala, dsb)",
+            satuan: "Kg",
+            type: "lain",
+        },
+        {
+            nomor: 65,
+            kode_coicop: "",
+            rincian: "E. TELUR DAN SUSU [R.66 s.d. R.74]",
+            satuan: "",
+            type: "sub",
+        },
+        {
+            nomor: 66,
+            kode_coicop: "01147002",
+            rincian: "Telur ayam ras",
+            satuan: "Butir",
+            type: "standar",
+        },
+        {
+            nomor: 67,
+            kode_coicop: "01147001",
+            rincian: "Telur ayam kampung",
+            satuan: "Butir",
+            type: "standar",
+        },
+        {
+            nomor: 68,
+            kode_coicop: "01147003",
+            rincian: "Telur itik/telur itik manila",
+            satuan: "Butir",
+            type: "standar",
+        },
+        {
+            nomor: 69,
+            kode_coicop: "01147005/ 11111003/ 01147004",
+            rincian:
+                "Telur lainnya (telur puyuh, telur asin mentah maupun matang, telur penyu, telur angsa, dsb)",
+            satuan: "Butir",
+            type: "lain",
+        },
+        {
+            nomor: 70,
+            kode_coicop: "01143003",
+            rincian: "Susu cair pabrik",
+            satuan: "Kotak kecil (250ml)",
+            type: "standar",
+        },
+        {
+            nomor: 71,
+            kode_coicop: "01143005",
+            rincian: "Susu kental manis",
+            satuan: "Kaleng (397gr)",
+            type: "standar",
+        },
+        {
+            nomor: 72,
+            kode_coicop: "01143001/2",
+            rincian: "Susu bubuk",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 73,
+            kode_coicop: "01143007",
+            rincian: "Susu bubuk bayi",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 74,
+            kode_coicop: "01141/45/46",
+            rincian: "Susu lainnya dan Hasil lain dari susu",
+            satuan: "",
+            type: "lain",
+        },
+        {
+            nomor: 75,
+            kode_coicop: "",
+            rincian: "F. SAYUR-SAYURAN [R.76 s.d. R.101]",
+            satuan: "",
+            type: "sub",
+        },
+        {
+            nomor: 76,
+            kode_coicop: "01171012",
+            rincian: "Bayam",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 77,
+            kode_coicop: "01171014",
+            rincian: "Kangkung",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 78,
+            kode_coicop: "01172001/2/3",
+            rincian: "Kol/kubis",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 79,
+            kode_coicop: "01171016",
+            rincian: "Sawi putih (petsai)",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 80,
+            kode_coicop: "01171015",
+            rincian: "Sawi hijau",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 81,
+            kode_coicop: "01173003",
+            rincian: "Buncis",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 82,
+            kode_coicop: "01173008",
+            rincian: "Kacang panjang",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 83,
+            kode_coicop: "01173005",
+            rincian: "Tomat sayur, tomat ceri",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 84,
+            kode_coicop: "01174001",
+            rincian: "Wortel",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 85,
+            kode_coicop: "01173004",
+            rincian: "Mentimun",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 86,
+            kode_coicop: "01171010",
+            rincian: "Daun ketela pohon/daun singkong",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 87,
+            kode_coicop: "01173023/26",
+            rincian: "Terong",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 88,
+            kode_coicop: "01171017",
+            rincian: "Tauge",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 89,
+            kode_coicop: "01173014/15",
+            rincian: "Labu, labu siam, labu parang",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 90,
+            kode_coicop: "01171026",
+            rincian: "Bahan sayur sop/capcay/ kimlo (paket)",
+            satuan: "Bungkus",
+            type: "standar",
+        },
+        {
+            nomor: 91,
+            kode_coicop: "01171024/25",
+            rincian: "Bahan sayur asam/lodeh (paket)",
+            satuan: "Bungkus",
+            type: "standar",
+        },
+        {
+            nomor: 92,
+            kode_coicop: "01173017",
+            rincian: "Nangka muda",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 93,
+            kode_coicop: "01173020",
+            rincian: "Pepaya muda",
+            satuan: "Kg",
+            type: "standar",
+        },
+        {
+            nomor: 94,
+            kode_coicop: "01173022",
+            rincian: "Jengkol",
+            satuan: "Kg",
+            type: "standar",
+        },
+    ];
+    const title =
+        "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";
 
     return (
-        <>
-            <Button type="primary" onClick={() => form.submit()}>
-                Simpan
-            </Button>
+        <Space direction="vertical" style={{ width: "100%" }}>
             <Space
-                style={{ width: "100%", justifyContent: "space-between" }}
+                style={{ width: "100%", justifyContent: "end" }}
                 direction="horizontal"
             >
-                {/* <Image src= /> */}
-                <Space direction="vertical" align="start">
-                    <Image {...imageProps} src="/images/bps.png" />
-                </Space>
-                <Space
-                    direction="vertical"
-                    style={{ alignContent: "center", textAlign: "center" }}
-                >
-                    <Image {...imageProps} src="/images/garuda.png" />
-                    <Title level={5}>
-                        SURVEI SOSIAL EKONOMI SEMESTER I 2024
-                    </Title>
-                    <Text>KETERANGAN KONSUMSI MAKANAN RUMAH TANGGA</Text>
-                </Space>
-                <Button type="primary" style={{ margin: "auto" }}>
-                    <Text
-                        style={{
-                            color: "#fff",
-                            // marginBottom: "0px",
-                            margin: "auto",
-                            fontSize: "20px",
-                            fontWeight: "600",
-                        }}
-                    >
-                        VSUSENAS.MAK
-                    </Text>
-                </Button>
+                <Text>
+                    Jumlah komoditas bahan makanan,bahan minuman, dan rokok yang
+                    terisi pada halaman ini
+                </Text>
+                <Form.Item style={{ margin: "auto" }} name="hal6_jml_komoditas">
+                    <InputNumber
+                        max={30}
+                        style={{ width: "40px" }}
+                    ></InputNumber>
+                </Form.Item>
             </Space>
             <Form
                 form={form}
-                name="Blok4_1_hal2"
+                name="Blok4_1_hal6"
                 onFinish={onFinish}
                 autoComplete="off"
                 layout="vertical"
             >
-                <table style={tableStyle}>
-                    <thead
-                        style={{
-                            backgroundColor: "#fc0",
-                            textAlign: "center",
-                        }}
-                    >
-                        <tr>
-                            <td style={cellStyle} colSpan={4}>
-                                <Space direction="vertical">
-                                    <Title level={4}>
-                                        BLOK I. KETERANGAN TEMPAT
-                                    </Title>
-                                    <Text>
-                                        [ disalin dari Blok I kuesioner Seruti
-                                        Inti (VSUSENAS.INTI) ]
-                                    </Text>
-                                </Space>
-                            </td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style={cellStyle}>101</td>
-                            <td style={cellStyle}>Provinsi</td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="kode_prov"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        defaultValue={"71"}
-                                        options={daftarProv}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>102</td>
-                            <td style={cellStyle}>Kabupaten / Kota *)</td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="kode_kab"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        options={daftarKabKot}
-                                        showSearch
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>103</td>
-                            <td style={cellStyle}>Kecamatan</td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="kode_kec"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        options={daftarKecamatan}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>104</td>
-                            <td style={cellStyle}>Desa / Kelurahan *)</td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="kode_desa"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        options={daftarDesa}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>105</td>
-                            <td style={cellStyle}>
-                                Klasifikasi Desa/Kelurahan
-                            </td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="klas"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        options={daftarKlas}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>106</td>
-                            <td style={cellStyle}>Nomor Blok Sensus</td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="kode_bs4"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Input maxLength={4} />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>107</td>
-                            <td style={cellStyle}>Nomor Kode Sampel</td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="nks"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Input maxLength={6} />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>108</td>
-                            <td style={cellStyle}>
-                                Nomor Urut Bangunan Fisik di Sketsa Peta WB
-                            </td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="108"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <InputNumber />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>109</td>
-                            <td style={cellStyle}>
-                                Nomor Urut Sampel Rumah Tangga
-                            </td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="109"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <InputNumber />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>110</td>
-                            <td style={cellStyle}>Nama Kepala Rumah Tangga</td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="110"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Input />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>110</td>
-                            <td style={cellStyle}>
-                                {" "}
-                                Alamat (Nama Jalan/Gang/RT/RW/Dusun){" "}
-                            </td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="111"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Input />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                {/* blok 2  */}
-                <Divider />
-                <table style={tableStyle}>
-                    <thead>
-                        <tr
-                            style={{
-                                backgroundColor: "#fc0",
-                                textAlign: "center",
-                            }}
-                        >
-                            <td colSpan={6} style={cellStyle}>
-                                <Space direction="vertical">
-                                    <Title level={4}>
-                                        BLOK II. KETERANGAN PENCACAH
-                                    </Title>
-                                    <Text>
-                                        [ disalin dari Blok II kuesioner Seruti
-                                        Inti (VSUSENAS.INTI) ]
-                                    </Text>
-                                </Space>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th style={cellStyle} colSpan={2}>
-                                Uraian
-                            </th>
-                            <th style={cellStyle}>Nama dan Kode</th>
-                            <th style={cellStyle}>Jabatan</th>
-                            <th style={cellStyle}>Waktu</th>
-                            <th style={cellStyle}>Tanda Tangan</th>
-                        </tr>
-                    </thead>
-                    <tbody
-                        style={{ borderStyle: "solid", border: "solid 1px" }}
-                    >
-                        <tr>
-                            <td style={cellStyle}>201</td>
-                            <td style={cellStyle}>Pencacah</td>
-
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td>
-                                <Form.Item
-                                    name="201_kode"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        // defaultValue={"0000"}
-                                        options={[]}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="201_jabatan"
-                                    style={formItemStyle}
-                                    label={null}
-                                >
-                                    <Select
-                                        // defaultValue={"0000"}
-                                        showSearch
-                                        options={[
-                                            {
-                                                label: "1. Staf BPS Provinsi",
-                                                value: "1",
-                                            },
-                                            {
-                                                label: "2. Staf BPS Kab/Kota",
-                                                value: "2",
-                                            },
-                                            { label: "3. KSK", value: "3" },
-                                            { label: "4. Mitra", value: "4" },
-                                        ]}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="201_waktu"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    {/* datepicker */}
-                                </Form.Item>
-                            </td>
-                            <td style={cellStyle}></td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>202</td>
-                            <td style={cellStyle}>Pengawas</td>
-
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="202_kode"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        // defaultValue={"0000"}
-                                        options={[]}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="202_jabatan"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        showSearch
-                                        options={[
-                                            {
-                                                label: "1. Staf BPS Provinsi",
-                                                value: "1",
-                                            },
-                                            {
-                                                label: "2. Staf BPS Kab/Kota",
-                                                value: "2",
-                                            },
-                                            { label: "3. KSK", value: "3" },
-                                            { label: "4. Mitra", value: "4" },
-                                        ]}
-
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="202_waktu"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    {/* datepicker */}
-                                </Form.Item>
-                            </td>
-                            <td style={cellStyle}></td>
-                        </tr>
-                        <tr>
-                            <td style={cellStyle}>203</td>
-                            <td style={cellStyle}>Hasil pencacahan</td>
-
-                            {/* <td>Sulawesi Utara</td> */}
-                            <td style={cellStyle} colSpan={4}>
-                                <Form.Item
-                                    name="203"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        showSearch
-                                        // defaultValue={"0000"}
-                                        options={[
-                                            {
-                                                label: "1. Terisi lengkap",
-                                                value: "1",
-                                            },
-                                            {
-                                                label: "2. Terisi tidak lengkap",
-                                                value: "2",
-                                            },
-                                            {
-                                                label: "3. Tidak ada ART/responden yang dapat memberi jawaban sampai akhir masa pencacahan",
-                                                value: "3",
-                                            },
-                                            {
-                                                label: "4. Responden menolak",
-                                                value: "4",
-                                            },
-                                            {
-                                                label: "5. Rumah tangga pindah/bangunan sensus sudah tidak ada",
-                                                value: "5",
-                                            },
-                                        ]}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                {contextHolder}
-                {/* Blok I  */}
-                {/* <Form.Item name="kode_prov" label="Provinsi">
-                    <Select
-                        options={daftarProv}
-                        onChange={() => setKabkotDisable(false)}
-                    />
-                </Form.Item> */}
+                <TabelBlok konten={konten} title={title} />
             </Form>
-        </>
+        </Space>
     );
 };
 
-export default Blok4_1_hal2;
+export default Blok4_1_hal6;

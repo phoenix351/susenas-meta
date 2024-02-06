@@ -2,17 +2,29 @@ import {
     Button,
     Divider,
     Form,
+    Image,
     Input,
+    InputNumber,
     Select,
     Space,
-    Upload,
+    Table,
+    Tabs,
+    Typography,
     message,
 } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+// import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import Blok4_1_hal10 from "./Blok4_1_hal10";
+import Blok4_1_hal2 from "./Blok4_1_hal2";
+import Blok4_1_hal4 from "./Blok4_1_hal4";
+import Blok4_1_hal6 from "./Blok4_1_hal6";
+import Blok4_1_hal8 from "./Blok4_1_hal8";
+import Art from "./Art";
 
-const Blok4_1_art: React.FC<{
+const { Text, Title } = Typography;
+
+const Blok4_1: React.FC<{
     form: any;
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
@@ -21,124 +33,89 @@ const Blok4_1_art: React.FC<{
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
+    const imageProps = {
+        width: "70px",
+        height: "auto",
+        preview: false,
+    };
+    const tableStyle: React.CSSProperties = {
+        borderCollapse: "collapse",
+        width: "100%",
+    };
+    const cellStyle = {
+        borderStyle: "solid",
+        border: "solid 1px black",
+        // width: "100%",
+        padding: "5px",
+    };
+    const formItemStyle = {
+        margin: "auto",
+        padding: "5px",
+    };
+    // konstanta
+    const daftarKlas: any[] | undefined = [
+        { label: "Desa", value: "1" },
+        { label: "Kelurahan", value: "2" },
+    ];
+    const daftarArt = [
+        { nama: "Bagas" },
+        { nama: "Jaje" },
+        { nama: "Messi" },
+        { nama: "Dodo" },
+    ];
+    // define forms
+    const [blok4_1_hal2Form] = Form.useForm();
+    const [blok4_1_hal4Form] = Form.useForm();
+    const [blok4_1_hal6Form] = Form.useForm();
+    const [blok4_1_hal8Form] = Form.useForm();
+    const [blok4_1_hal10Form] = Form.useForm();
+
     const [messageApi, contextHolder] = message.useMessage();
-    const [daftarProv, setDaftarProv] = useState([]);
-    const [daftarKabKot, setDaftarKabKot] = useState([]);
-    const [daftarSemester, setDaftarSemester] = useState([]);
-    const [daftarNks, setDaftarNks] = useState([]);
 
-    const [kabkotDisable, setKabkotDisable] = useState(true);
-    const [semesterDisable, setSemesterDisable] = useState(true);
-    const [nksDisable, setNksDisable] = useState(true);
-
-    const fetchProvinsi = async () => {
-        const url = route("api.entri.provinsi");
-
-        const { data } = await axios.get(url);
-
-        const daftarProvinsi = data.data.map((item: any) => ({
-            label: `[${item.kode}] ${item.nama}`,
-            value: item.kode,
-        }));
-        setDaftarProv(daftarProvinsi);
+    const blok4_1_hal2Finish = (values: any) => {
+        console.log({ values });
+    };
+    const blok4_1_hal4Finish = (values: any) => {
+        console.log({ values });
+    };
+    const blok4_1_hal6Finish = (values: any) => {
+        console.log({ values });
+    };
+    const blok4_1_hal8Finish = (values: any) => {
+        console.log({ values });
+    };
+    const blok4_1_hal10Finish = (values: any) => {
+        console.log({ values });
     };
 
-    const fetchKabkot = async () => {
-        const url = route("api.entri.kabkot");
-
-        const { data } = await axios.get(url);
-        const daftarKabkot = data.data.map((item: any) => ({
-            label: `[${item.kode}] ${item.nama}`,
-            value: item.kode,
-        }));
-        setDaftarKabKot(daftarKabkot);
-    };
-    const fetchSemester = async () => {
-        const url = route("api.entri.semester");
-
-        const { data } = await axios.get(url);
-        const daftarKabkot = data.map((item: any) => ({
-            label: item.label,
-            value: item.value,
-        }));
-        setDaftarKabKot(daftarKabkot);
-    };
-    const fetchNks = async () =>
-        // kodeProv: string,
-        // kodeKabkot: string,
-        // semester: string
-        {
-            const url = route("api.entri.nks", {
-                kodeKabkot: form.getFieldValue("kode_kab"),
-                semester: form.getFieldValue("semester"),
-            });
-
-            const { data } = await axios.get(url);
-            // console.log("====================================");
-            // console.log(url);
-            // console.log("====================================");
-            const daftarNks = data.data.map((item: any) => ({
-                label: item.kode_nks,
-                value: item.kode_nks,
-            }));
-            setDaftarNks(daftarNks);
-        };
     useEffect(() => {
         try {
-            fetchProvinsi();
-            fetchKabkot();
+            // fetchProvinsi();
             // fetchSemester();
         } catch (error) {}
     }, []);
 
+    function handleChange(activeKey: string): void {
+        throw new Error("Function not implemented.");
+    }
+
     return (
-        <Space style={tabContentStyle}>
-            <Form
-                form={form}
-                name="Blok4_1_art"
-                onFinish={onFinish}
-                autoComplete="off"
-                layout="vertical"
-                style={{ width: "300px" }}
-            >
-                {contextHolder}
-                {/* <Space direction="horizontal"> */}
-                <Form.Item name="kode_prov" label="Provinsi">
-                    <Select
-                        options={daftarProv}
-                        onChange={() => setKabkotDisable(false)}
+        <Tabs
+            onChange={handleChange}
+            type="line"
+            style={{ backgroundColor: "#fff", padding: "10px" }}
+            items={daftarArt.map((art, index) => ({
+                label: art.nama,
+                key: String(index + 1),
+                children: (
+                    <Art
+                        form={blok4_1_hal2Form}
+                        onFinish={blok4_1_hal2Finish}
                     />
-                </Form.Item>
-                <Form.Item name="kode_kab" label="Kab/Kota">
-                    <Select
-                        options={daftarKabKot}
-                        disabled={kabkotDisable}
-                        onChange={() => setSemesterDisable(false)}
-                    />
-                </Form.Item>
-                {/* </Space> */}
-                <Form.Item name="semester" label="semester">
-                    <Select
-                        disabled={semesterDisable}
-                        options={[
-                            { label: "Semester I", value: "1" },
-                            { label: "Semester II", value: "2" },
-                        ]}
-                        onChange={() => {
-                            setNksDisable(false);
-                            fetchNks();
-                        }}
-                    />
-                </Form.Item>
-                <Form.Item name="nks" label="NKS">
-                    <Select options={daftarNks} disabled={nksDisable} />
-                </Form.Item>
-                <Button type="primary" onClick={() => form.submit()}>
-                    Refresh
-                </Button>
-            </Form>
-        </Space>
+                ),
+            }))}
+        />
     );
 };
 
-export default Blok4_1_art;
+export default Blok4_1;

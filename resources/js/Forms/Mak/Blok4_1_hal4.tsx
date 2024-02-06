@@ -214,36 +214,19 @@ const Blok4_1_hal4: React.FC<{
     return (
         <Space direction="vertical" style={{ width: "100%" }}>
             <Space
-                style={{ width: "", justifyContent: "space-between" }}
+                style={{ width: "100%", justifyContent: "end" }}
                 direction="horizontal"
             >
-                <Space direction="horizontal">
-                    <Text>Waktu mulai wawancara :</Text>
-                    <Form.Item
-                        style={{ margin: "auto" }}
-                        name="waktu_mulai_jam"
-                    >
-                        <InputNumber max={23}></InputNumber>
-                    </Form.Item>
-                    <Form.Item
-                        style={{ margin: "auto" }}
-                        name="waktu_mulai_menit"
-                    >
-                        <InputNumber max={59}></InputNumber>
-                    </Form.Item>
-                </Space>
-                <Space>
-                    <Text>
-                        Jumlah komoditas bahan makanan,bahan minuman, dan rokok
-                        yang terisi pada halaman ini
-                    </Text>
-                    <Form.Item
-                        style={{ margin: "auto" }}
-                        name="hal2_jml_komoditas"
-                    >
-                        <InputNumber max={59}></InputNumber>
-                    </Form.Item>
-                </Space>
+                <Text>
+                    Jumlah komoditas bahan makanan,bahan minuman, dan rokok yang
+                    terisi pada halaman ini
+                </Text>
+                <Form.Item style={{ margin: "auto" }} name="hal4_jml_komoditas">
+                    <InputNumber
+                        max={27}
+                        style={{ width: "40px" }}
+                    ></InputNumber>
+                </Form.Item>
             </Space>
             <Form
                 form={form}

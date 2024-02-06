@@ -34,6 +34,7 @@ import Blok1_2 from "@/Forms/Mak/Blok1_2";
 import Blok4_1 from "@/Forms/Mak/Blok4_1";
 import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
 import Blok4_3 from "@/Forms/Mak/Blok4_3";
+import Worksheet from "@/Forms/Mak/Worksheet";
 
 const Mak = () => {
     useEffect(() => {}, []);
@@ -50,6 +51,7 @@ const Mak = () => {
     const [blok4_1Form] = Form.useForm();
     const [blok4_1artForm] = Form.useForm();
     const [blok4_3Form] = Form.useForm();
+    const [wtfForm] = Form.useForm();
     const [daftarSampel, setDaftarSampel] = useState([]);
     const [messageApi, contextHolder] = message.useMessage();
     const Status = {
@@ -141,6 +143,31 @@ const Mak = () => {
         }
     };
     const blok4_3Finish = async (values: any) => {
+        console.log({ values });
+        messageApi.open({
+            type: "loading",
+            key: "cari",
+            content: "Memuat Data",
+        });
+        try {
+            const url = route("api.entri.inti", values);
+            const { data } = await axios.get(url);
+            console.log({ data });
+            setDaftarSampel(data.data);
+            messageApi.open({
+                type: "success",
+                key: "cari",
+                content: "Berhasil mengambil data",
+            });
+        } catch (error) {
+            messageApi.open({
+                type: "error",
+                key: "cari",
+                content: "Oops terjadi kesalahan, silahkan hubungi admin",
+            });
+        }
+    };
+    const wtfFinish = async (values: any) => {
         console.log({ values });
         messageApi.open({
             type: "loading",
@@ -279,8 +306,19 @@ const Mak = () => {
                             ),
                         },
                         {
-                            label: "Blok IV.1",
+                            label: "Worksheet",
                             key: "2",
+                            children: (
+                                <Worksheet
+                                    tabContentStyle={tabContentStyle}
+                                    form={wtfForm}
+                                    onFinish={wtfFinish}
+                                />
+                            ),
+                        },
+                        {
+                            label: "Blok IV.1",
+                            key: "3",
                             children: (
                                 <Blok4_1
                                     form={blok4_1Form}
@@ -291,7 +329,7 @@ const Mak = () => {
                         },
                         {
                             label: "Blok IV.1 ART",
-                            key: "3",
+                            key: "4",
                             children: (
                                 <Blok4_1art
                                     tabContentStyle={tabContentStyle}
@@ -302,7 +340,7 @@ const Mak = () => {
                         },
                         {
                             label: "Blok IV.3",
-                            key: "4",
+                            key: "5",
                             children: (
                                 <Blok4_3
                                     tabContentStyle={tabContentStyle}

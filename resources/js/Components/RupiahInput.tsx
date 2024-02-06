@@ -1,17 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Input, InputNumber } from "antd";
 
 interface RupiahInputProps {
-    value: number;
+    // value: number;
     onChange: (value: number | undefined) => void;
     [key: string]: any; // Allow additional props
 }
 
-const RupiahInput: React.FC<RupiahInputProps> = ({
-    value,
-    onChange,
-    ...rest
-}) => {
+const RupiahInput: React.FC = () => {
+    const [value, setValue] = useState(0);
+    const handleChange = (nilai: any) => {
+        setValue(nilai);
+    };
     return (
         <div style={{ display: "flex", alignItems: "center" }}>
             <InputNumber
@@ -28,8 +28,8 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
                     return isNaN(parsedValue) ? 0 : parsedValue;
                 }}
                 value={value}
-                onChange={onChange}
-                {...rest}
+                onChange={handleChange}
+                // {...rest}
             />
         </div>
     );

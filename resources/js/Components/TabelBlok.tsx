@@ -16,12 +16,21 @@ const tableStyle: React.CSSProperties = {
 const blokStyle: React.CSSProperties = {
     backgroundColor: "#fc0",
     fontWeight: "700",
+    padding: "5px",
 };
 const cellStyle = {
     borderStyle: "solid",
     border: "solid 1px black",
     // width: "100%",
     // textAlign: "center",
+    padding: "5px",
+};
+const darkCell = {
+    borderStyle: "solid",
+    border: "solid 1px black",
+    // width: "100%",
+    // textAlign: "center",
+    backgroundColor: "#636f83",
     padding: "5px",
 };
 const renderRow = (data: RowData) => {
@@ -81,19 +90,19 @@ const renderRow = (data: RowData) => {
             <td colSpan={2} style={blokStyle}>
                 {data.rincian}
             </td>
-            <td style={cellStyle}></td>
+            <td style={darkCell}></td>
             <td style={cellStyle}>
                 <Form.Item name={`${data.nomor}_beli_harga`}>
                     <Input />
                 </Form.Item>
             </td>
-            <td style={cellStyle}></td>
+            <td style={darkCell}></td>
             <td style={cellStyle}>
                 <Form.Item name={`${data.nomor}_produksi_harga`}>
                     <Input />
                 </Form.Item>
             </td>
-            <td style={cellStyle}></td>
+            <td style={darkCell}></td>
             <td style={cellStyle}>
                 <Form.Item name={`${data.nomor}_total_harga`}>
                     <Input />
