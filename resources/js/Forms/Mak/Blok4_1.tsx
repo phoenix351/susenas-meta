@@ -20,6 +20,7 @@ import Blok4_1_hal2 from "./Blok4_1_hal2";
 import Blok4_1_hal4 from "./Blok4_1_hal4";
 import Blok4_1_hal6 from "./Blok4_1_hal6";
 import Blok4_1_hal8 from "./Blok4_1_hal8";
+import { SubTotal } from "@/types";
 
 const { Text, Title } = Typography;
 
@@ -27,8 +28,17 @@ const Blok4_1: React.FC<{
     form: any;
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
+    subTotalHarga: SubTotal[];
+    calculate: ({
+        subKey,
+        jenis,
+    }: {
+        subKey: number;
+        jenis: keyof SubTotal;
+    }) => void;
+
     // record: any;
-}> = ({ form, onFinish, tabContentStyle }) => {
+}> = ({ form, onFinish, tabContentStyle, subTotalHarga, calculate }) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -57,99 +67,106 @@ const Blok4_1: React.FC<{
         { label: "Kelurahan", value: "2" },
     ];
     // define forms
-    const [blok4_1_hal2Form] = Form.useForm();
-    const [blok4_1_hal4Form] = Form.useForm();
-    const [blok4_1_hal6Form] = Form.useForm();
-    const [blok4_1_hal8Form] = Form.useForm();
-    const [blok4_1_hal10Form] = Form.useForm();
 
     const [messageApi, contextHolder] = message.useMessage();
+    const isEffectSetUp = useRef(false);
+    const handleKeyPress = (event: {
+        ctrlKey: any;
+        key: string;
+        preventDefault: () => void;
+    }) => {
+        if (event.ctrlKey && event.key === "s") {
+            event.preventDefault();
+            console.log("Submitting the form");
 
-    const blok4_1_hal2Finish = (values: any) => {
-        console.log({ values });
-    };
-    const blok4_1_hal4Finish = (values: any) => {
-        console.log({ values });
-    };
-    const blok4_1_hal6Finish = (values: any) => {
-        console.log({ values });
-    };
-    const blok4_1_hal8Finish = (values: any) => {
-        console.log({ values });
-    };
-    const blok4_1_hal10Finish = (values: any) => {
-        console.log({ values });
+            form.submit();
+        }
     };
 
     useEffect(() => {
-        try {
-            // fetchProvinsi();
-            // fetchSemester();
-        } catch (error) {}
-    }, []);
+        if (!isEffectSetUp.current) {
+            document.addEventListener("keydown", handleKeyPress);
+            isEffectSetUp.current = true; // Set the ref to true to indicate that the effect has been set up
+        }
 
-    function handleChange(activeKey: string): void {
-        throw new Error("Function not implemented.");
-    }
+        return () => {
+            document.removeEventListener("keydown", handleKeyPress);
+        };
+    }, [form]);
+
+    function handleChange(activeKey: string): void {}
 
     return (
-        <Tabs
-            onChange={handleChange}
-            type="line"
-            style={{ backgroundColor: "#fff", padding: "10px" }}
-            items={[
-                {
-                    label: "Hal 2",
-                    key: "1",
-                    children: (
-                        <Blok4_1_hal2
-                            form={blok4_1_hal2Form}
-                            onFinish={blok4_1_hal2Finish}
-                        />
-                    ),
-                },
-                {
-                    label: "Hal 4",
-                    key: "2",
-                    children: (
-                        <Blok4_1_hal4
-                            form={blok4_1_hal4Form}
-                            onFinish={blok4_1_hal4Finish}
-                        />
-                    ),
-                },
-                {
-                    label: "Hal 6",
-                    key: "3",
-                    children: (
-                        <Blok4_1_hal6
-                            form={blok4_1_hal6Form}
-                            onFinish={blok4_1_hal6Finish}
-                        />
-                    ),
-                },
-                {
-                    label: "Blok 8",
-                    key: "4",
-                    children: (
-                        <Blok4_1_hal8
-                            form={blok4_1_hal8Form}
-                            onFinish={blok4_1_hal8Finish}
-                        />
-                    ),
-                },
-                {
-                    label: "Blok 10",
-                    key: "5",
-                    children: (
-                        <Blok4_1_hal10
-                            form={blok4_1_hal10Form}
-                            onFinish={blok4_1_hal10Finish}
-                        />
-                    ),
-                },
-            ]}
-        />
+        <Form
+            form={form}
+            name="Blok4_1_hal2"
+            onFinish={onFinish}
+            autoComplete="off"
+            layout="vertical"
+        >
+            <Tabs
+                onChange={handleChange}
+                type="line"
+                style={{ backgroundColor: "#fff", padding: "10px" }}
+                items={[
+                    {
+                        label: "Hal 2",
+                        key: "1",
+                        children: (
+                            <Blok4_1_hal2
+                                form={form}
+                                calculate={calculate}
+                                subTotalHarga={subTotalHarga}
+                            />
+                        ),
+                    },
+                    {
+                        label: "Hal 4",
+                        key: "2",
+                        children: (
+                            <Blok4_1_hal4
+                                form={form}
+                                calculate={calculate}
+                                subTotalHarga={subTotalHarga}
+                            />
+                        ),
+                    },
+                    {
+                        label: "Hal 6",
+                        key: "3",
+                        children: (
+                            <Blok4_1_hal6
+                                form={form}
+                                calculate={calculate}
+                                subTotalHarga={subTotalHarga}
+                            />
+                        ),
+                    },
+                    {
+                        label: "Blok 8",
+                        key: "4",
+                        children: (
+                            <Blok4_1_hal8
+                                form={form}
+                                calculate={calculate}
+                                subTotalHarga={subTotalHarga}
+                            />
+                        ),
+                    },
+                    {
+                        label: "Blok 10",
+                        key: "5",
+                        children: (
+                            <Blok4_1_hal10
+                                form={form}
+                                calculate={calculate}
+                                subTotalHarga={subTotalHarga}
+                            />
+                        ),
+                    },
+                ]}
+            />
+        </Form>
     );
 };
 

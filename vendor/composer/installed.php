@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'laravel/laravel',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => '0d8dbe8264e1272b2deea0769a9054681ff03733',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '17aeab4000bbc5c008d2cd614b2a991d91c39cdb',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -389,9 +389,9 @@
             'dev_requirement' => false,
         ),
         'laravel/laravel' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => '0d8dbe8264e1272b2deea0769a9054681ff03733',
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '17aeab4000bbc5c008d2cd614b2a991d91c39cdb',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -742,8 +742,8 @@
         'psr/log-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.0|2.0|3.0',
-                1 => '3.0.0',
+                0 => '3.0.0',
+                1 => '1.0|2.0|3.0',
             ),
         ),
         'psr/simple-cache' => array(
@@ -965,6 +965,15 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
+        'spatie/laravel-csp' => array(
+            'pretty_version' => '2.8.4',
+            'version' => '2.8.4.0',
+            'reference' => '5c49058d4955b2232ce8012ff5a5e8d84d497e7c',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/laravel-csp',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'spatie/laravel-ignition' => array(
             'pretty_version' => '2.1.3',
             'version' => '2.1.3.0',
@@ -973,6 +982,15 @@
             'install_path' => __DIR__ . '/../spatie/laravel-ignition',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'spatie/laravel-package-tools' => array(
+            'pretty_version' => '1.16.2',
+            'version' => '1.16.2.0',
+            'reference' => 'e62eeb1fe8a8a0b2e83227a6c279c8c59f7d3a15',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/laravel-package-tools',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'symfony/console' => array(
             'pretty_version' => 'v6.3.0',

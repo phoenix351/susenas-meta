@@ -2,6 +2,7 @@ import {
     Button,
     Divider,
     Form,
+    FormInstance,
     Image,
     Input,
     InputNumber,
@@ -16,15 +17,17 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { render } from "react-dom";
 import RupiahInput from "@/Components/RupiahInput";
+import { SubTotal } from "@/types";
 
 const { Text, Title } = Typography;
 
 const Blok4_3: React.FC<{
-    form: any;
+    form: FormInstance;
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
+    subTotalHarga: SubTotal[];
     // record: any;
-}> = ({ form, onFinish, tabContentStyle }) => {
+}> = ({ form, onFinish, tabContentStyle, subTotalHarga }) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -124,26 +127,32 @@ const Blok4_3: React.FC<{
             </table>
         );
     };
-    const renderBlok432 = (rincian: Rincian) => {
+    const renderBlok432: React.FC<{ rincian: Rincian; key: number }> = ({
+        rincian,
+        key,
+    }) => {
         return (
             <tr>
                 <td style={centerCell}>{rincian.nomor}</td>
                 <td style={cellStyle}>{rincian.rincian}</td>
 
                 <td style={cellStyle}>
-                    <Form.Item name={`blok4_32_${rincian.id}_beli`}>
-                        <RupiahInput />
-                    </Form.Item>
+                    <RupiahInput
+                        key={key}
+                        inputName={`blok4_32_${rincian.id - 1}_beli`}
+                    />
                 </td>
                 <td style={cellStyle}>
-                    <Form.Item name={`blok4_32_${rincian.id}_produksi`}>
-                        <RupiahInput />
-                    </Form.Item>
+                    <RupiahInput
+                        key={key}
+                        inputName={`blok4_32_${rincian.id - 1}_produksi`}
+                    />
                 </td>
                 <td style={cellStyle}>
-                    <Form.Item name={`blok4_32_${rincian.id}_total`}>
-                        <RupiahInput />
-                    </Form.Item>
+                    <RupiahInput
+                        key={key}
+                        inputName={`blok4_32_${rincian.id - 1}_total`}
+                    />
                 </td>
             </tr>
         );
@@ -246,6 +255,21 @@ const Blok4_3: React.FC<{
             type: "average",
         },
     ];
+    // define Values;
+    useEffect(() => {
+        console.log("====================================");
+        console.log(subTotalHarga);
+        console.log("====================================");
+        subTotalHarga.forEach((sub, index) => {
+            let total = sub.total ?? 0;
+            let produksi = sub.produksi ?? 0;
+            let beli = sub.beli ?? 0;
+            form.setFieldValue(`blok4_32_${index}_beli`, beli);
+            form.setFieldValue(`blok4_32_${index}_total`, beli + produksi);
+            form.setFieldValue(`blok4_32_${index}_produksi`, produksi);
+        });
+    }, [subTotalHarga]);
+
     return (
         <Space direction="vertical" style={tabContentStyle}>
             <Form
@@ -261,6 +285,7 @@ const Blok4_3: React.FC<{
                     }
                     subtitle=""
                     columnsCount={6}
+                    key={1}
                 >
                     <tr>
                         <td style={cellStyle}></td>
@@ -304,8 +329,11 @@ const Blok4_3: React.FC<{
                         "Produksi Sendiri, Pemberian, dsb., Seminggu Terakhir",
                         "Total Seminggu Terakhir [Kolom 3 + Kolom 4]",
                     ]}
+                    key={2}
                 >
-                    {daftarRincian432.map((rincian) => renderBlok432(rincian))}
+                    {daftarRincian432.map((rincian, key) =>
+                        renderBlok432({ rincian, key })
+                    )}
                 </Blok>
 
                 {contextHolder}

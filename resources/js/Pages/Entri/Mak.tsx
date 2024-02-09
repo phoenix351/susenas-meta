@@ -2,39 +2,16 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 import { useEffect, useState } from "react";
 import { Head, router } from "@inertiajs/react";
-import { PageProps, User, KondisiSummary, Summary } from "@/types";
-import BarChart from "@/Components/Grafik/BarChart";
-import {
-    ReactElement,
-    JSXElementConstructor,
-    ReactFragment,
-    ReactPortal,
-} from "react";
-import {
-    Button,
-    Card,
-    Col,
-    Form,
-    Row,
-    Space,
-    Statistic,
-    Table,
-    Tabs,
-    message,
-} from "antd";
-import {
-    WarningOutlined,
-    StopOutlined,
-    CheckCircleOutlined,
-} from "@ant-design/icons";
-import EntriIntiForm from "@/Forms/EntriIntiSearch";
+import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
+import { Button, Form, Space, Tabs, message } from "antd";
 import axios from "axios";
-import EntriMak from "@/Forms/Mak/Blok1_2";
 import Blok1_2 from "@/Forms/Mak/Blok1_2";
 import Blok4_1 from "@/Forms/Mak/Blok4_1";
 import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
 import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
+import { SubTotal } from "@/types";
+import form from "antd/es/form";
 
 const Mak = () => {
     useEffect(() => {}, []);
@@ -93,7 +70,10 @@ const Mak = () => {
         }
     };
     const blok4_1Finish = async (values: any) => {
+        console.log("submitt");
         console.log({ values });
+        // console.log();
+        console.log("====================================");
         messageApi.open({
             type: "loading",
             key: "cari",
@@ -273,9 +253,47 @@ const Mak = () => {
         },
     ];
 
-    function handleChange(activeKey: string): void {
-        throw new Error("Function not implemented.");
-    }
+    function handleChange(activeKey: string): void {}
+    const [subTotalHarga, setSubTotalHarga] = useState([
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+        { beli: 0, produksi: 0, total: 0 },
+    ]);
+    // const [totalProduksi, setTotalProduksi] = useState(0);
+    const calculateSubTotalHarga = ({
+        subKey,
+        jenis,
+    }: {
+        subKey: number;
+        jenis: keyof SubTotal;
+    }) => {
+        // console.log({ subKey, jenis });
+        // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
+        const pattern = `${jenis}_harga${subKey}`;
+        const allFieldValues = blok4_1Form.getFieldsValue();
+        // console.log({ pattern, allFieldValues });
+
+        const sum = Object.entries(allFieldValues)
+            .filter(([fieldName]) => fieldName.endsWith(pattern))
+            .reduce(
+                (accumulator, [, value]) =>
+                    accumulator + ((value as number) || 0),
+                0
+            );
+
+        let newSubTotalHarga: SubTotal[] = [...subTotalHarga];
+        newSubTotalHarga[subKey][jenis] = sum;
+        setSubTotalHarga(newSubTotalHarga);
+    };
 
     return (
         <>
@@ -321,9 +339,12 @@ const Mak = () => {
                             key: "3",
                             children: (
                                 <Blok4_1
+                                    onFinish={blok4_1Finish}
                                     form={blok4_1Form}
                                     tabContentStyle={tabContentStyle}
-                                    onFinish={blok4_1Finish}
+                                    calculate={calculateSubTotalHarga}
+                                    subTotalHarga={subTotalHarga}
+                                    // onFinish={blok4_1Finish}
                                 />
                             ),
                         },
@@ -346,6 +367,7 @@ const Mak = () => {
                                     tabContentStyle={tabContentStyle}
                                     form={blok4_3Form}
                                     onFinish={blok4_3Finish}
+                                    subTotalHarga={subTotalHarga}
                                 />
                             ),
                         },

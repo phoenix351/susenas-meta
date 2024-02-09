@@ -65,26 +65,10 @@ const Blok4_1: React.FC<{
     ];
     // define forms
     const [blok4_1_hal2Form] = Form.useForm();
-    const [blok4_1_hal4Form] = Form.useForm();
-    const [blok4_1_hal6Form] = Form.useForm();
-    const [blok4_1_hal8Form] = Form.useForm();
-    const [blok4_1_hal10Form] = Form.useForm();
 
     const [messageApi, contextHolder] = message.useMessage();
 
     const blok4_1_hal2Finish = (values: any) => {
-        console.log({ values });
-    };
-    const blok4_1_hal4Finish = (values: any) => {
-        console.log({ values });
-    };
-    const blok4_1_hal6Finish = (values: any) => {
-        console.log({ values });
-    };
-    const blok4_1_hal8Finish = (values: any) => {
-        console.log({ values });
-    };
-    const blok4_1_hal10Finish = (values: any) => {
         console.log({ values });
     };
 

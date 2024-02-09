@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, InputNumber } from "antd";
+import { Form, Input, InputNumber } from "antd";
 
 interface RupiahInputProps {
     // value: number;
@@ -7,14 +7,18 @@ interface RupiahInputProps {
     [key: string]: any; // Allow additional props
 }
 
-const RupiahInput: React.FC = () => {
+const RupiahInput: React.FC<{ inputName: string; onChange?: any }> = ({
+    inputName,
+    onChange,
+}) => {
     const [value, setValue] = useState(0);
     const handleChange = (nilai: any) => {
         setValue(nilai);
     };
     return (
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <Form.Item name={inputName}>
             <InputNumber
+                min={0}
                 style={{ width: "100%", textAlign: "right" }}
                 formatter={(value: any) =>
                     `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
@@ -28,10 +32,13 @@ const RupiahInput: React.FC = () => {
                     return isNaN(parsedValue) ? 0 : parsedValue;
                 }}
                 value={value}
-                onChange={handleChange}
+                onChange={(value: any) => {
+                    handleChange(value);
+                    onChange(value);
+                }}
                 // {...rest}
             />
-        </div>
+        </Form.Item>
     );
 };
 
