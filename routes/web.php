@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\MasterJabatanController;
+use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\ProfileController;
 use App\Models\Kabkot;
 use App\Models\MasterBarang;
 use App\Models\MasterJabatan;
+use App\Models\MasterWilayah;
 use App\Models\Nks;
 use App\Models\Provinsi;
 use App\Models\SusenasInti;
@@ -63,12 +65,8 @@ Route::middleware('auth')->group(function () {
         return response()->json([$tingkatList]);
     })->name('admin.master.jabatan.tingkat');
 
-    route::get('/api/entri/provinsi', function () {
-        $data = Provinsi::get();
-        return response()->json(['data' => $data]);
-    })->name('api.entri.provinsi');
     route::get('/api/entri/kabkot', function () {
-        $data = Kabkot::get();
+        $data = MasterWilayah::distinct()->get(['kode_kabkot', 'kabkot']);
         return response()->json(['data' => $data]);
     })->name('api.entri.kabkot');
     route::get('/api/entri/semester', function () {
@@ -76,14 +74,26 @@ Route::middleware('auth')->group(function () {
         return response()->json(['data' => $data]);
     })->name('api.entri.semester');
 
-    route::get('/api/entri/nks', function (Request $request) {
+
+
+    route::get('/api/entri/kecamatan', function (Request $request) {
         $kabkot = $request->query('kodeKabkot');
-        $semester = $request->query('semester');
+        // $semester = $request->query('semester');
 
-        $data = Nks::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
-        return response()->json(['data' => $data, 'semester' => $semester, 'kabkot' => $kabkot]);
-    })->name('api.entri.nks');
+        $data = MasterWilayah::where('kode_kabkot', $kabkot)->distinct()->get(['kode_kec', 'kec']);
+        return response()->json($data, 200);
+    })->name('api.entri.kec');
+    route::get('/api/entri/desa', [MasterWilayahController::class, 'fetch_desa'])->name('api.entri.desa');
+    route::get('/api/entri/bs4', [MasterWilayahController::class, 'fetch_bs4'])->name('api.entri.bs4');
+    route::get('/api/entri/nks', [MasterWilayahController::class, 'fetch_nks'])->name('api.entri.nks');
 
+    route::get('/entri/mak/create', function (Request $request) {
+        // $kabkot = $request->query('id_dsrt');
+
+
+        // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
+        return Inertia::render("Entri/Mak");
+    })->name("entri.mak.create");
     route::get('/entri/mak', function (Request $request) {
         $kabkot = $request->query('id_dsrt');
 

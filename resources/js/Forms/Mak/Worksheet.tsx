@@ -1,5 +1,6 @@
+import MetaSelect from "@/Components/MetaSelect";
 import RupiahInput from "@/Components/RupiahInput";
-import { Form, InputNumber, Space, Typography } from "antd";
+import { Form, Input, InputNumber, Space, Typography } from "antd";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 
 const { Text, Title } = Typography;
@@ -42,23 +43,35 @@ const renderRow = (props: RincianWorksheet) => {
         </>
     );
 
-    const inputComponents: { [key: string]: JSX.Element } = {
-        number: <InputNumber />,
-        binary: <InputNumber max={2} />,
-        rupiah: <RupiahInput />,
+    const InputComponent: React.FC<{ type: string; name: string }> = ({
+        type,
+        name,
+    }) => {
+        const inputComponents: { [type: string]: JSX.Element } = {
+            number: (
+                <Form.Item name={name} label={null}>
+                    <InputNumber min={0} />
+                </Form.Item>
+            ),
+            binary: (
+                <MetaSelect
+                    name={name}
+                    options={[
+                        { label: "[1] YA", value: "1" },
+                        { label: "[2] TIDAK", value: 2 },
+                    ]}
+                />
+            ),
+            rupiah: <RupiahInput inputName={name} />,
+        };
+        return inputComponents[type];
     };
 
     return (
         <tr>
             {commonColumns}
             <td style={centerCell}>
-                <Form.Item
-                    name={`wtf_${props.id}`}
-                    label={null}
-                    style={formItemStyle}
-                >
-                    {inputComponents[props.type]}
-                </Form.Item>
+                <InputComponent type={props.type} name={`wtf_${props.id}`} />
             </td>
         </tr>
     );

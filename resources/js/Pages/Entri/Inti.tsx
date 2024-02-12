@@ -72,20 +72,6 @@ const Dashboard = () => {
             });
         }
     };
-    const dataSource = [
-        {
-            key: "1",
-            name: "Mike",
-            age: 32,
-            address: "10 Downing Street",
-        },
-        {
-            key: "2",
-            name: "John",
-            age: 42,
-            address: "10 Downing Street",
-        },
-    ];
 
     const columns = [
         {
@@ -167,6 +153,14 @@ const Dashboard = () => {
                 direction="vertical"
             >
                 <EntriIntiForm form={cariForm} onFinish={cariFinish} />
+                <Space style={{ width: "100%", justifyContent: "end" }}>
+                    <Button
+                        type="primary"
+                        onClick={() => router.visit(route("entri.mak.create"))}
+                    >
+                        Tambah Ruta
+                    </Button>
+                </Space>
                 <Table dataSource={daftarSampel} columns={columns} />;
             </Space>
         </>

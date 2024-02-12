@@ -4,6 +4,7 @@ import {
     Form,
     Input,
     Select,
+    SelectProps,
     Space,
     Upload,
     message,
@@ -11,54 +12,26 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { SelectionItem } from "antd/es/table/interface";
 
 const EntriIntiForm: React.FC<{
     form: any;
     onFinish: (values: any) => void;
     // record: any;
 }> = ({ form, onFinish }) => {
-    const formItemLayout = {
-        // wrapperCol: { span: 24 },
-    };
     const [messageApi, contextHolder] = message.useMessage();
-    const [daftarProv, setDaftarProv] = useState([]);
+    const daftarProv: {}[] = [{ label: "[71] SULAWESI UTARA", value: "71" }];
     const [daftarKabKot, setDaftarKabKot] = useState([]);
     const [daftarSemester, setDaftarSemester] = useState([]);
     const [daftarNks, setDaftarNks] = useState([]);
-
-    const [kabkotDisable, setKabkotDisable] = useState(true);
-    const [semesterDisable, setSemesterDisable] = useState(true);
-    const [nksDisable, setNksDisable] = useState(true);
-
-    const fetchProvinsi = async () => {
-        const url = route("api.entri.provinsi");
-
-        const { data } = await axios.get(url);
-
-        const daftarProvinsi = data.data.map((item: any) => ({
-            label: `[${item.kode}] ${item.nama}`,
-            value: item.kode,
-        }));
-        setDaftarProv(daftarProvinsi);
-    };
 
     const fetchKabkot = async () => {
         const url = route("api.entri.kabkot");
 
         const { data } = await axios.get(url);
         const daftarKabkot = data.data.map((item: any) => ({
-            label: `[${item.kode}] ${item.nama}`,
-            value: item.kode,
-        }));
-        setDaftarKabKot(daftarKabkot);
-    };
-    const fetchSemester = async () => {
-        const url = route("api.entri.semester");
-
-        const { data } = await axios.get(url);
-        const daftarKabkot = data.map((item: any) => ({
-            label: item.label,
-            value: item.value,
+            label: `[${item.kode_kabkot}] ${item.kabkot}`,
+            value: item.kode_kabkot,
         }));
         setDaftarKabKot(daftarKabkot);
     };
@@ -73,18 +46,15 @@ const EntriIntiForm: React.FC<{
             });
 
             const { data } = await axios.get(url);
-            // console.log("====================================");
-            // console.log(url);
-            // console.log("====================================");
+
             const daftarNks = data.data.map((item: any) => ({
-                label: item.kode_nks,
-                value: item.kode_nks,
+                label: item,
+                value: item,
             }));
             setDaftarNks(daftarNks);
         };
     useEffect(() => {
         try {
-            fetchProvinsi();
             fetchKabkot();
             // fetchSemester();
         } catch (error) {}
@@ -97,41 +67,71 @@ const EntriIntiForm: React.FC<{
                 name="EntriIntiForm"
                 onFinish={onFinish}
                 autoComplete="off"
-                layout="vertical"
+                // layout="vertical"
                 style={{ width: "300px" }}
             >
                 {contextHolder}
                 {/* <Space direction="horizontal"> */}
                 <Form.Item name="kode_prov" label="Provinsi">
                     <Select
+                        allowClear
+                        showSearch
+                        optionFilterProp="label"
                         options={daftarProv}
-                        onChange={() => setKabkotDisable(false)}
+                        onClear={() => {}}
+                        onChange={() => {
+                            form.setFieldsValue({
+                                kode_kab: "",
+                                semester: "",
+                                nks: "",
+                            });
+
+                            setDaftarNks([]);
+                        }}
                     />
                 </Form.Item>
                 <Form.Item name="kode_kab" label="Kab/Kota">
                     <Select
+                        allowClear
+                        showSearch
+                        optionFilterProp="label"
                         options={daftarKabKot}
-                        disabled={kabkotDisable}
-                        onChange={() => setSemesterDisable(false)}
+                        // disabled={kabkotDisable}
+                        onChange={() => {
+                            form.setFieldsValue({
+                                semester: "",
+                                nks: "",
+                            });
+
+                            setDaftarNks([]);
+                        }}
                     />
                 </Form.Item>
-                {/* </Space> */}
                 <Form.Item name="semester" label="semester">
                     <Select
-                        disabled={semesterDisable}
+                        allowClear
+                        showSearch
+                        optionFilterProp="label"
+                        // disabled={semesterDisable}
                         options={[
-                            { label: "Semester I", value: "1" },
-                            { label: "Semester II", value: "2" },
+                            { label: "Semester I", value: "1", selected: true },
+                            // { label: "Semester II", value: "2" },
                         ]}
                         onChange={() => {
-                            setNksDisable(false);
                             fetchNks();
                         }}
                     />
                 </Form.Item>
                 <Form.Item name="nks" label="NKS">
-                    <Select options={daftarNks} disabled={nksDisable} />
+                    <Select
+                        allowClear
+                        showSearch
+                        optionFilterProp="label"
+                        options={daftarNks}
+                        onChange={() => form.submit()}
+                    />
                 </Form.Item>
+
                 <Button type="primary" onClick={() => form.submit()}>
                     Refresh
                 </Button>

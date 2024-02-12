@@ -28,7 +28,7 @@ return new class extends Migration
 
             $table->string('klas', 1);
             $table->string('kode_bs4', 4);
-            $table->string('nks', 5);
+            $table->string('nks', 6);
 
             $table->smallInteger('jumlah_ruta');
 

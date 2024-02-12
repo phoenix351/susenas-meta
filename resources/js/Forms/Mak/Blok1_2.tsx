@@ -2,6 +2,7 @@ import {
     Button,
     Divider,
     Form,
+    FormInstance,
     Image,
     Input,
     InputNumber,
@@ -14,11 +15,12 @@ import {
 import { useEffect, useRef, useState } from "react";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import MetaSelect from "@/Components/MetaSelect";
 
 const { Text, Title } = Typography;
 
 const Blok1_2: React.FC<{
-    form: any;
+    form: FormInstance;
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
     // record: any;
@@ -47,8 +49,8 @@ const Blok1_2: React.FC<{
     };
     // konstanta
     const daftarKlas: any[] | undefined = [
-        { label: "Desa", value: "1" },
-        { label: "Kelurahan", value: "2" },
+        { label: "[1] Desa", value: "1" },
+        { label: "[2] Kelurahan", value: "2" },
     ];
     const [messageApi, contextHolder] = message.useMessage();
     const [daftarProv, setDaftarProv] = useState([
@@ -57,13 +59,9 @@ const Blok1_2: React.FC<{
     const [daftarKabKot, setDaftarKabKot] = useState([]);
     const [daftarKecamatan, setDaftarKecamatan] = useState([]);
     const [daftarDesa, setDaftarDesa] = useState([]);
-    const [daftarSemester, setDaftarSemester] = useState([]);
 
     const [daftarNks, setDaftarNks] = useState([]);
-
-    const [kabkotDisable, setKabkotDisable] = useState(true);
-    const [semesterDisable, setSemesterDisable] = useState(true);
-    const [nksDisable, setNksDisable] = useState(true);
+    const [daftarBs4, setDaftarBs4] = useState([]);
 
     const fetchProvinsi = async () => {
         const url = route("api.entri.provinsi");
@@ -82,8 +80,8 @@ const Blok1_2: React.FC<{
 
         const { data } = await axios.get(url);
         const daftarKabkot = data.data.map((item: any) => ({
-            label: `[${item.kode}] ${item.nama}`,
-            value: item.kode,
+            label: `[${item.kode_kabkot}] ${item.kabkot}`,
+            value: item.kode_kabkot,
         }));
         setDaftarKabKot(daftarKabkot);
     };
@@ -97,25 +95,76 @@ const Blok1_2: React.FC<{
         }));
         setDaftarKabKot(daftarKabkot);
     };
-    const fetchNks = async () =>
+    const fetchNks = async (value: string) =>
         // kodeProv: string,
         // kodeKabkot: string,
         // semester: string
         {
             const url = route("api.entri.nks", {
-                kodeKabkot: form.getFieldValue("kode_kab"),
-                semester: form.getFieldValue("semester"),
+                kodeKabkot: form.getFieldValue("kode_kabkot"),
+                kodeKec: form.getFieldValue("kode_kec"),
+                kodeDesa: form.getFieldValue("kode_desa"),
+                kodeBs4: form.getFieldValue("kode_bs4"),
+                // semester: form.getFieldValue("semester"),
             });
 
             const { data } = await axios.get(url);
-            // console.log("====================================");
-            // console.log(url);
-            // console.log("====================================");
-            const daftarNks = data.data.map((item: any) => ({
-                label: item.kode_nks,
-                value: item.kode_nks,
+            const daftarNks = data.map((item: any) => ({
+                label: item,
+                value: item,
             }));
             setDaftarNks(daftarNks);
+        };
+    const fetchKecamatan = async (value: string) =>
+        // kodeProv: string,
+        // kodeKabkot: string,
+        // semester: string
+        {
+            const url = route("api.entri.kec", {
+                kodeKabkot: value,
+            });
+
+            const { data } = await axios.get(url);
+            const daftarKec = data.map((item: any) => ({
+                label: `[${item.kode_kec}] ${item.kec} `,
+                value: item.kode_kec,
+            }));
+            setDaftarKecamatan(daftarKec);
+        };
+    const fetchDesa = async (value: string) =>
+        // kodeProv: string,
+        // kodeKabkot: string,
+        // semester: string
+        {
+            const url = route("api.entri.desa", {
+                kodeKabkot: form.getFieldValue("kode_kabkot"),
+                kodeKec: form.getFieldValue("kode_kec"),
+            });
+
+            const { data } = await axios.get(url);
+            const daftarDesa = data.map((item: any) => ({
+                label: `[${item.kode_desa}] ${item.desa} `,
+                value: item.kode_desa,
+            }));
+            setDaftarDesa(daftarDesa);
+        };
+    const fetchBs4 = async (value: string) =>
+        // kodeProv: string,
+        // kodeKabkot: string,
+        // semester: string
+        {
+            const url = route("api.entri.bs4", {
+                kodeKabkot: form.getFieldValue("kode_kabkot"),
+                kodeKec: form.getFieldValue("kode_kec"),
+                kodeDesa: form.getFieldValue("kode_desa"),
+            });
+
+            const { data } = await axios.get(url);
+            const daftarBs4 = data.map((item: any) => ({
+                label: item,
+                value: item,
+            }));
+            setDaftarBs4(daftarBs4);
         };
     useEffect(() => {
         try {
@@ -199,9 +248,26 @@ const Blok1_2: React.FC<{
                                     style={formItemStyle}
                                 >
                                     <Select
+                                        allowClear
+                                        showSearch
                                         defaultValue={"71"}
                                         options={daftarProv}
-                                        // onChange={() => setKabkotDisable(false)}
+                                        onChange={() => {
+                                            form.setFieldsValue({
+                                                kode_kabkot: "",
+                                                kode_kec: "",
+                                                kode_desa: "",
+                                                kode_bs4: "",
+                                                klas: "",
+                                                semester: "",
+                                                nks: "",
+                                            });
+
+                                            setDaftarKecamatan([]);
+                                            setDaftarDesa([]);
+                                            setDaftarNks([]);
+                                            setDaftarBs4([]);
+                                        }}
                                     />
                                 </Form.Item>
                             </td>
@@ -212,14 +278,31 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="kode_kab"
+                                    name="kode_kabkot"
                                     label={null}
                                     style={formItemStyle}
                                 >
                                     <Select
-                                        options={daftarKabKot}
+                                        allowClear
                                         showSearch
-                                        // onChange={() => setKabkotDisable(false)}
+                                        optionFilterProp="label"
+                                        options={daftarKabKot}
+                                        onChange={(value: string) => {
+                                            form.setFieldsValue({
+                                                kode_kec: "",
+                                                kode_desa: "",
+                                                klas: "",
+                                                kode_bs4: "",
+                                                semester: "",
+                                                nks: "",
+                                            });
+
+                                            // setDaftarKecamatan([]);
+                                            fetchKecamatan(value);
+                                            setDaftarDesa([]);
+                                            setDaftarNks([]);
+                                            setDaftarBs4([]);
+                                        }}
                                     />
                                 </Form.Item>
                             </td>
@@ -235,8 +318,21 @@ const Blok1_2: React.FC<{
                                     style={formItemStyle}
                                 >
                                     <Select
+                                        allowClear
+                                        showSearch
+                                        optionFilterProp="label"
                                         options={daftarKecamatan}
-                                        // onChange={() => setKabkotDisable(false)}
+                                        onChange={(value: string) => {
+                                            form.setFieldsValue({
+                                                kode_desa: "",
+                                                kode_bs4: "",
+                                                semester: "",
+                                                nks: "",
+                                            });
+
+                                            fetchDesa(value);
+                                            setDaftarDesa([]);
+                                        }}
                                     />
                                 </Form.Item>
                             </td>
@@ -252,8 +348,18 @@ const Blok1_2: React.FC<{
                                     style={formItemStyle}
                                 >
                                     <Select
+                                        allowClear
+                                        showSearch
+                                        optionFilterProp="label"
                                         options={daftarDesa}
-                                        // onChange={() => setKabkotDisable(false)}
+                                        onChange={(value: string) => {
+                                            form.setFieldsValue({
+                                                kode_bs4: "",
+                                                semester: "",
+                                            });
+
+                                            fetchBs4(value);
+                                        }}
                                     />
                                 </Form.Item>
                             </td>
@@ -263,7 +369,6 @@ const Blok1_2: React.FC<{
                             <td style={cellStyle}>
                                 Klasifikasi Desa/Kelurahan
                             </td>
-                            {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
                                     name="klas"
@@ -271,8 +376,10 @@ const Blok1_2: React.FC<{
                                     style={formItemStyle}
                                 >
                                     <Select
+                                        allowClear
+                                        showSearch
+                                        optionFilterProp="label"
                                         options={daftarKlas}
-                                        // onChange={() => setKabkotDisable(false)}
                                     />
                                 </Form.Item>
                             </td>
@@ -287,7 +394,14 @@ const Blok1_2: React.FC<{
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <Input maxLength={4} />
+                                    <Select
+                                        optionFilterProp="label"
+                                        options={daftarBs4}
+                                        onChange={(value: string) => {
+                                            form.setFieldValue("nks", "");
+                                            fetchNks(value);
+                                        }}
+                                    />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -301,7 +415,11 @@ const Blok1_2: React.FC<{
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <Input maxLength={6} />
+                                    <Select
+                                        allowClear
+                                        showSearch
+                                        options={daftarNks}
+                                    />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -317,7 +435,7 @@ const Blok1_2: React.FC<{
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <InputNumber />
+                                    <InputNumber min={1} max={1000} />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -333,7 +451,7 @@ const Blok1_2: React.FC<{
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <InputNumber />
+                                    <InputNumber min={1} />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -347,7 +465,7 @@ const Blok1_2: React.FC<{
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <Input />
+                                    <Input minLength={2} />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -364,7 +482,7 @@ const Blok1_2: React.FC<{
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <Input />
+                                    <Input minLength={5} />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -396,7 +514,7 @@ const Blok1_2: React.FC<{
                             <th style={cellStyle} colSpan={2}>
                                 Uraian
                             </th>
-                            <th style={cellStyle}>Nama dan Kode</th>
+                            <th style={cellStyle}>Nama Petugas</th>
                             <th style={cellStyle}>Jabatan</th>
                             <th style={cellStyle}>Waktu</th>
                             <th style={cellStyle}>Tanda Tangan</th>
@@ -412,15 +530,11 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td>
                                 <Form.Item
-                                    name="201_kode"
+                                    name="201_nama"
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <Select
-                                        // defaultValue={"0000"}
-                                        options={[]}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
+                                    <Input minLength={2} />
                                 </Form.Item>
                             </td>
                             <td style={cellStyle}>
@@ -432,6 +546,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         // defaultValue={"0000"}
                                         showSearch
+                                        optionFilterProp="label"
                                         options={[
                                             {
                                                 label: "1. Staf BPS Provinsi",
@@ -466,15 +581,11 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="202_kode"
+                                    name="202_nama"
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <Select
-                                        // defaultValue={"0000"}
-                                        options={[]}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
+                                    <Input minLength={2} />
                                 </Form.Item>
                             </td>
                             <td style={cellStyle}>
@@ -485,6 +596,7 @@ const Blok1_2: React.FC<{
                                 >
                                     <Select
                                         showSearch
+                                        optionFilterProp="label"
                                         options={[
                                             {
                                                 label: "1. Staf BPS Provinsi",
@@ -497,8 +609,6 @@ const Blok1_2: React.FC<{
                                             { label: "3. KSK", value: "3" },
                                             { label: "4. Mitra", value: "4" },
                                         ]}
-
-                                        // onChange={() => setKabkotDisable(false)}
                                     />
                                 </Form.Item>
                             </td>
@@ -519,39 +629,31 @@ const Blok1_2: React.FC<{
 
                             {/* <td>Sulawesi Utara</td> */}
                             <td style={cellStyle} colSpan={4}>
-                                <Form.Item
+                                <MetaSelect
                                     name="203"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    <Select
-                                        showSearch
-                                        // defaultValue={"0000"}
-                                        options={[
-                                            {
-                                                label: "1. Terisi lengkap",
-                                                value: "1",
-                                            },
-                                            {
-                                                label: "2. Terisi tidak lengkap",
-                                                value: "2",
-                                            },
-                                            {
-                                                label: "3. Tidak ada ART/responden yang dapat memberi jawaban sampai akhir masa pencacahan",
-                                                value: "3",
-                                            },
-                                            {
-                                                label: "4. Responden menolak",
-                                                value: "4",
-                                            },
-                                            {
-                                                label: "5. Rumah tangga pindah/bangunan sensus sudah tidak ada",
-                                                value: "5",
-                                            },
-                                        ]}
-                                        // onChange={() => setKabkotDisable(false)}
-                                    />
-                                </Form.Item>
+                                    options={[
+                                        {
+                                            label: "[1] Terisi lengkap",
+                                            value: "1",
+                                        },
+                                        {
+                                            label: "[2] Terisi tidak lengkap",
+                                            value: "2",
+                                        },
+                                        {
+                                            label: "[3] Tidak ada ART/responden yang dapat memberi jawaban sampai akhir masa pencacahan",
+                                            value: "3",
+                                        },
+                                        {
+                                            label: "[4] Responden menolak",
+                                            value: "4",
+                                        },
+                                        {
+                                            label: "[5] Rumah tangga pindah/bangunan sensus sudah tidak ada",
+                                            value: "5",
+                                        },
+                                    ]}
+                                />
                             </td>
                         </tr>
                     </tbody>
