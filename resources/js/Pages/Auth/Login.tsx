@@ -144,7 +144,6 @@ const LoginForm: React.FC = () => {
                         </Form.Item>
                         <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                             <Button
-                                type="primary"
                                 htmlType="submit"
                                 className="login-form__submit-btn bg-primary"
                             >

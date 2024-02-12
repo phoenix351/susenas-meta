@@ -43,7 +43,7 @@ const darkCell: React.CSSProperties = {
     padding: "5px",
 };
 
-const YourRowComponent: React.FC<{
+const RowKonsumsi: React.FC<{
     data: any;
     form: FormInstance;
     subKey?: number;
@@ -57,9 +57,6 @@ const YourRowComponent: React.FC<{
     }) => void;
 }> = ({ data, form, subKey, subTotalHarga, calculate }) => {
     const [totalHarga, setTotalHarga] = useState(0);
-    useEffect(() => {
-        console.log(subTotalHarga);
-    }, []);
 
     useEffect(() => {
         const beliHarga = parseFloat(
@@ -80,7 +77,8 @@ const YourRowComponent: React.FC<{
         <tr>
             <td style={centerCell}>{data.nomor}</td>
             <td style={cellStyle}>{data.kode_coicop}</td>
-            <td colSpan={2} style={data.type === "sub" ? blokStyle : cellStyle}>
+
+            <td colSpan={1} style={data.type === "sub" ? blokStyle : cellStyle}>
                 {data.rincian}
                 {data.type === "lain" && (
                     <Form.Item name={`${data.nomor}_lainnya`}>
@@ -88,19 +86,19 @@ const YourRowComponent: React.FC<{
                     </Form.Item>
                 )}
             </td>
+            <td colSpan={1} style={data.type === "sub" ? blokStyle : cellStyle}>
+                {data.type === "lain" ? (
+                    <Form.Item name={`${data.nomor}_lainnya`}>
+                        <Input placeholder="Sebutkan" />
+                    </Form.Item>
+                ) : (
+                    data.satuan
+                )}
+            </td>
             <td style={data.type === "sub" ? darkCell : cellStyle}>
                 {data.type === "sub" || (
                     <Form.Item name={`${data.nomor}_beli_volume`}>
-                        <InputNumber
-                            min={0}
-                            onKeyDown={() =>
-                                console.log(
-                                    form.getFieldValue(
-                                        `${data.nomor}_beli_harga`
-                                    )
-                                )
-                            }
-                        />
+                        <InputNumber min={0} />
                     </Form.Item>
                 )}
             </td>
@@ -197,4 +195,4 @@ const YourRowComponent: React.FC<{
     );
 };
 
-export default YourRowComponent;
+export default RowKonsumsi;

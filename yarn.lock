@@ -689,6 +689,11 @@
   "resolved" "https://registry.npmjs.org/@types/history/-/history-4.7.11.tgz"
   "version" "4.7.11"
 
+"@types/lodash@^4.14.202":
+  "integrity" "sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ=="
+  "resolved" "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.202.tgz"
+  "version" "4.14.202"
+
 "@types/node@^18.13.0", "@types/node@>= 14":
   "integrity" "sha512-NpaM49IGQQAUlBhHMF82QH80J08os4ZmyF9MkpCzWAGuOHqE4gTEbhzd7L3l5LmWuZ6E0OiC1FweQ4tsiW35+g=="
   "resolved" "https://registry.npmjs.org/@types/node/-/node-18.16.16.tgz"

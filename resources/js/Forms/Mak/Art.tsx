@@ -1,17 +1,34 @@
 import { Form, InputNumber, Space, Typography } from "antd";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import TabelBlok from "@/Components/TabelBlok";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SubTotal } from "@/types";
 
 const { Text, Title } = Typography;
 
 const Art: React.FC<{
-    form: any;
     onFinish: (values: any) => void;
+    rekapArt: any;
+    kunci: any;
+    setRekapArt: (value: any) => void;
     // record: any;
-}> = ({ form, onFinish }) => {
+}> = ({ onFinish, rekapArt, kunci, setRekapArt }) => {
     //    const konten =
+
+    // first initialize the rekap art
+    const [form] = Form.useForm();
+    useEffect(() => {
+        if (!kunci) return;
+        let newRekapArt = [...rekapArt];
+
+        newRekapArt[kunci] = [
+            { beli: 0, produksi: 0, total: 0 },
+            { beli: 0, produksi: 0, total: 0 },
+        ];
+
+        setRekapArt(newRekapArt);
+    }, []);
+
     const konten = [
         {
             nomor: 159,
@@ -316,6 +333,10 @@ const Art: React.FC<{
         let newSubTotalHarga: SubTotal[] = [...subTotalHarga];
         newSubTotalHarga[subKey][jenis] = sum;
         setSubTotalHarga(newSubTotalHarga);
+        // setRekapArt(newSubTotalHarga);
+        let newRekapArt = [...rekapArt];
+        newRekapArt[kunci] = newSubTotalHarga;
+        setRekapArt(newRekapArt);
     };
 
     const title =

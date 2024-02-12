@@ -254,6 +254,7 @@ const Mak = () => {
     ];
 
     function handleChange(activeKey: string): void {}
+    const [rekapArt, setRekapArt] = useState([]);
     const [subTotalHarga, setSubTotalHarga] = useState([
         { beli: 0, produksi: 0, total: 0 },
         { beli: 0, produksi: 0, total: 0 },
@@ -356,6 +357,8 @@ const Mak = () => {
                                     tabContentStyle={tabContentStyle}
                                     form={blok4_1artForm}
                                     onFinish={blok4_1artFinish}
+                                    rekapArt={rekapArt}
+                                    setRekapArt={setRekapArt}
                                 />
                             ),
                         },
@@ -368,6 +371,7 @@ const Mak = () => {
                                     form={blok4_3Form}
                                     onFinish={blok4_3Finish}
                                     subTotalHarga={subTotalHarga}
+                                    rekapArt={rekapArt}
                                 />
                             ),
                         },

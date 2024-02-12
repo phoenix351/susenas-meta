@@ -15,11 +15,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
-import Blok4_1_hal10 from "./Blok4_1_hal10";
-import Blok4_1_hal2 from "./Blok4_1_hal2";
-import Blok4_1_hal4 from "./Blok4_1_hal4";
-import Blok4_1_hal6 from "./Blok4_1_hal6";
-import Blok4_1_hal8 from "./Blok4_1_hal8";
+
 import Art from "./Art";
 
 const { Text, Title } = Typography;
@@ -28,8 +24,10 @@ const Blok4_1: React.FC<{
     form: any;
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
+    rekapArt: any;
+    setRekapArt: (value: any) => void;
     // record: any;
-}> = ({ form, onFinish, tabContentStyle }) => {
+}> = ({ form, onFinish, tabContentStyle, rekapArt, setRekapArt }) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -79,25 +77,24 @@ const Blok4_1: React.FC<{
         } catch (error) {}
     }, []);
 
-    function handleChange(activeKey: string): void {
-        throw new Error("Function not implemented.");
-    }
-
     return (
         <Tabs
-            onChange={handleChange}
             type="line"
             style={{ backgroundColor: "#fff", padding: "10px" }}
-            items={daftarArt.map((art, index) => ({
-                label: art.nama,
-                key: String(index + 1),
-                children: (
-                    <Art
-                        form={blok4_1_hal2Form}
-                        onFinish={blok4_1_hal2Finish}
-                    />
-                ),
-            }))}
+            items={daftarArt.map((art, index) => {
+                return {
+                    label: art.nama,
+                    key: String(index + 1),
+                    children: (
+                        <Art
+                            onFinish={blok4_1_hal2Finish}
+                            kunci={index}
+                            rekapArt={rekapArt}
+                            setRekapArt={setRekapArt}
+                        />
+                    ),
+                };
+            })}
         />
     );
 };

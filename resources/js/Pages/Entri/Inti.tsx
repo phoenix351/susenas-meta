@@ -2,7 +2,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 import { useEffect, useState } from "react";
 import { Head, router } from "@inertiajs/react";
-import { PageProps, User, KondisiSummary, Summary } from "@/types";
+import { PageProps, User } from "@/types";
 import BarChart from "@/Components/Grafik/BarChart";
 import {
     ReactElement,
@@ -64,7 +64,7 @@ const Dashboard = () => {
                 key: "cari",
                 content: "Berhasil mengambil data",
             });
-        } catch (error) {
+        } catch (err) {
             messageApi.open({
                 type: "error",
                 key: "cari",
