@@ -13,6 +13,7 @@ import {
     message,
 } from "antd";
 import { useEffect, useRef, useState } from "react";
+import _debounce from "lodash/debounce";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
 import Blok4_1_hal10 from "./Blok4_1_hal10";
@@ -20,7 +21,7 @@ import Blok4_1_hal2 from "./Blok4_1_hal2";
 import Blok4_1_hal4 from "./Blok4_1_hal4";
 import Blok4_1_hal6 from "./Blok4_1_hal6";
 import Blok4_1_hal8 from "./Blok4_1_hal8";
-import { SubTotal } from "@/types";
+import { RekapMak, SubTotal } from "@/types";
 
 const { Text, Title } = Typography;
 
@@ -36,9 +37,18 @@ const Blok4_1: React.FC<{
         subKey: number;
         jenis: keyof SubTotal;
     }) => void;
+    rekapMak: RekapMak[];
+    setRekapMak: React.Dispatch<React.SetStateAction<RekapMak[]>>;
 
     // record: any;
-}> = ({ form, onFinish, tabContentStyle, subTotalHarga, calculate }) => {
+}> = ({
+    form,
+    onFinish,
+    tabContentStyle,
+    subTotalHarga,
+    calculate,
+    rekapMak,
+}) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -103,6 +113,9 @@ const Blok4_1: React.FC<{
             onFinish={onFinish}
             autoComplete="off"
             layout="vertical"
+            onValuesChange={() =>
+                _debounce(() => calculate({ subKey: 1, jenis: "beli" }), 600)()
+            }
         >
             <Tabs
                 onChange={handleChange}
@@ -116,7 +129,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1_hal2
                                 form={form}
                                 calculate={calculate}
-                                subTotalHarga={subTotalHarga}
+                                rekapMak={rekapMak}
                             />
                         ),
                     },
@@ -127,7 +140,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1_hal4
                                 form={form}
                                 calculate={calculate}
-                                subTotalHarga={subTotalHarga}
+                                rekapMak={rekapMak}
                             />
                         ),
                     },
@@ -138,7 +151,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1_hal6
                                 form={form}
                                 calculate={calculate}
-                                subTotalHarga={subTotalHarga}
+                                rekapMak={rekapMak}
                             />
                         ),
                     },
@@ -149,7 +162,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1_hal8
                                 form={form}
                                 calculate={calculate}
-                                subTotalHarga={subTotalHarga}
+                                rekapMak={rekapMak}
                             />
                         ),
                     },
@@ -160,7 +173,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1_hal10
                                 form={form}
                                 calculate={calculate}
-                                subTotalHarga={subTotalHarga}
+                                rekapMak={rekapMak}
                             />
                         ),
                     },

@@ -274,7 +274,7 @@ const konten = [
 ];
 const Blok4_1_hal2: React.FC<{
     form: FormInstance;
-    subTotalHarga: SubTotal[];
+    rekapMak: SubTotal[];
     calculate: ({
         subKey,
         jenis,
@@ -283,7 +283,7 @@ const Blok4_1_hal2: React.FC<{
         jenis: keyof SubTotal;
     }) => void;
     // record: any;
-}> = ({ form, subTotalHarga, calculate }) => {
+}> = ({ form, rekapMak, calculate }) => {
     //    const konten =
     useEffect(() => {
         const handleKeyPress = (event: {
@@ -330,7 +330,7 @@ const Blok4_1_hal2: React.FC<{
                 form={form}
                 konten={konten}
                 title={title}
-                subTotalHarga={subTotalHarga}
+                rekapMak={rekapMak}
                 calculate={calculate}
             />
         </Space>

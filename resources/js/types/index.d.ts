@@ -23,3 +23,16 @@ interface SubTotal {
     produksi: number;
     total: number;
 }
+interface Rincian {
+    id: number;
+    nomor: number;
+    subKey?: string;
+    rincian: string;
+    type: string;
+}
+interface RekapMak {
+    beli: number;
+    produksi: number;
+    total: number;
+    sub?: string;
+}

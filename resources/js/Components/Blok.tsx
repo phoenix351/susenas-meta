@@ -4,6 +4,7 @@ const { Text, Title } = Typography;
 const tableStyle: React.CSSProperties = {
     borderCollapse: "collapse",
     width: "100%",
+    backgroundColor: "#fff",
 };
 const cellStyle = {
     borderStyle: "solid",

@@ -11,10 +11,120 @@ import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
 import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
 import { SubTotal } from "@/types";
-import form from "antd/es/form";
+import Blok_QC from "@/Forms/Mak/Blok_QC";
+const daftarRincian432 = [
+    {
+        id: 1,
+        nomor: 1,
+        rincian: "Padi-padian (R.1)",
+        type: "standar",
+    },
+    {
+        id: 2,
+        nomor: 2,
+        rincian: "Umbi-umbian (R.8)",
+        type: "standar",
+    },
+    {
+        id: 3,
+        nomor: 3,
+        rincian: "Ikan/udang/cumi/kerang (R.16)",
+        type: "standar",
+    },
+    {
+        id: 4,
+        nomor: 4,
+        rincian: "Daging (R.55)",
+        type: "standar",
+    },
+    {
+        id: 5,
+        nomor: 5,
+        rincian: "Telur dan Susu (R.65)",
+        type: "standar",
+    },
+    {
+        id: 6,
+        nomor: 6,
+        rincian: "Sayur-sayuran (R.75)",
+        type: "standar",
+    },
+    {
+        id: 7,
+        nomor: 7,
+        rincian: "Kacang-kacangan (R.102)",
+        type: "standar",
+    },
+    {
+        id: 8,
+        nomor: 8,
+        rincian: "Buah-buahan (R.110)",
+        type: "standar",
+    },
+    {
+        id: 9,
+        nomor: 9,
+        rincian: "Minyak dan Kelapa (R.126)",
+        type: "standar",
+    },
+    {
+        id: 10,
+        nomor: 10,
+        rincian: "Bahan Minuman (R.131)",
+        type: "standar",
+    },
+    {
+        id: 11,
+        nomor: 11,
+        rincian: "Bumbu-bumbuan (R.139)",
+        type: "standar",
+    },
+    {
+        id: 12,
+        nomor: 12,
+        rincian: "Bahan Makanan Lainnya (R.154)",
+        type: "standar",
+    },
+    {
+        id: 13,
+        nomor: 13,
+        rincian: "Makanan dan Minuman Jadi (Blok IV.3.1 Baris Jumlah)",
+        type: "standar",
+    },
+    {
+        id: 14,
+        nomor: 14,
+        rincian: "Rokok dan Tembakau (Blok IV.3.1 Baris Jumlah)",
+        type: "standar",
+    },
+    {
+        id: 15,
+        nomor: 15,
+        rincian: "SUBJUMLAH [R.1 s.d. R.14]",
+        type: "standar",
+    },
+    {
+        id: 16,
+        nomor: 16,
+        rincian: "RATA-RATA PENGELUARAN MAKANAN SEBULAN [R.15 x 30/7]",
+        type: "average",
+    },
+    {
+        id: 17,
+        nomor: 17,
+        rincian:
+            "RATA-RATA PENGELUARAN BUKAN MAKANAN SEBULAN [salin dari Blok 4.3.3 rincian 8 kolom 3]",
+        type: "average",
+    },
+    {
+        id: 18,
+        nomor: 18,
+        rincian: "RATA-RATA PENGELUARAN MAKANAN SEBULAN [R.16 + R17]",
+        type: "average",
+    },
+];
 
 const Mak = () => {
-    useEffect(() => {}, []);
     // const [cariForm] = Form.useForm();
     const tabContentStyle: React.CSSProperties = {
         backgroundColor: "#fff",
@@ -30,20 +140,13 @@ const Mak = () => {
     const [blok4_3Form] = Form.useForm();
     const [wtfForm] = Form.useForm();
     const [daftarSampel, setDaftarSampel] = useState([]);
+    const [daftarArt, setDaftarArt] = useState([]);
+    const [rekapMak, setRekapMak] = useState(
+        daftarRincian432.map((rincian) => ({ beli: 0, produksi: 0, total: 0 }))
+    );
+
     const [messageApi, contextHolder] = message.useMessage();
-    const Status = {
-        3: (
-            <Button type="primary" danger>
-                Error
-            </Button>
-        ),
-        2: <Button type="default">Warning</Button>,
-        1: (
-            <Button type="primary" style={{ backgroundColor: "green" }}>
-                Success
-            </Button>
-        ),
-    };
+
     const blok1_2Finish = async (values: any) => {
         console.log({ values });
         messageApi.open({
@@ -70,10 +173,8 @@ const Mak = () => {
         }
     };
     const blok4_1Finish = async (values: any) => {
-        console.log("submitt");
-        console.log({ values });
         // console.log();
-        console.log("====================================");
+
         messageApi.open({
             type: "loading",
             key: "cari",
@@ -172,86 +273,6 @@ const Mak = () => {
             });
         }
     };
-    const dataSource = [
-        {
-            key: "1",
-            name: "Mike",
-            age: 32,
-            address: "10 Downing Street",
-        },
-        {
-            key: "2",
-            name: "John",
-            age: 42,
-            address: "10 Downing Street",
-        },
-    ];
-
-    const columns = [
-        {
-            title: "Nomor",
-            dataIndex: "id",
-            key: "id",
-        },
-        {
-            title: "Kecamatan",
-            dataIndex: "kec",
-            key: "kec",
-            render: (_: any, record: any) =>
-                `[${record.kode_kec}] ${record.nama_kecamatan}`,
-        },
-        {
-            title: "Desa",
-            dataIndex: "desa",
-            key: "desa",
-            render: (_: any, record: any) =>
-                `[${record.kode_desa}] ${record.nama_desa}`,
-        },
-        {
-            title: "Blok Sensus",
-            dataIndex: "kode_bs4",
-            key: "kode_bs4",
-        },
-        {
-            title: "No Urut Sampel",
-            dataIndex: "id_dsrt",
-            key: "id_dsrt",
-        },
-        {
-            title: "Nama KRT",
-            dataIndex: "nama_krt",
-            key: "nama_krt",
-        },
-        {
-            title: "Alamat",
-            dataIndex: "alamat",
-            key: "alamat",
-        },
-        {
-            title: "Status",
-            dataIndex: "status",
-            key: "status",
-            render: (value: number) => {
-                const statusElement = Status[value as keyof typeof Status];
-                return statusElement || <span>No Status</span>;
-            },
-        },
-        {
-            title: "Entri",
-            dataIndex: "entri",
-            key: "entri",
-            render: (_: any, record: any) => (
-                <Button
-                    type="primary"
-                    onClick={() =>
-                        router.get(route("entri.mak", { id_dsrt: record.id }))
-                    }
-                >
-                    Entri
-                </Button>
-            ),
-        },
-    ];
 
     function handleChange(activeKey: string): void {}
     const [rekapArt, setRekapArt] = useState([]);
@@ -277,24 +298,102 @@ const Mak = () => {
         subKey: number;
         jenis: keyof SubTotal;
     }) => {
+        // return;
         // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
-        const pattern = `${jenis}_harga${subKey}`;
         const allFieldValues = blok4_1Form.getFieldsValue();
-        // console.log({ pattern, allFieldValues });
 
-        const sum = Object.entries(allFieldValues)
-            .filter(([fieldName]) => fieldName.endsWith(pattern))
-            .reduce(
-                (accumulator, [, value]) =>
-                    accumulator + ((value as number) || 0),
-                0
+        const subArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17];
+        const jenisArr = ["beli", "produksi"];
+        subArr.forEach((sub: any) => {
+            let newrekapMak: SubTotal[] = [...rekapMak];
+            console.log({ newrekapMak });
+
+            const pattern_beli = `beli_harga${sub}`;
+            const sum_beli = Object.entries(allFieldValues)
+                .filter(([fieldName]) => fieldName.endsWith(pattern_beli))
+                .reduce(
+                    (accumulator, [, value]) =>
+                        accumulator + ((value as number) || 0),
+                    0
+                );
+            newrekapMak[sub]["beli"] = sum_beli;
+            const pattern_produksi = `produksi_harga${sub}`;
+            const sum_produksi = Object.entries(allFieldValues)
+                .filter(([fieldName]) => fieldName.endsWith(pattern_produksi))
+                .reduce(
+                    (accumulator, [, value]) =>
+                        accumulator + ((value as number) || 0),
+                    0
+                );
+            newrekapMak[sub]["produksi"] = sum_produksi;
+            newrekapMak[sub]["total"] =
+                newrekapMak[sub]["beli"] + newrekapMak[sub]["produksi"];
+            // newrekapMak[14]["beli"] = Object.entries(newrekapMak)
+            newrekapMak[14] = newrekapMak
+                .slice(0, 13)
+                // .filter(([fieldName]: any) => fieldName === "beli");
+                .reduce(
+                    (prev, current) => ({
+                        beli: prev.beli + current.beli,
+                        produksi: prev.produksi + current.produksi,
+                        total: prev.total + current.total,
+                    }),
+                    { beli: 0, produksi: 0, total: 0 }
+                );
+            newrekapMak[15]["total"] = Math.round(
+                (newrekapMak[14]["total"] * 30) / 7
             );
-
-        let newSubTotalHarga: SubTotal[] = [...subTotalHarga];
-        newSubTotalHarga[subKey][jenis] = sum;
-        setSubTotalHarga(newSubTotalHarga);
+            newrekapMak[17]["total"] =
+                newrekapMak[15]["total"] + newrekapMak[16]["total"];
+            console.log("====================================");
+            console.log({ rekapArt, daftarArt });
+            console.log("====================================");
+            setRekapMak(newrekapMak);
+        });
     };
+
+    useEffect(() => {
+        let newrekapMak = [...rekapMak];
+        console.log({ newrekapMak });
+
+        const summary = daftarArt.reduce((summary: any[], item: any) => {
+            item.rekap.forEach((entry: any, index: number) => {
+                summary[index] = summary[index] || {
+                    beli: 0,
+                    produksi: 0,
+                    total: 0,
+                };
+                summary[index].beli += entry.beli;
+                summary[index].produksi += entry.produksi;
+                summary[index].total += entry.total;
+            });
+            return summary;
+        }, []);
+        newrekapMak[12] = summary[0];
+        newrekapMak[13] = summary[1];
+        newrekapMak[14] = newrekapMak
+            .slice(0, 13)
+            // .filter(([fieldName]: any) => fieldName === "beli");
+            .reduce(
+                (prev, current) => ({
+                    beli: current ? prev.beli + current.beli : 0,
+                    produksi: current ? prev.produksi + current.produksi : 0,
+                    total: current ? prev.total + current.total : 0,
+                }),
+                { beli: 0, produksi: 0, total: 0 }
+            );
+        newrekapMak[15]["total"] = Math.round(
+            (newrekapMak[14]["total"] * 30) / 7
+        );
+        newrekapMak[17]["total"] =
+            newrekapMak[15]["total"] + newrekapMak[16]["total"];
+
+        console.log("====================================");
+        console.log({ rekapArt, daftarArt });
+        console.log("====================================");
+        setRekapMak(newrekapMak);
+    }, [daftarArt]);
 
     return (
         <>
@@ -345,6 +444,8 @@ const Mak = () => {
                                     tabContentStyle={tabContentStyle}
                                     calculate={calculateSubTotalHarga}
                                     subTotalHarga={subTotalHarga}
+                                    rekapMak={rekapMak}
+                                    setRekapMak={setRekapMak}
                                     // onFinish={blok4_1Finish}
                                 />
                             ),
@@ -359,6 +460,8 @@ const Mak = () => {
                                     onFinish={blok4_1artFinish}
                                     rekapArt={rekapArt}
                                     setRekapArt={setRekapArt}
+                                    daftarArt={daftarArt}
+                                    setDaftarArt={setDaftarArt}
                                 />
                             ),
                         },
@@ -370,8 +473,25 @@ const Mak = () => {
                                     tabContentStyle={tabContentStyle}
                                     form={blok4_3Form}
                                     onFinish={blok4_3Finish}
-                                    subTotalHarga={subTotalHarga}
-                                    rekapArt={rekapArt}
+                                    daftarArt={daftarArt}
+                                    rekapMak={rekapMak}
+                                    daftarRincian432={daftarRincian432}
+                                    setRekapMak={setRekapMak}
+                                />
+                            ),
+                        },
+                        {
+                            label: "Blok QC",
+                            key: "6",
+                            children: (
+                                <Blok_QC
+                                    tabContentStyle={tabContentStyle}
+                                    form={blok4_3Form}
+                                    onFinish={blok4_3Finish}
+                                    daftarArt={daftarArt}
+                                    rekapMak={rekapMak}
+                                    daftarRincian432={daftarRincian432}
+                                    setRekapMak={setRekapMak}
                                 />
                             ),
                         },

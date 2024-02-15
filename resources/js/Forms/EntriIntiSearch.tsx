@@ -47,7 +47,7 @@ const EntriIntiForm: React.FC<{
 
             const { data } = await axios.get(url);
 
-            const daftarNks = data.data.map((item: any) => ({
+            const daftarNks = data.map((item: any) => ({
                 label: item,
                 value: item,
             }));

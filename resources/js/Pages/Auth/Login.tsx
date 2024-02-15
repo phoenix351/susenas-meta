@@ -3,9 +3,10 @@ import BackgroundWave from "@/Components/BackgroundWave";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Link, usePage } from "@inertiajs/react";
 
-import { Form, Input, Button, Image, message } from "antd";
+import { Form, Input, Button, Image, message, Space } from "antd";
 import { router, Head } from "@inertiajs/react";
 import { useEffect, useState } from "react";
+import ApplicationLogo from "@/Components/ApplicationLogo";
 
 const LoginForm: React.FC = () => {
     const { errors } = usePage().props;
@@ -79,41 +80,20 @@ const LoginForm: React.FC = () => {
 
                 {!loading ? (
                     <Form
+                        layout="vertical"
                         onFinish={handleSubmit}
                         className="login-form__form"
-                        name="basic"
-                        labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 16 }}
-                        style={{ maxWidth: 600 }}
+                        // labelCol={{ span: 8 }}
+                        // wrapperCol={{ span: 16 }}
+                        // style={{ maxWidth: 600 }}
                         autoComplete="off"
                         method="post"
                         action={route("login")}
                     >
+                        <ApplicationLogo />
+
                         <Form.Item
-                            wrapperCol={{ offset: 8, span: 16 }}
-                            style={{ justifyContent: "center" }}
-                        >
-                            <Link
-                                href="/"
-                                style={{
-                                    color: "#fff",
-                                    display: "flex",
-                                    justifyContent: "start",
-                                    alignItems: "center",
-                                    fontSize: "1.3rem",
-                                }}
-                            >
-                                <Image
-                                    {...imageProps}
-                                    src="images/smokol-white.png"
-                                />
-                                <h1>Smokol</h1>
-                            </Link>
-                        </Form.Item>
-                        <Form.Item
-                            label={
-                                <label style={{ color: "#fff" }}>email</label>
-                            }
+                            label={null}
                             name="email"
                             colon={false}
                             rules={[
@@ -123,14 +103,10 @@ const LoginForm: React.FC = () => {
                                 },
                             ]}
                         >
-                            <Input />
+                            <Input type="email" placeholder="nama@bps.go.id" />
                         </Form.Item>
                         <Form.Item
-                            label={
-                                <label style={{ color: "#fff" }}>
-                                    password
-                                </label>
-                            }
+                            label={null}
                             name="password"
                             colon={false}
                             rules={[
@@ -140,9 +116,9 @@ const LoginForm: React.FC = () => {
                                 },
                             ]}
                         >
-                            <Input.Password />
+                            <Input.Password placeholder="Password" />
                         </Form.Item>
-                        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                        <Form.Item>
                             <Button
                                 htmlType="submit"
                                 className="login-form__submit-btn bg-primary"

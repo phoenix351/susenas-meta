@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, FormInstance, Input, InputNumber, Typography } from "antd"; // Replace 'your-library' with the actual library you are using for Form, Input, and Text components
 import RupiahInput from "./RupiahInput";
 import { SubTotal } from "@/types";
+import TextRupiah from "./TextRupiah";
 
 const { Text } = Typography;
 const tableStyle: React.CSSProperties = {
@@ -47,7 +48,7 @@ const RowKonsumsi: React.FC<{
     data: any;
     form: FormInstance;
     subKey?: number;
-    subTotalHarga: SubTotal[];
+    rekapMak: SubTotal[];
     calculate: ({
         subKey,
         jenis,
@@ -55,7 +56,7 @@ const RowKonsumsi: React.FC<{
         subKey: number;
         jenis: keyof SubTotal;
     }) => void;
-}> = ({ data, form, subKey, subTotalHarga, calculate }) => {
+}> = ({ data, form, subKey, rekapMak, calculate }) => {
     const [totalHarga, setTotalHarga] = useState(0);
 
     useEffect(() => {
@@ -119,21 +120,18 @@ const RowKonsumsi: React.FC<{
                                 )
                         );
                         if (data.type === "sub") return;
-                        calculate({
-                            subKey: data.subKey,
-                            jenis: "beli" as keyof SubTotal,
-                        });
+                        // calculate({
+                        //     subKey: data.subKey,
+                        //     jenis: "beli" as keyof SubTotal,
+                        // });
                     }}
                 />
 
                 {data.type === "sub" && (
-                    <Text style={{ color: "red" }}>
-                        {/* {subTotalHarga[data.subKey]?["beli"]} */}
-                        {`Rp ${subTotalHarga[data.subKey]?.beli ?? ""}`.replace(
-                            /\B(?=(\d{3})+(?!\d))/g,
-                            "."
-                        )}
-                    </Text>
+                    <TextRupiah
+                        color="red"
+                        value={rekapMak[data.subKey]["beli"]}
+                    />
                 )}
             </td>
             <td style={data.type === "sub" ? darkCell : cellStyle}>
@@ -160,19 +158,17 @@ const RowKonsumsi: React.FC<{
                                 )
                         );
                         if (data.type === "sub") return;
-                        calculate({
-                            subKey: data.subKey,
-                            jenis: "produksi" as keyof SubTotal,
-                        });
+                        // calculate({
+                        //     subKey: data.subKey,
+                        //     jenis: "produksi" as keyof SubTotal,
+                        // });
                     }}
                 />
                 {data.type === "sub" && (
-                    <Text style={{ color: "red" }}>
-                        {`Rp ${subTotalHarga[data.subKey].produksi}`.replace(
-                            /\B(?=(\d{3})+(?!\d))/g,
-                            "."
-                        )}
-                    </Text>
+                    <TextRupiah
+                        color="red"
+                        value={rekapMak[data.subKey]["produksi"]}
+                    />
                 )}
             </td>
             <td style={data.type === "sub" ? darkCell : cellStyle}>
@@ -187,9 +183,7 @@ const RowKonsumsi: React.FC<{
             <td style={rightCell}>
                 <RupiahInput inputName={`${data.nomor}_total_harga`} />
 
-                <Text style={{ color: "red" }}>
-                    {`Rp ${totalHarga}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
-                </Text>
+                <TextRupiah color="red" value={totalHarga} />
             </td>
         </tr>
     );

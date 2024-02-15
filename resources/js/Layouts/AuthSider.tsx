@@ -87,7 +87,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                             marginLeft: "10px",
                         }}
                     >
-                        Susenas-Meta
+                        SSN-META
                     </span>
                 </div>
 

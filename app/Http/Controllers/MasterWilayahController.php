@@ -37,7 +37,11 @@ class MasterWilayahController extends Controller
         $kode_bs4 = $request->query('kodeBs4');
         // $semester = $request->query('semester');
 
-        $data = MasterWilayah::where('kode_kabkot', $kode_kabkot)->where('kode_kec', $kode_kec)->where('kode_desa', $kode_desa)->where('kode_bs4', $kode_bs4)->distinct()->pluck('nks');
+        if (strlen($kode_kec) < 1) {
+            $data = MasterWilayah::where('kode_kabkot', $kode_kabkot)->distinct()->pluck('nks');
+        } else {
+            $data = MasterWilayah::where('kode_kabkot', $kode_kabkot)->where('kode_kec', $kode_kec)->where('kode_desa', $kode_desa)->where('kode_bs4', $kode_bs4)->distinct()->pluck('nks');
+        }
         return response()->json($data, 200);
     }
 }

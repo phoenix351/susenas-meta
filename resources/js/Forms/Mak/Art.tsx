@@ -1,33 +1,26 @@
-import { Form, InputNumber, Space, Typography } from "antd";
+import { Button, Form, InputNumber, Space, Typography } from "antd";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import TabelBlok from "@/Components/TabelBlok";
 import { useEffect, useState } from "react";
 import { SubTotal } from "@/types";
 
+import _debounce from "lodash/debounce";
+
 const { Text, Title } = Typography;
 
 const Art: React.FC<{
     onFinish: (values: any) => void;
-    rekapArt: any;
-    kunci: any;
-    setRekapArt: (value: any) => void;
+    artKey: any;
+    daftarArt: any;
+    setDaftarArt: (value: any) => void;
+
     // record: any;
-}> = ({ onFinish, rekapArt, kunci, setRekapArt }) => {
+}> = ({ onFinish, artKey, setDaftarArt, daftarArt }) => {
     //    const konten =
 
     // first initialize the rekap art
+
     const [form] = Form.useForm();
-    useEffect(() => {
-        if (!kunci) return;
-        let newRekapArt = [...rekapArt];
-
-        newRekapArt[kunci] = [
-            { beli: 0, produksi: 0, total: 0 },
-            { beli: 0, produksi: 0, total: 0 },
-        ];
-
-        setRekapArt(newRekapArt);
-    }, []);
 
     const konten = [
         {
@@ -308,6 +301,7 @@ const Art: React.FC<{
         { beli: 0, produksi: 0, total: 0 },
         { beli: 0, produksi: 0, total: 0 },
     ]);
+
     // const [totalProduksi, setTotalProduksi] = useState(0);
     const calculateSubTotalHarga = ({
         subKey,
@@ -333,45 +327,115 @@ const Art: React.FC<{
         let newSubTotalHarga: SubTotal[] = [...subTotalHarga];
         newSubTotalHarga[subKey][jenis] = sum;
         setSubTotalHarga(newSubTotalHarga);
-        // setRekapArt(newSubTotalHarga);
-        let newRekapArt = [...rekapArt];
-        newRekapArt[kunci] = newSubTotalHarga;
-        setRekapArt(newRekapArt);
+        // setRekapArt(newSubTotalHarga)
+        let newDaftarArt = [...daftarArt];
+        const updatedArray = newDaftarArt.map((obj) =>
+            obj.artKey === artKey ? { ...obj, rekap: newSubTotalHarga } : obj
+        );
+        console.log({
+            updatedArray,
+            daftarArt,
+        });
     };
+    const calculateRekap = () => {
+        // console.log({ subKey, jenis });
+        // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
+        // const pattern = `${jenis}_harga${subKey}`;
+        const beli_0 = `beli_harga0`;
+        const beli_1 = `beli_harga1`;
+        const produksi_0 = `produksi_harga0`;
+        const produksi_1 = `produksi_harga1`;
+
+        const allFieldValues = form.getFieldsValue();
+        // console.log({ pattern, allFieldValues });
+
+        const sum_beli_0 = Object.entries(allFieldValues)
+            .filter(([fieldName]) => fieldName.endsWith(beli_0))
+            .reduce(
+                (accumulator, [, value]) =>
+                    accumulator + ((value as number) || 0),
+                0
+            );
+        const sum_beli_1 = Object.entries(allFieldValues)
+            .filter(([fieldName]) => fieldName.endsWith(beli_1))
+            .reduce(
+                (accumulator, [, value]) =>
+                    accumulator + ((value as number) || 0),
+                0
+            );
+        const sum_produksi_0 = Object.entries(allFieldValues)
+            .filter(([fieldName]) => fieldName.endsWith(produksi_0))
+            .reduce(
+                (accumulator, [, value]) =>
+                    accumulator + ((value as number) || 0),
+                0
+            );
+        const sum_produksi_1 = Object.entries(allFieldValues)
+            .filter(([fieldName]) => fieldName.endsWith(produksi_1))
+            .reduce(
+                (accumulator, [, value]) =>
+                    accumulator + ((value as number) || 0),
+                0
+            );
+
+        let newSubTotalHarga: SubTotal[] = [...subTotalHarga];
+        newSubTotalHarga["0"]["beli"] = sum_beli_0;
+        newSubTotalHarga["1"]["beli"] = sum_beli_1;
+        newSubTotalHarga["0"]["produksi"] = sum_produksi_0;
+        newSubTotalHarga["1"]["produksi"] = sum_produksi_1;
+        //calculate total for each
+        newSubTotalHarga["0"]["total"] = sum_beli_0 + sum_produksi_0;
+        newSubTotalHarga["1"]["total"] = sum_beli_1 + sum_produksi_1;
+        setSubTotalHarga(newSubTotalHarga);
+
+        let newDaftarArt = [...daftarArt];
+        const updatedArt = newDaftarArt.map((obj) =>
+            obj.key === artKey ? { ...obj, rekap: newSubTotalHarga } : obj
+        );
+
+        setDaftarArt(updatedArt);
+    };
+    // useEffect(() => {
+    //     calculateRekap();
 
     const title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";
 
     return (
         <Space direction="vertical" style={{ width: "100%" }}>
-            <Space
-                style={{ width: "100%", justifyContent: "end" }}
-                direction="horizontal"
-            >
-                <Text>
-                    Jumlah komoditas bahan makanan,bahan minuman, dan rokok yang
-                    terisi pada halaman ini
-                </Text>
-                <Form.Item style={{ margin: "auto" }} name="hal6_jml_komoditas">
-                    <InputNumber
-                        max={30}
-                        style={{ width: "40px" }}
-                    ></InputNumber>
-                </Form.Item>
-            </Space>
             <Form
                 form={form}
                 name="Art"
                 onFinish={onFinish}
                 autoComplete="off"
                 layout="vertical"
+                onValuesChange={() => _debounce(calculateRekap, 600)()}
             >
+                <Space
+                    style={{ width: "100%", justifyContent: "end" }}
+                    direction="horizontal"
+                >
+                    <Text>
+                        Jumlah komoditas bahan makanan,bahan minuman, dan rokok
+                        yang terisi pada halaman ini
+                    </Text>
+                    <Form.Item
+                        style={{ margin: "auto" }}
+                        name="hal6_jml_komoditas"
+                    >
+                        <InputNumber
+                            max={30}
+                            style={{ width: "40px" }}
+                        ></InputNumber>
+                    </Form.Item>
+                    <Button onClick={() => form.submit()}>finish</Button>
+                </Space>
                 <TabelBlok
                     form={form}
                     konten={konten}
                     title={title}
                     calculate={calculateSubTotalHarga}
-                    subTotalHarga={subTotalHarga}
+                    rekapMak={subTotalHarga}
                 />
             </Form>
         </Space>

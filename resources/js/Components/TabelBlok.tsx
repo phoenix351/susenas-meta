@@ -120,7 +120,7 @@ const darkCell: React.CSSProperties = {
 const TabelBlok: React.FC<{
     title: string;
     konten: RowData[];
-    subTotalHarga: SubTotal[];
+    rekapMak: SubTotal[];
     calculate: ({
         subKey,
         jenis,
@@ -129,7 +129,7 @@ const TabelBlok: React.FC<{
         jenis: keyof SubTotal;
     }) => void;
     form: FormInstance;
-}> = ({ title, konten, subTotalHarga, calculate, form }) => {
+}> = ({ title, konten, rekapMak, calculate, form }) => {
     title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";
 
@@ -213,7 +213,7 @@ const TabelBlok: React.FC<{
                             data={item}
                             form={form}
                             // subKey={subKey}
-                            subTotalHarga={subTotalHarga}
+                            rekapMak={rekapMak}
                             calculate={calculate}
                         />
                     );

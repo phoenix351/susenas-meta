@@ -29,11 +29,16 @@ const formItemStyle = {
     margin: "auto",
     padding: "5px",
 };
+interface SelectItem {
+    label: string;
+    value: any;
+}
 interface RincianWorksheet {
     id: number;
     nomor?: number | null | string;
     rincian?: string;
     type: string;
+    options: SelectItem[];
 }
 const renderRow = (props: RincianWorksheet) => {
     const commonColumns = (
@@ -43,10 +48,11 @@ const renderRow = (props: RincianWorksheet) => {
         </>
     );
 
-    const InputComponent: React.FC<{ type: string; name: string }> = ({
-        type,
-        name,
-    }) => {
+    const InputComponent: React.FC<{
+        type: string;
+        name: string;
+        options?: SelectItem[];
+    }> = ({ type, name, options }) => {
         const inputComponents: { [type: string]: JSX.Element } = {
             number: (
                 <Form.Item name={name} label={null}>
@@ -63,6 +69,7 @@ const renderRow = (props: RincianWorksheet) => {
                 />
             ),
             rupiah: <RupiahInput inputName={name} />,
+            multi: <MetaSelect name={name} options={options ?? []} />,
         };
         return inputComponents[type];
     };
@@ -71,18 +78,16 @@ const renderRow = (props: RincianWorksheet) => {
         <tr>
             {commonColumns}
             <td style={centerCell}>
-                <InputComponent type={props.type} name={`wtf_${props.id}`} />
+                <InputComponent
+                    type={props.type}
+                    name={`wtf_${props.id}`}
+                    options={props.options}
+                />
             </td>
         </tr>
     );
 };
 const daftarRincian = [
-    {
-        id: 1,
-        nomor: 1,
-        rincian: "KODE KLASIFIKASI WILAYAH (R105)",
-        type: "number",
-    },
     {
         id: 2,
         nomor: 2,
@@ -134,6 +139,7 @@ const daftarRincian = [
     },
     {
         id: 10,
+
         nomor: 10,
         rincian: "ADA ART YANG SEDANG BERSEKOLAH? (R610=2)",
         type: "binary",
@@ -173,7 +179,14 @@ const daftarRincian = [
         id: 16,
         nomor: 14,
         rincian: "STATUS RUMAH? (Blok XVIII Rincian 1802)",
-        type: "number",
+        type: "multi",
+        options: [
+            { label: "[1] Milik sendiri", value: 1 },
+            { label: "[2] Kontrak/sewa", value: 2 },
+            { label: "[3] Bebas sewa", value: 3 },
+            { label: "[4] Dinas", value: 4 },
+            { label: "[5] Lainnya", value: 5 },
+        ],
     },
     {
         id: 17,
@@ -186,25 +199,52 @@ const daftarRincian = [
         id: 18,
         nomor: 16,
         rincian: "AIR MINUM? (R1810A)",
-        type: "number",
+        type: "multi",
+        options: [
+            { label: "[1] Air kemasan bermerk", value: 1 },
+            { label: "[2] Air isi ulang", value: 2 },
+            { label: "[3] Leding/sumur bor/pompa ", value: 3 },
+            { label: "[4] Lainnya", value: 4 },
+        ],
     },
     {
         id: 19,
         nomor: 17,
         rincian: "SUMBER AIR CUCI/MANDI, DLL (R1814A)",
-        type: "number",
+        type: "multi",
+        options: [
+            { label: "[1] Air kemasan bermerk", value: 1 },
+            { label: "[2] Air isi ulang", value: 2 },
+            { label: "[3] Leding/sumur bor/pompa ", value: 3 },
+            { label: "[4] Lainnya", value: 4 },
+        ],
     },
     {
         id: 20,
         nomor: 17,
         rincian: "SUMBER UTAMA PENERANGAN? (R1816A)",
-        type: "number",
+        type: "multi",
+        options: [
+            { label: "[1] Listrik PLN dengan meteran", value: 1 },
+            { label: "[2] Listrik PLN tanpa meteran", value: 2 },
+            { label: "[3] Listrik non PLN", value: 3 },
+            { label: "[4] Bukan listrik", value: 4 },
+        ],
     },
     {
         id: 21,
         nomor: 23,
         rincian: "BAHAN BAKAR MEMASAK? (R1817)",
-        type: "number",
+        type: "multi",
+        options: [
+            { label: "[1] Listrik", value: 1 },
+            { label: "[2] LPG > 3 kg", value: 2 },
+            { label: "[3] LPG 3 kg", value: 3 },
+            { label: "[4] Minyak tanah", value: 4 },
+            { label: "[5] Arang/briket/kayu bakar", value: 5 },
+            { label: "[6] Lainnya", value: 6 },
+            { label: "[7] Tidak memasak di rumah", value: 7 },
+        ],
     },
     {
         id: 22,
@@ -217,13 +257,6 @@ const daftarRincian = [
         nomor: 26,
         rincian: "MEMILIKI KENDARAAN BERMOTOR? (R2001H=1 atau R2001.K=1)",
         type: "binary",
-    },
-    {
-        id: 24,
-        nomor: 27,
-        rincian:
-            "TANAH RUMAH MILIK SENDIRI/PUNYA LAHAN TEMPAT LAIN? (Blok XX R2001M=1)",
-        type: "number",
     },
     {
         id: 25,
