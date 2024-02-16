@@ -1,6 +1,14 @@
 import MetaSelect from "@/Components/MetaSelect";
 import RupiahInput from "@/Components/RupiahInput";
-import { Form, Input, InputNumber, Space, Typography } from "antd";
+import {
+    Form,
+    FormInstance,
+    Input,
+    InputNumber,
+    Space,
+    Typography,
+} from "antd";
+import { useState } from "react";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 
 const { Text, Title } = Typography;
@@ -38,9 +46,41 @@ interface RincianWorksheet {
     nomor?: number | null | string;
     rincian?: string;
     type: string;
-    options: SelectItem[];
+    options?: SelectItem[] | undefined;
+    children?: RincianWorksheet[];
 }
-const renderRow = (props: RincianWorksheet) => {
+const InputComponent: React.FC<{
+    type: string;
+    name: string;
+    key: number;
+    options?: SelectItem[];
+    children?: RincianWorksheet[];
+    setValue?: (value: any) => void;
+}> = ({ type, name, options, key, children, setValue }) => {
+    const inputComponents: { [type: string]: JSX.Element } = {
+        number: (
+            <Form.Item name={name} label={null}>
+                <InputNumber min={0} />
+            </Form.Item>
+        ),
+        binary: (
+            <MetaSelect
+                name={name}
+                options={[
+                    { label: "[1] YA", value: "1" },
+                    { label: "[2] TIDAK", value: "2" },
+                ]}
+                onChange={setValue && ((value) => setValue(value))}
+            />
+        ),
+        rupiah: <RupiahInput inputName={name} />,
+        multi: <MetaSelect name={name} options={options ?? []} />,
+    };
+    return inputComponents[type];
+};
+
+const renderRow: any = (props: RincianWorksheet, form: FormInstance) => {
+    const [value, setValue] = useState("");
     const commonColumns = (
         <>
             <td style={centerCell}>{props.nomor}</td>
@@ -48,45 +88,68 @@ const renderRow = (props: RincianWorksheet) => {
         </>
     );
 
-    const InputComponent: React.FC<{
-        type: string;
-        name: string;
-        options?: SelectItem[];
-    }> = ({ type, name, options }) => {
-        const inputComponents: { [type: string]: JSX.Element } = {
-            number: (
-                <Form.Item name={name} label={null}>
-                    <InputNumber min={0} />
-                </Form.Item>
-            ),
-            binary: (
-                <MetaSelect
-                    name={name}
-                    options={[
-                        { label: "[1] YA", value: "1" },
-                        { label: "[2] TIDAK", value: 2 },
-                    ]}
-                />
-            ),
-            rupiah: <RupiahInput inputName={name} />,
-            multi: <MetaSelect name={name} options={options ?? []} />,
-        };
-        return inputComponents[type];
-    };
-
     return (
-        <tr>
-            {commonColumns}
+        <>
+            <tr
+                style={{
+                    backgroundColor: props.id % 2 === 0 ? " #fffae6" : "",
+                }}
+            >
+                {commonColumns}
+                <td style={centerCell}>
+                    <InputComponent
+                        type={props.type}
+                        name={`wtf_${props.id}`}
+                        options={props.options}
+                        key={props.id}
+                        children={props.children}
+                        setValue={setValue}
+                    />
+                </td>
+            </tr>
+            {props.children &&
+                props.type === "binary" &&
+                value === "1" &&
+                props.children.map((child: any) => (
+                    <tr>
+                        <td style={centerCell}>{}</td>
+                        <td style={cellStyle}>{child.rincian}</td>
+                        <td style={centerCell}>
+                            <InputComponent
+                                type={child.type}
+                                name={`wtf_${child.id}`}
+                                options={child.options}
+                                key={child.id}
+                            />
+                        </td>
+                    </tr>
+                ))}
+        </>
+    );
+};
+{
+    /* {(props.children || false) &&
+    // form.getFieldValue(`wtf_${props.id}`) &&
+    props.children?.map((item) => (
+        <tr
+            style={{
+                backgroundColor:
+                    item.id % 2 === 0 ? " #fffae6" : "",
+            }}
+        >
+            <td style={centerCell}>{}</td>
+            <td style={cellStyle}>{item.rincian}</td>{" "}
             <td style={centerCell}>
                 <InputComponent
-                    type={props.type}
-                    name={`wtf_${props.id}`}
-                    options={props.options}
+                    type={item.type}
+                    name={`wtf_${item.id}`}
+                    options={item.options}
+                    key={item.id}
                 />
             </td>
         </tr>
-    );
-};
+    ))} */
+}
 const daftarRincian = [
     {
         id: 2,
@@ -99,6 +162,14 @@ const daftarRincian = [
         nomor: 3,
         rincian: "ADA BALITA? (R302>0)",
         type: "binary",
+        // children: [
+        //     {
+        //         id: 1,
+        //         nomor: 1,
+        //         rincian: "Konsumsi Susu",
+        //         type: "rupiah",
+        //     },
+        // ],
     },
     {
         id: 4,
@@ -181,11 +252,11 @@ const daftarRincian = [
         rincian: "STATUS RUMAH? (Blok XVIII Rincian 1802)",
         type: "multi",
         options: [
-            { label: "[1] Milik sendiri", value: 1 },
-            { label: "[2] Kontrak/sewa", value: 2 },
-            { label: "[3] Bebas sewa", value: 3 },
-            { label: "[4] Dinas", value: 4 },
-            { label: "[5] Lainnya", value: 5 },
+            { label: "[1] Milik sendiri", value: "1" },
+            { label: "[2] Kontrak/sewa", value: "2" },
+            { label: "[3] Bebas sewa", value: "3" },
+            { label: "[4] Dinas", value: "4" },
+            { label: "[5] Lainnya", value: "5" },
         ],
     },
     {
@@ -201,10 +272,10 @@ const daftarRincian = [
         rincian: "AIR MINUM? (R1810A)",
         type: "multi",
         options: [
-            { label: "[1] Air kemasan bermerk", value: 1 },
-            { label: "[2] Air isi ulang", value: 2 },
-            { label: "[3] Leding/sumur bor/pompa ", value: 3 },
-            { label: "[4] Lainnya", value: 4 },
+            { label: "[1] Air kemasan bermerk", value: "1" },
+            { label: "[2] Air isi ulang", value: "2" },
+            { label: "[3] Leding/sumur bor/pompa ", value: "3" },
+            { label: "[4] Lainnya", value: "4" },
         ],
     },
     {
@@ -213,10 +284,10 @@ const daftarRincian = [
         rincian: "SUMBER AIR CUCI/MANDI, DLL (R1814A)",
         type: "multi",
         options: [
-            { label: "[1] Air kemasan bermerk", value: 1 },
-            { label: "[2] Air isi ulang", value: 2 },
-            { label: "[3] Leding/sumur bor/pompa ", value: 3 },
-            { label: "[4] Lainnya", value: 4 },
+            { label: "[1] Air kemasan bermerk", value: "1" },
+            { label: "[2] Air isi ulang", value: "2" },
+            { label: "[3] Leding/sumur bor/pompa ", value: "3" },
+            { label: "[4] Lainnya", value: "4" },
         ],
     },
     {
@@ -225,10 +296,10 @@ const daftarRincian = [
         rincian: "SUMBER UTAMA PENERANGAN? (R1816A)",
         type: "multi",
         options: [
-            { label: "[1] Listrik PLN dengan meteran", value: 1 },
-            { label: "[2] Listrik PLN tanpa meteran", value: 2 },
-            { label: "[3] Listrik non PLN", value: 3 },
-            { label: "[4] Bukan listrik", value: 4 },
+            { label: "[1] Listrik PLN dengan meteran", value: "1" },
+            { label: "[2] Listrik PLN tanpa meteran", value: "2" },
+            { label: "[3] Listrik non PLN", value: "3" },
+            { label: "[4] Bukan listrik", value: "4" },
         ],
     },
     {
@@ -237,13 +308,13 @@ const daftarRincian = [
         rincian: "BAHAN BAKAR MEMASAK? (R1817)",
         type: "multi",
         options: [
-            { label: "[1] Listrik", value: 1 },
-            { label: "[2] LPG > 3 kg", value: 2 },
-            { label: "[3] LPG 3 kg", value: 3 },
-            { label: "[4] Minyak tanah", value: 4 },
-            { label: "[5] Arang/briket/kayu bakar", value: 5 },
-            { label: "[6] Lainnya", value: 6 },
-            { label: "[7] Tidak memasak di rumah", value: 7 },
+            { label: "[1] Listrik", value: "1" },
+            { label: "[2] LPG > 3 kg", value: "2" },
+            { label: "[3] LPG 3 kg", value: "3" },
+            { label: "[4] Minyak tanah", value: "4" },
+            { label: "[5] Arang/briket/kayu bakar", value: "5" },
+            { label: "[6] Lainnya", value: "6" },
+            { label: "[7] Tidak memasak di rumah", value: "7" },
         ],
     },
     {
@@ -326,7 +397,9 @@ const Worksheet: React.FC<{
                     </thead>
                     <tbody>
                         {/* render rows */}
-                        {daftarRincian.map((rincian) => renderRow(rincian))}
+                        {daftarRincian.map((rincian) =>
+                            renderRow(rincian, form)
+                        )}
                     </tbody>
                 </table>
             </Form>

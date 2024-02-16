@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterJabatanController;
 use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\ProfileController;
@@ -10,6 +11,7 @@ use App\Models\MasterWilayah;
 use App\Models\Nks;
 use App\Models\Provinsi;
 use App\Models\SusenasInti;
+use App\Models\SusenasMak;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -74,6 +76,11 @@ Route::middleware('auth')->group(function () {
         return response()->json(['data' => $data]);
     })->name('api.entri.semester');
 
+    route::post('/entri/mak', [MakController::class, 'store'])->name('entri.mak.store');
+    route::patch('/entri/mak/konsumsi', [MakController::class, 'konsumsi_store'])->name('entri.mak.konsumsi.store');
+    route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');
+    route::get('/api/entri/mak', [MakController::class, 'fetch'])->name('api.entri.mak');
+
 
 
     route::get('/api/entri/kecamatan', function (Request $request) {
@@ -94,38 +101,7 @@ Route::middleware('auth')->group(function () {
         // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
         return Inertia::render("Entri/Mak");
     })->name("entri.mak.create");
-    route::get('/entri/mak', function (Request $request) {
-        $kabkot = $request->query('id_dsrt');
-
-
-        // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
-        return Inertia::render("Entri/Mak");
-    })->name('entri.mak');
-
-    route::get('/api/entri/inti', function (Request $request) {
-        $kabkot = $request->query('kode_kab');
-        $semester = $request->query('semester');
-        $provinsi = $request->query('kode_prov');
-        $nks = $request->query('nks');
-
-        $query = "
-    SELECT susenas_inti.*, master_kecamatan.nama AS nama_kecamatan, master_desa.nama as nama_desa
-    FROM susenas_inti
-    LEFT JOIN master_kecamatan ON master_kecamatan.kab = susenas_inti.kode_kab
-                               AND master_kecamatan.kec = susenas_inti.kode_kec
-    LEFT JOIN master_desa ON master_desa.kab = susenas_inti.kode_kab
-                               AND master_desa.kec = susenas_inti.kode_kec
-                               AND master_desa.desa = susenas_inti.kode_desa
-
-    WHERE susenas_inti.kode_kab = ?
-      AND susenas_inti.semester = ?
-      AND susenas_inti.kode_prov = ?
-      AND susenas_inti.nks = ?
-";
-
-        $data = DB::select($query, [$kabkot, $semester, $provinsi, $nks]);
-        return response()->json(['data' => $data, 'semester' => $semester, 'kabkot' => $kabkot, 'provinsi' => $provinsi, 'nks' => $nks]);
-    })->name('api.entri.inti');
+    route::get('/entri/mak', [MakController::class, 'edit'])->name('entri.mak.edit');
 
 
     route::get('/dashboard', function () {

@@ -21,6 +21,7 @@ const MetaSelect: React.FC<{
                 showSearch
                 optionFilterProp="label"
                 options={options}
+                onChange={onChange && ((value) => onChange(value))}
             />
         </Form.Item>
     );

@@ -15,6 +15,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import _debounce from "lodash/debounce";
+
 import MetaSelect from "@/Components/MetaSelect";
 
 const { Text, Title } = Typography;
@@ -23,8 +25,9 @@ const Blok1_2: React.FC<{
     form: FormInstance;
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
+    setDaftarArt: (value: any) => void;
     // record: any;
-}> = ({ form, onFinish, tabContentStyle }) => {
+}> = ({ form, onFinish, tabContentStyle, setDaftarArt }) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -170,10 +173,22 @@ const Blok1_2: React.FC<{
         try {
             // fetchProvinsi();
             fetchKabkot();
+            form.setFieldValue("kode_prov", "71");
             // fetchSemester();
         } catch (error) {}
     }, []);
 
+    const debouncedSetDaftarArt = _debounce((value) => {
+        setDaftarArt((prev: any) => {
+            let current = [...prev];
+            current[0].nama = value;
+            return current;
+        });
+    }, 600);
+    const handleNamaKk = (event: { target: { value: any } }) => {
+        const value = event.target.value;
+        debouncedSetDaftarArt(value);
+    };
     return (
         <Space direction="vertical" style={tabContentStyle}>
             <Space
@@ -237,6 +252,15 @@ const Blok1_2: React.FC<{
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td style={cellStyle}>000</td>
+                            <td style={cellStyle}>Identitas Database</td>
+                            <td style={cellStyle}>
+                                <Form.Item name="id" label={null}>
+                                    <InputNumber />
+                                </Form.Item>
+                            </td>
+                        </tr>
                         <tr>
                             <td style={cellStyle}>101</td>
                             <td style={cellStyle}>Provinsi</td>
@@ -431,7 +455,7 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="108"
+                                    name="r108"
                                     label={null}
                                     style={formItemStyle}
                                 >
@@ -447,7 +471,7 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="109"
+                                    name="r109"
                                     label={null}
                                     style={formItemStyle}
                                 >
@@ -461,11 +485,14 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="110"
+                                    name="r110"
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <Input minLength={2} />
+                                    <Input
+                                        minLength={2}
+                                        onChange={handleNamaKk}
+                                    />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -478,7 +505,7 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="111"
+                                    name="r111"
                                     label={null}
                                     style={formItemStyle}
                                 >
@@ -530,7 +557,7 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td>
                                 <Form.Item
-                                    name="201_nama"
+                                    name="r201_nama"
                                     label={null}
                                     style={formItemStyle}
                                 >
@@ -539,7 +566,7 @@ const Blok1_2: React.FC<{
                             </td>
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="201_jabatan"
+                                    name="r201_jabatan"
                                     style={formItemStyle}
                                     label={null}
                                 >
@@ -565,7 +592,7 @@ const Blok1_2: React.FC<{
                             </td>
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="201_waktu"
+                                    name="r201_waktu"
                                     label={null}
                                     style={formItemStyle}
                                 >
@@ -581,7 +608,7 @@ const Blok1_2: React.FC<{
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="202_nama"
+                                    name="r202_nama"
                                     label={null}
                                     style={formItemStyle}
                                 >
@@ -590,7 +617,7 @@ const Blok1_2: React.FC<{
                             </td>
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="202_jabatan"
+                                    name="r202_jabatan"
                                     label={null}
                                     style={formItemStyle}
                                 >
@@ -614,7 +641,7 @@ const Blok1_2: React.FC<{
                             </td>
                             <td style={cellStyle}>
                                 <Form.Item
-                                    name="202_waktu"
+                                    name="r202_waktu"
                                     label={null}
                                     style={formItemStyle}
                                 >
@@ -630,7 +657,7 @@ const Blok1_2: React.FC<{
                             {/* <td>Sulawesi Utara</td> */}
                             <td style={cellStyle} colSpan={4}>
                                 <MetaSelect
-                                    name="203"
+                                    name="r203"
                                     options={[
                                         {
                                             label: "[1] Terisi lengkap",

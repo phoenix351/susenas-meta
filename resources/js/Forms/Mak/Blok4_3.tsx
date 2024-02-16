@@ -311,9 +311,6 @@ const Blok4_3: React.FC<{
             return [...newRekap];
         });
     }, [daftarArt]);
-    useEffect(() => {
-        console.log({ rekapArt });
-    }, [rekapArt]);
 
     return (
         <Space direction="vertical" style={tabContentStyle}>

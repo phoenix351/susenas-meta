@@ -55,7 +55,7 @@ const Dashboard = () => {
             content: "Memuat Data",
         });
         try {
-            const url = route("api.entri.inti", values);
+            const url = route("api.entri.mak", values);
             const { data } = await axios.get(url);
             console.log({ data });
             setDaftarSampel(data.data);
@@ -84,14 +84,14 @@ const Dashboard = () => {
             dataIndex: "kec",
             key: "kec",
             render: (_: any, record: any) =>
-                `[${record.kode_kec}] ${record.nama_kecamatan}`,
+                `[${record.kode_kec}] ${record.kec}`,
         },
         {
             title: "Desa",
             dataIndex: "desa",
             key: "desa",
             render: (_: any, record: any) =>
-                `[${record.kode_desa}] ${record.nama_desa}`,
+                `[${record.kode_desa}] ${record.desa}`,
         },
         {
             title: "Blok Sensus",
@@ -100,18 +100,18 @@ const Dashboard = () => {
         },
         {
             title: "No Urut Sampel",
-            dataIndex: "id_dsrt",
-            key: "id_dsrt",
+            dataIndex: "109",
+            key: "109",
         },
         {
             title: "Nama KRT",
-            dataIndex: "nama_krt",
-            key: "nama_krt",
+            dataIndex: "110",
+            key: "110",
         },
         {
             title: "Alamat",
-            dataIndex: "alamat",
-            key: "alamat",
+            dataIndex: "111",
+            key: "111",
         },
         {
             title: "Status",
@@ -130,7 +130,7 @@ const Dashboard = () => {
                 <Button
                     type="primary"
                     onClick={() =>
-                        router.get(route("entri.mak", { id_dsrt: record.id }))
+                        router.get(route("entri.mak.edit", { id: record.id }))
                     }
                 >
                     Entri

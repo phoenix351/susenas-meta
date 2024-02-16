@@ -87,7 +87,10 @@ const RowKonsumsi: React.FC<{
                     </Form.Item>
                 )}
             </td>
-            <td colSpan={1} style={data.type === "sub" ? blokStyle : cellStyle}>
+            <td
+                colSpan={1}
+                style={data.type === "sub" ? blokStyle : centerCell}
+            >
                 {data.type === "lain" ? (
                     <Form.Item name={`${data.nomor}_lainnya`}>
                         <Input placeholder="Sebutkan" />
@@ -105,7 +108,9 @@ const RowKonsumsi: React.FC<{
             </td>
             <td style={cellStyle}>
                 <RupiahInput
-                    inputName={`${data.nomor}_beli_harga${data.subKey}`}
+                    inputName={`${data.type === "sub" ? "jumlah" : ""}${
+                        data.nomor
+                    }_beli_harga${data.subKey}`}
                     onChange={(value: any) => {
                         form.setFieldsValue({
                             [`${data.nomor}_beli_harga`]: value,
@@ -143,7 +148,9 @@ const RowKonsumsi: React.FC<{
             </td>
             <td style={cellStyle}>
                 <RupiahInput
-                    inputName={`${data.nomor}_produksi_harga${data.subKey}`}
+                    inputName={`${data.type === "sub" ? "jumlah" : ""}${
+                        data.nomor
+                    }_produksi_harga${data.subKey}`}
                     onChange={(value: any) => {
                         form.setFieldsValue({
                             [`${data.nomor}_produksi_harga`]: value,

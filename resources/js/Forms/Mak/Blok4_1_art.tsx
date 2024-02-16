@@ -244,7 +244,10 @@ const Blok4_1: React.FC<{
                         </td>
 
                         <td style={centerCell}>
-                            <Button onClick={() => onEdit(art.key, "remove")}>
+                            <Button
+                                onClick={() => onEdit(art.key, "remove")}
+                                disabled={index === 0}
+                            >
                                 Hapus
                             </Button>
                         </td>

@@ -41,7 +41,7 @@ const EntriIntiForm: React.FC<{
         // semester: string
         {
             const url = route("api.entri.nks", {
-                kodeKabkot: form.getFieldValue("kode_kab"),
+                kodeKabkot: form.getFieldValue("kode_kabkot"),
                 semester: form.getFieldValue("semester"),
             });
 
@@ -56,6 +56,7 @@ const EntriIntiForm: React.FC<{
     useEffect(() => {
         try {
             fetchKabkot();
+            form.setFieldValue("kode_prov", "71");
             // fetchSemester();
         } catch (error) {}
     }, []);
@@ -90,7 +91,7 @@ const EntriIntiForm: React.FC<{
                         }}
                     />
                 </Form.Item>
-                <Form.Item name="kode_kab" label="Kab/Kota">
+                <Form.Item name="kode_kabkot" label="Kab/Kota">
                     <Select
                         allowClear
                         showSearch

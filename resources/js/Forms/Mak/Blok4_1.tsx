@@ -79,30 +79,6 @@ const Blok4_1: React.FC<{
     // define forms
 
     const [messageApi, contextHolder] = message.useMessage();
-    const isEffectSetUp = useRef(false);
-    const handleKeyPress = (event: {
-        ctrlKey: any;
-        key: string;
-        preventDefault: () => void;
-    }) => {
-        if (event.ctrlKey && event.key === "s") {
-            event.preventDefault();
-            console.log("Submitting the form");
-
-            form.submit();
-        }
-    };
-
-    useEffect(() => {
-        if (!isEffectSetUp.current) {
-            document.addEventListener("keydown", handleKeyPress);
-            isEffectSetUp.current = true; // Set the ref to true to indicate that the effect has been set up
-        }
-
-        return () => {
-            document.removeEventListener("keydown", handleKeyPress);
-        };
-    }, [form]);
 
     function handleChange(activeKey: string): void {}
 
@@ -117,6 +93,9 @@ const Blok4_1: React.FC<{
                 _debounce(() => calculate({ subKey: 1, jenis: "beli" }), 600)()
             }
         >
+            <Form.Item name="id_ruta">
+                <Input placeholder="id rt" />
+            </Form.Item>
             <Tabs
                 onChange={handleChange}
                 type="line"

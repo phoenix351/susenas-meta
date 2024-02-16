@@ -337,7 +337,7 @@ const Art: React.FC<{
             daftarArt,
         });
     };
-    const calculateRekap = () => {
+    const calculateRekap = _debounce(() => {
         // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
         // const pattern = `${jenis}_harga${subKey}`;
@@ -350,28 +350,42 @@ const Art: React.FC<{
         // console.log({ pattern, allFieldValues });
 
         const sum_beli_0 = Object.entries(allFieldValues)
-            .filter(([fieldName]) => fieldName.endsWith(beli_0))
+            .filter(
+                ([fieldName]) =>
+                    fieldName.endsWith(beli_0) && !fieldName.includes("jumlah")
+            )
             .reduce(
                 (accumulator, [, value]) =>
                     accumulator + ((value as number) || 0),
                 0
             );
         const sum_beli_1 = Object.entries(allFieldValues)
-            .filter(([fieldName]) => fieldName.endsWith(beli_1))
+            .filter(
+                ([fieldName]) =>
+                    fieldName.endsWith(beli_1) && !fieldName.includes("jumlah")
+            )
             .reduce(
                 (accumulator, [, value]) =>
                     accumulator + ((value as number) || 0),
                 0
             );
         const sum_produksi_0 = Object.entries(allFieldValues)
-            .filter(([fieldName]) => fieldName.endsWith(produksi_0))
+            .filter(
+                ([fieldName]) =>
+                    fieldName.endsWith(produksi_0) &&
+                    !fieldName.includes("jumlah")
+            )
             .reduce(
                 (accumulator, [, value]) =>
                     accumulator + ((value as number) || 0),
                 0
             );
         const sum_produksi_1 = Object.entries(allFieldValues)
-            .filter(([fieldName]) => fieldName.endsWith(produksi_1))
+            .filter(
+                ([fieldName]) =>
+                    fieldName.endsWith(produksi_1) &&
+                    !fieldName.includes("jumlah")
+            )
             .reduce(
                 (accumulator, [, value]) =>
                     accumulator + ((value as number) || 0),
@@ -394,10 +408,10 @@ const Art: React.FC<{
         );
 
         setDaftarArt(updatedArt);
+    }, 600);
+    const handleValueChange = () => {
+        calculateRekap();
     };
-    // useEffect(() => {
-    //     calculateRekap();
-
     const title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";
 
@@ -409,7 +423,7 @@ const Art: React.FC<{
                 onFinish={onFinish}
                 autoComplete="off"
                 layout="vertical"
-                onValuesChange={() => _debounce(calculateRekap, 600)()}
+                onValuesChange={handleValueChange}
             >
                 <Space
                     style={{ width: "100%", justifyContent: "end" }}

@@ -1,6 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
 import { Button, Form, Space, Tabs, message } from "antd";
@@ -10,7 +10,7 @@ import Blok4_1 from "@/Forms/Mak/Blok4_1";
 import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
 import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
-import { SubTotal } from "@/types";
+import { PageProps, SubTotal } from "@/types";
 import Blok_QC from "@/Forms/Mak/Blok_QC";
 const daftarRincian432 = [
     {
@@ -124,7 +124,7 @@ const daftarRincian432 = [
     },
 ];
 
-const Mak = () => {
+const Mak = ({ data }: PageProps & { data: any }) => {
     // const [cariForm] = Form.useForm();
     const tabContentStyle: React.CSSProperties = {
         backgroundColor: "#fff",
@@ -134,13 +134,23 @@ const Mak = () => {
         width: "100%",
     };
     // define forms
-    const [blok1_2Form] = Form.useForm();
+    const [form] = Form.useForm();
     const [blok4_1Form] = Form.useForm();
     const [blok4_1artForm] = Form.useForm();
     const [blok4_3Form] = Form.useForm();
     const [wtfForm] = Form.useForm();
     const [daftarSampel, setDaftarSampel] = useState([]);
-    const [daftarArt, setDaftarArt] = useState([]);
+
+    const [daftarArt, setDaftarArt] = useState([
+        {
+            nama: "Art-0",
+            key: "Art-0",
+            rekap: [
+                { produksi: 0, beli: 0, total: 0 },
+                { produksi: 0, beli: 0, total: 0 },
+            ],
+        },
+    ]);
     const [rekapMak, setRekapMak] = useState(
         daftarRincian432.map((rincian) => ({ beli: 0, produksi: 0, total: 0 }))
     );
@@ -149,22 +159,26 @@ const Mak = () => {
 
     const blok1_2Finish = async (values: any) => {
         console.log({ values });
+        // return;
         messageApi.open({
             type: "loading",
             key: "cari",
-            content: "Memuat Data",
+            content: "Menyimpan data...",
         });
         try {
-            const url = route("api.entri.inti", values);
-            const { data } = await axios.get(url);
-            console.log({ data });
-            setDaftarSampel(data.data);
+            const url = route("entri.mak.update");
+            const { data } = await axios.patch(url, values, {
+                headers: { "Content-Type": "application/json" },
+            });
             messageApi.open({
                 type: "success",
                 key: "cari",
-                content: "Berhasil mengambil data",
+                content: "Berhasil menyimpan",
             });
         } catch (error) {
+            console.log("====================================");
+            console.log({ error });
+            console.log("====================================");
             messageApi.open({
                 type: "error",
                 key: "cari",
@@ -173,27 +187,29 @@ const Mak = () => {
         }
     };
     const blok4_1Finish = async (values: any) => {
-        // console.log();
+        console.log({ values });
 
         messageApi.open({
             type: "loading",
-            key: "cari",
+            key: "4_1",
             content: "Memuat Data",
         });
         try {
-            const url = route("api.entri.inti", values);
-            const { data } = await axios.get(url);
+            const url = route("entri.mak.konsumsi.store");
+            const { data } = await axios.patch(url, values, {
+                headers: { "Content-Type": "application/json" },
+            });
             console.log({ data });
             setDaftarSampel(data.data);
             messageApi.open({
                 type: "success",
-                key: "cari",
-                content: "Berhasil mengambil data",
+                key: "4_1",
+                content: "Berhasil menyimpan data",
             });
         } catch (error) {
             messageApi.open({
                 type: "error",
-                key: "cari",
+                key: "4_1",
                 content: "Oops terjadi kesalahan, silahkan hubungi admin",
             });
         }
@@ -202,7 +218,7 @@ const Mak = () => {
         console.log({ values });
         messageApi.open({
             type: "loading",
-            key: "cari",
+            key: "4_1",
             content: "Memuat Data",
         });
         try {
@@ -307,11 +323,15 @@ const Mak = () => {
         const jenisArr = ["beli", "produksi"];
         subArr.forEach((sub: any) => {
             let newrekapMak: SubTotal[] = [...rekapMak];
-            console.log({ newrekapMak });
+            console.log({ allFieldValues });
 
             const pattern_beli = `beli_harga${sub}`;
             const sum_beli = Object.entries(allFieldValues)
-                .filter(([fieldName]) => fieldName.endsWith(pattern_beli))
+                .filter(
+                    ([fieldName]) =>
+                        fieldName.endsWith(pattern_beli) &&
+                        !fieldName.includes("jumlah")
+                )
                 .reduce(
                     (accumulator, [, value]) =>
                         accumulator + ((value as number) || 0),
@@ -320,7 +340,11 @@ const Mak = () => {
             newrekapMak[sub]["beli"] = sum_beli;
             const pattern_produksi = `produksi_harga${sub}`;
             const sum_produksi = Object.entries(allFieldValues)
-                .filter(([fieldName]) => fieldName.endsWith(pattern_produksi))
+                .filter(
+                    ([fieldName]) =>
+                        fieldName.endsWith(pattern_produksi) &&
+                        !fieldName.includes("jumlah")
+                )
                 .reduce(
                     (accumulator, [, value]) =>
                         accumulator + ((value as number) || 0),
@@ -395,6 +419,27 @@ const Mak = () => {
         setRekapMak(newrekapMak);
     }, [daftarArt]);
 
+    const isEffectSetUp = useRef(false);
+    const handleKeyPress = (event: {
+        ctrlKey: any;
+        key: string;
+        preventDefault: () => void;
+    }) => {
+        if (event.ctrlKey && event.key === "s") {
+            event.preventDefault();
+            console.log("Submitting the form");
+
+            form.submit();
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("keydown", handleKeyPress);
+        form.setFieldsValue(data);
+        blok4_1Form.setFieldsValue({ id_ruta: data.id });
+        console.log({ data });
+    }, []);
+
     return (
         <>
             {contextHolder}
@@ -408,6 +453,14 @@ const Mak = () => {
                 }}
                 direction="vertical"
             >
+                <Button
+                    onClick={() => {
+                        form.submit();
+                        blok4_1Form.submit();
+                    }}
+                >
+                    Simpan
+                </Button>
                 <Tabs
                     onChange={handleChange}
                     type="card"
@@ -418,8 +471,9 @@ const Mak = () => {
                             children: (
                                 <Blok1_2
                                     tabContentStyle={tabContentStyle}
-                                    form={blok1_2Form}
+                                    form={form}
                                     onFinish={blok1_2Finish}
+                                    setDaftarArt={setDaftarArt}
                                 />
                             ),
                         },
@@ -429,8 +483,8 @@ const Mak = () => {
                             children: (
                                 <Worksheet
                                     tabContentStyle={tabContentStyle}
-                                    form={wtfForm}
-                                    onFinish={wtfFinish}
+                                    form={form}
+                                    onFinish={blok1_2Finish}
                                 />
                             ),
                         },
