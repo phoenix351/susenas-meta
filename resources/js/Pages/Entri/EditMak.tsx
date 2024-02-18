@@ -3,7 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { useEffect, useRef, useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
-import { Button, Form, Space, Tabs, message } from "antd";
+import { Button, Form, FormInstance, Space, Tabs, message } from "antd";
 import axios from "axios";
 import Blok1_2 from "@/Forms/Mak/Blok1_2";
 import Blok4_1 from "@/Forms/Mak/Blok4_1";
@@ -124,7 +124,11 @@ const daftarRincian432 = [
     },
 ];
 
-const Mak = ({ data }: PageProps & { data: any }) => {
+const Mak = ({
+    data,
+    konsumsi_ruta,
+    art,
+}: PageProps & { data: any; konsumsi_ruta: any[]; art: any[] }) => {
     // const [cariForm] = Form.useForm();
     const tabContentStyle: React.CSSProperties = {
         backgroundColor: "#fff",
@@ -138,11 +142,15 @@ const Mak = ({ data }: PageProps & { data: any }) => {
     const [blok4_1Form] = Form.useForm();
     const [blok4_1artForm] = Form.useForm();
     const [blok4_3Form] = Form.useForm();
+    let [artForm] = Form.useForm();
+
     const [wtfForm] = Form.useForm();
     const [daftarSampel, setDaftarSampel] = useState([]);
 
     const [daftarArt, setDaftarArt] = useState([
         {
+            id_ruta: "",
+            id_art: "",
             nama: "Art-0",
             key: "Art-0",
             rekap: [
@@ -176,9 +184,6 @@ const Mak = ({ data }: PageProps & { data: any }) => {
                 content: "Berhasil menyimpan",
             });
         } catch (error) {
-            console.log("====================================");
-            console.log({ error });
-            console.log("====================================");
             messageApi.open({
                 type: "error",
                 key: "cari",
@@ -186,9 +191,38 @@ const Mak = ({ data }: PageProps & { data: any }) => {
             });
         }
     };
+    const artFormFinish = async (values: any) => {
+        console.log({ values });
+        // return;
+
+        messageApi.open({
+            type: "loading",
+            key: "4_1",
+            content: "Menyimpan data art...",
+        });
+        try {
+            const url = route("entri.mak.art.store");
+            const response = await axios.post(url, values, {
+                headers: { "Content-Type": "application/json" },
+            });
+            console.log({ response });
+            // setDaftarSampel(data.data);
+            messageApi.open({
+                type: "success",
+                key: "4_1",
+                content: "Berhasil menyimpan data",
+            });
+        } catch (error) {
+            messageApi.open({
+                type: "error",
+                key: "4_1",
+                content: "Oops terjadi kesalahan, silahkan hubungi admin",
+            });
+        }
+    };
     const blok4_1Finish = async (values: any) => {
         console.log({ values });
-
+        return;
         messageApi.open({
             type: "loading",
             key: "4_1",
@@ -307,13 +341,7 @@ const Mak = ({ data }: PageProps & { data: any }) => {
         { beli: 0, produksi: 0, total: 0 },
     ]);
     // const [totalProduksi, setTotalProduksi] = useState(0);
-    const calculateSubTotalHarga = ({
-        subKey,
-        jenis,
-    }: {
-        subKey: number;
-        jenis: keyof SubTotal;
-    }) => {
+    const calculateSubTotalHarga = () => {
         // return;
         // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
@@ -370,9 +398,7 @@ const Mak = ({ data }: PageProps & { data: any }) => {
             );
             newrekapMak[17]["total"] =
                 newrekapMak[15]["total"] + newrekapMak[16]["total"];
-            console.log("====================================");
-            console.log({ rekapArt, daftarArt });
-            console.log("====================================");
+
             setRekapMak(newrekapMak);
         });
     };
@@ -413,9 +439,6 @@ const Mak = ({ data }: PageProps & { data: any }) => {
         newrekapMak[17]["total"] =
             newrekapMak[15]["total"] + newrekapMak[16]["total"];
 
-        console.log("====================================");
-        console.log({ rekapArt, daftarArt });
-        console.log("====================================");
         setRekapMak(newrekapMak);
     }, [daftarArt]);
 
@@ -427,18 +450,66 @@ const Mak = ({ data }: PageProps & { data: any }) => {
     }) => {
         if (event.ctrlKey && event.key === "s") {
             event.preventDefault();
-            console.log("Submitting the form");
-
             form.submit();
         }
     };
-
+    // initialize the form
     useEffect(() => {
+        console.log({ art });
+        art = art.map((item) => ({
+            ...item,
+            rekap: [
+                { produksi: 0, beli: 0, total: 0 },
+                { produksi: 0, beli: 0, total: 0 },
+            ],
+        }));
+        setDaftarArt(art);
+
         document.addEventListener("keydown", handleKeyPress);
         form.setFieldsValue(data);
         blok4_1Form.setFieldsValue({ id_ruta: data.id });
-        console.log({ data });
+        console.log({ data, konsumsi_ruta });
+        const daftarSub = [1, 8, 16];
+        let konsumsiRutaValues = konsumsi_ruta.map((item) => ({
+            [`${daftarSub.includes(item.id_komoditas) ? "jumlah" : ""}${
+                item.id_komoditas
+            }_beli_harga${item.id_kelompok}`]: item.harga_beli,
+            [`${daftarSub.includes(item.id_komoditas) ? "jumlah" : ""}${
+                item.id_komoditas
+            }_produksi_harga${item.id_kelompok}`]: item.harga_produksi,
+            [`${item.id_komoditas}_total_harga`]: item.harga_total,
+            [`${item.id_komoditas}_item`]: item.item,
+            [`${item.id_komoditas}_satuan`]: item.satuan,
+            [`${item.id_komoditas}_beli_volume`]: item.volume_beli,
+            [`${item.id_komoditas}_produksi_volume`]: item.volume_produksi,
+            [`${item.id_komoditas}_total_volume`]: item.volume_total,
+        }));
+
+        const singleObject = konsumsiRutaValues.reduce((result, obj) => {
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    result[key] = obj[key];
+                }
+            }
+            return result;
+        }, {});
+        // console.log({ singleObject });
+        blok4_1Form.setFieldsValue(singleObject);
+        artForm.setFieldsValue({
+            id_ruta: data.id,
+        });
     }, []);
+    const [artForms, setArtForms] = useState<FormInstance<any>[]>([]);
+    useEffect(() => {
+        daftarArt.forEach((item, index) => {
+            console.log({ item });
+
+            artForm.setFieldValue(`${index}-id_art`, data.id);
+            artForm.setFieldValue(`${index}-nama`, item.nama);
+            // const [form] = Form.useForm();
+            // setArtForms([...artForms,form])
+        });
+    }, [daftarArt]);
 
     return (
         <>
@@ -456,7 +527,9 @@ const Mak = ({ data }: PageProps & { data: any }) => {
                 <Button
                     onClick={() => {
                         form.submit();
-                        blok4_1Form.submit();
+                        // blok4_1Form.submit();
+                        // save art
+                        // artForm.submit();
                     }}
                 >
                     Simpan
@@ -511,7 +584,9 @@ const Mak = ({ data }: PageProps & { data: any }) => {
                                 <Blok4_1art
                                     tabContentStyle={tabContentStyle}
                                     form={blok4_1artForm}
+                                    artForm={artForm}
                                     onFinish={blok4_1artFinish}
+                                    artFormFinish={artFormFinish}
                                     rekapArt={rekapArt}
                                     setRekapArt={setRekapArt}
                                     daftarArt={daftarArt}
@@ -525,8 +600,8 @@ const Mak = ({ data }: PageProps & { data: any }) => {
                             children: (
                                 <Blok4_3
                                     tabContentStyle={tabContentStyle}
-                                    form={blok4_3Form}
-                                    onFinish={blok4_3Finish}
+                                    form={form}
+                                    onFinish={blok1_2Finish}
                                     daftarArt={daftarArt}
                                     rekapMak={rekapMak}
                                     daftarRincian432={daftarRincian432}
@@ -540,8 +615,8 @@ const Mak = ({ data }: PageProps & { data: any }) => {
                             children: (
                                 <Blok_QC
                                     tabContentStyle={tabContentStyle}
-                                    form={blok4_3Form}
-                                    onFinish={blok4_3Finish}
+                                    form={form}
+                                    onFinish={blok1_2Finish}
                                     daftarArt={daftarArt}
                                     rekapMak={rekapMak}
                                     daftarRincian432={daftarRincian432}

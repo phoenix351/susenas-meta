@@ -2,6 +2,7 @@ import {
     Button,
     Divider,
     Form,
+    FormInstance,
     Image,
     Input,
     InputNumber,
@@ -15,6 +16,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import _debounce from "lodash/debounce";
 
 import Art from "./Art";
 import Blok from "@/Components/Blok";
@@ -25,8 +27,10 @@ const { Text, Title } = Typography;
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 const Blok4_1: React.FC<{
-    form: any;
+    form: FormInstance;
     onFinish: (values: any) => void;
+    artForm: FormInstance;
+    artFormFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
     rekapArt: any;
     setRekapArt: (value: any) => void;
@@ -37,6 +41,8 @@ const Blok4_1: React.FC<{
 }> = ({
     form,
     onFinish,
+    artForm,
+    artFormFinish,
     tabContentStyle,
     rekapArt,
     setRekapArt,
@@ -84,29 +90,6 @@ const Blok4_1: React.FC<{
     const blok4_1_hal2Finish = (values: any) => {
         console.log({ values });
     };
-    // const defaultItems = daftarArt.map(
-    //     (
-    //         art: {
-    //             [x: string]: any;
-    //             nama: any;
-    //         },
-    //         index: any
-    //     ) => {
-    //         return {
-    //             label: art.nama,
-    //             key: String(index),
-    //             children: (
-    //                 <Art
-    //                     onFinish={blok4_1_hal2Finish}
-    //                     artKey={art.artKey}
-    //                     daftarArt={daftarArt}
-    //                     setDaftarArt={setDaftarArt}
-    //                 />
-    //             ),
-    //         };
-    //     }
-    // );
-    // const defaultItems =
 
     const [activeKey, setActiveKey] = useState("0");
     const newTabIndex = useRef(1);
@@ -120,27 +103,14 @@ const Blok4_1: React.FC<{
 
     const add = () => {
         const newActiveKey = `Art-${newTabIndex.current++}`;
-        // setItems([
-        //     ...items,
-        //     {
-        //         label: newActiveKey,
-        //         key: String(newActiveKey),
-        //         children: (
-        //             <Art
-        //                 onFinish={blok4_1_hal2Finish}
-        //                 artKey={newActiveKey}
-        //                 daftarArt={asu}
-        //                 setDaftarArt={setAsu}
-        //             />
-        //         ),
-        //     },
-        // ]);
 
         setActiveKey(newActiveKey);
 
         setDaftarArt((currentDaftarArt: any) => [
             ...currentDaftarArt,
             {
+                id_art: "",
+                id_ruta: "",
                 nama: newActiveKey,
                 key: newActiveKey,
                 rekap: [
@@ -151,34 +121,21 @@ const Blok4_1: React.FC<{
         ]);
     };
 
-    // const remove = (targetKey: TargetKey) => {
-    //     const targetIndex = items.findIndex(
-    //         (pane: { key: TargetKey }) => pane.key === targetKey
-    //     );
-    //     const newPanes = items.filter(
-    //         (pane: { key: TargetKey }) => pane.key !== targetKey
-    //     );
-    //     if (newPanes.length && targetKey === activeKey) {
-    //         const { key } =
-    //             newPanes[
-    //                 targetIndex === newPanes.length
-    //                     ? targetIndex - 1
-    //                     : targetIndex
-    //             ];
-    //         setActiveKey(key);
-    //     }
-    //     setItems(newPanes);
-    //     // remove art
-
-    //     let newArt = daftarArt;
-    //     newArt = newArt.filter((obj: { key: string }) => obj.key !== targetKey);
-    //     setDaftarArt(newArt);
-    // };
     const handleCellEdit = (index: number, key: string, value: any) => {
         const updatedArts = [...daftarArt];
+        // console.log({ value });
+
         updatedArts[index][key] = value.trim();
         setDaftarArt(updatedArts);
     };
+    const handleCellDelete = (nomor_art: number) => {
+        const updatedArts = [...daftarArt];
+        // console.log({ value });
+
+        setDaftarArt(updatedArts);
+    };
+    const debounceCellEdit = _debounce(handleCellEdit, 1000);
+    const debounceCellDelete = _debounce(handleCellDelete, 1000);
 
     const handleCellBlur = (index: number) => {
         const updatedArts = [...daftarArt];
@@ -188,19 +145,7 @@ const Blok4_1: React.FC<{
         setDaftarArt(updatedArts);
     };
 
-    const onEdit = (targetKey: TargetKey, action: "add" | "remove") => {
-        if (action === "add") {
-            add();
-        } else {
-            // remove(targetKey);
-        }
-    };
-
-    useEffect(() => {
-        try {
-            console.log({ after: daftarArt });
-        } catch (error) {}
-    }, [daftarArt]);
+    // generate art components
     const items = daftarArt.map((art: any, index: number) => ({
         label: art.nama,
         key: String(index),
@@ -210,25 +155,32 @@ const Blok4_1: React.FC<{
                 artKey={art.key}
                 daftarArt={daftarArt}
                 setDaftarArt={setDaftarArt}
+                id_ruta={artForm.getFieldValue("id_ruta")}
+                id_art={art.id}
             />
         ),
     }));
+
     return (
         <Space direction="vertical">
             <Button type="primary" onClick={add}>
                 Tambah Art
             </Button>
 
-            <Blok
-                title="DAFTAR ANGGOTA RUMAH TANGGA"
-                columns={["Nomor", "Nama Anggota Rumah Tangga", "aksi"]}
-                columnsCount={3}
-            >
-                {daftarArt.map((art: any, index: number) => (
-                    <tr key={index}>
-                        <td style={centerCell}>{index + 1}</td>
-                        <td style={cellStyle}>
-                            <Typography.Paragraph
+            <Form name="artForm" form={artForm} onFinish={artFormFinish}>
+                <Form.Item name={`id_ruta`} hidden>
+                    <Input />
+                </Form.Item>
+                <Blok
+                    title="DAFTAR ANGGOTA RUMAH TANGGA"
+                    columns={["Nomor", "Nama Anggota Rumah Tangga", "aksi"]}
+                    columnsCount={3}
+                >
+                    {daftarArt.map((art: any, index: number) => (
+                        <tr key={index}>
+                            <td style={centerCell}>{index + 1}</td>
+                            <td style={cellStyle}>
+                                {/* <Typography.Paragraph
                                 editable={{
                                     onChange: (newContent) =>
                                         handleCellEdit(
@@ -240,34 +192,46 @@ const Blok4_1: React.FC<{
                                 }}
                             >
                                 {art.nama}
-                            </Typography.Paragraph>
-                        </td>
+                            </Typography.Paragraph> */}
+                                <Form.Item
+                                    name={`${index}-id_art`}
+                                    style={{ display: "none" }}
+                                >
+                                    <Input />
+                                </Form.Item>
+                                <Form.Item name={`${index}-nama`}>
+                                    <Input
+                                        placeholder="nama anggota rumah tangga"
+                                        onChange={(event: any) =>
+                                            debounceCellEdit(
+                                                index,
+                                                "nama",
+                                                event.target.value
+                                            )
+                                        }
+                                    />
+                                </Form.Item>
+                            </td>
 
-                        <td style={centerCell}>
-                            <Button
-                                onClick={() => onEdit(art.key, "remove")}
-                                disabled={index === 0}
-                            >
-                                Hapus
-                            </Button>
-                        </td>
-                    </tr>
-                ))}
-            </Blok>
+                            <td style={centerCell}>
+                                <Button
+                                    onClick={() =>
+                                        debounceCellDelete(art.nomor)
+                                    }
+                                    disabled={index === 0}
+                                >
+                                    Hapus
+                                </Button>
+                            </td>
+                        </tr>
+                    ))}
+                </Blok>
+            </Form>
             <Tabs
-                onEdit={onEdit}
                 style={{ backgroundColor: "#fff", padding: "10px" }}
                 items={items}
                 type="line"
             />
-            {/* {daftarArt.map((art: any) => (
-                <Art
-                    onFinish={blok4_1_hal2Finish}
-                    artKey={art.artKey}
-                    daftarArt={daftarArt}
-                    setDaftarArt={setDaftarArt}
-                />
-            ))} */}
         </Space>
     );
 };

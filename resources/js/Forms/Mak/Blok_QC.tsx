@@ -83,12 +83,12 @@ const Blok4_3: React.FC<{
     const [messageApi, contextHolder] = message.useMessage();
 
     const daftarQC: any[] = [
-        { rincian: "Kalori per Kapita per Hari" },
-        { rincian: "Jumlah Komoditas Bahan Makanan/Minuman" },
-        { rincian: "Jumlah Komoditas Makanan/Minuman Jadi dan Rokok" },
-        { rincian: "Jumlah Komoditas Non Makanan" },
-        { rincian: "Jumlah Semua Komoditas" },
-        { rincian: "Pengeluaran per kapita" },
+        { rincian: "Kalori per Kapita per Hari", id: 0 },
+        { rincian: "Jumlah Komoditas Bahan Makanan/Minuman", id: 1 },
+        { rincian: "Jumlah Komoditas Makanan/Minuman Jadi dan Rokok", id: 2 },
+        { rincian: "Jumlah Komoditas Non Makanan", id: 3 },
+        { rincian: "Jumlah Semua Komoditas", id: 4 },
+        { rincian: "Pengeluaran per kapita", id: 5 },
     ];
 
     const renderQC: React.FC<{ rincian: Rincian; key: number }> = ({
@@ -105,16 +105,14 @@ const Blok4_3: React.FC<{
                         <>
                             <RupiahInput
                                 key={key}
-                                inputName={`blokqc_${rincian.id - 1}`}
+                                inputName={`blokqc_${rincian.id}`}
                             />
                             <TextRupiah value={0} color={"red"} />
                         </>
                     ) : (
-                        <Input
-                            style={{ textAlign: "right" }}
-                            key={key}
-                            name={`blokqc_${rincian.id - 1}`}
-                        />
+                        <Form.Item name={`blokqc_${rincian.id}`} label={null}>
+                            <Input style={{ textAlign: "right" }} key={key} />
+                        </Form.Item>
                     )}
                 </td>
             </tr>

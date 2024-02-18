@@ -100,18 +100,18 @@ const Dashboard = () => {
         },
         {
             title: "No Urut Sampel",
-            dataIndex: "109",
-            key: "109",
+            dataIndex: "r109",
+            key: "r109",
         },
         {
             title: "Nama KRT",
-            dataIndex: "110",
-            key: "110",
+            dataIndex: "r110",
+            key: "r110",
         },
         {
             title: "Alamat",
-            dataIndex: "111",
-            key: "111",
+            dataIndex: "r111",
+            key: "r111",
         },
         {
             title: "Status",
@@ -130,7 +130,7 @@ const Dashboard = () => {
                 <Button
                     type="primary"
                     onClick={() =>
-                        router.get(route("entri.mak.edit", { id: record.id }))
+                        router.get(`${route("entri.mak.edit")}/${record.id}`)
                     }
                 >
                     Entri

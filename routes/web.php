@@ -1,22 +1,16 @@
 <?php
 
+use App\Http\Controllers\AnggotaRutaController;
 use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterJabatanController;
 use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\ProfileController;
-use App\Models\Kabkot;
-use App\Models\MasterBarang;
 use App\Models\MasterJabatan;
 use App\Models\MasterWilayah;
-use App\Models\Nks;
-use App\Models\Provinsi;
-use App\Models\SusenasInti;
-use App\Models\SusenasMak;
+
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -77,9 +71,12 @@ Route::middleware('auth')->group(function () {
     })->name('api.entri.semester');
 
     route::post('/entri/mak', [MakController::class, 'store'])->name('entri.mak.store');
+    route::post('/entri/mak/art', [AnggotaRutaController::class, 'store'])->name('entri.mak.art.store');
     route::patch('/entri/mak/konsumsi', [MakController::class, 'konsumsi_store'])->name('entri.mak.konsumsi.store');
+    route::patch('/entri/mak/konsumsi/art', [MakController::class, 'konsumsi_art_store'])->name('entri.mak.konsumsi_art.store');
     route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');
     route::get('/api/entri/mak', [MakController::class, 'fetch'])->name('api.entri.mak');
+    route::get('/api/mak/konsumsi/art/{id_art}', [MakController::class, 'konsumsi_art_fetch'])->name('api.mak.konsumsi.art');
 
 
 
@@ -94,14 +91,8 @@ Route::middleware('auth')->group(function () {
     route::get('/api/entri/bs4', [MasterWilayahController::class, 'fetch_bs4'])->name('api.entri.bs4');
     route::get('/api/entri/nks', [MasterWilayahController::class, 'fetch_nks'])->name('api.entri.nks');
 
-    route::get('/entri/mak/create', function (Request $request) {
-        // $kabkot = $request->query('id_dsrt');
-
-
-        // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
-        return Inertia::render("Entri/Mak");
-    })->name("entri.mak.create");
-    route::get('/entri/mak', [MakController::class, 'edit'])->name('entri.mak.edit');
+    route::get('/entri/mak/create', [MakController::class, 'create'])->name("entri.mak.create");
+    route::get('/entri/mak/{id}', [MakController::class, 'edit'])->name('entri.mak.edit');
 
 
     route::get('/dashboard', function () {

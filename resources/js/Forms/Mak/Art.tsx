@@ -1,10 +1,11 @@
-import { Button, Form, InputNumber, Space, Typography } from "antd";
+import { Button, Form, Input, InputNumber, Space, Typography } from "antd";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import TabelBlok from "@/Components/TabelBlok";
 import { useEffect, useState } from "react";
 import { SubTotal } from "@/types";
 
 import _debounce from "lodash/debounce";
+import axios from "axios";
 
 const { Text, Title } = Typography;
 
@@ -13,15 +14,119 @@ const Art: React.FC<{
     artKey: any;
     daftarArt: any;
     setDaftarArt: (value: any) => void;
+    id_ruta: string;
+    id_art: string;
 
     // record: any;
-}> = ({ onFinish, artKey, setDaftarArt, daftarArt }) => {
+}> = ({ onFinish, artKey, setDaftarArt, daftarArt, id_ruta, id_art }) => {
     //    const konten =
 
     // first initialize the rekap art
 
     const [form] = Form.useForm();
+    const konsumsiArtFinish = async (values: any) => {
+        console.log({ values });
+        console.log("sending");
 
+        // messageApi.open({
+        //     type: "loading",
+        //     key: "4_1",
+        //     content: "Memuat Data",
+        // });
+        try {
+            const url = route("entri.mak.konsumsi_art.store");
+            const { data } = await axios.patch(url, values, {
+                headers: { "Content-Type": "application/json" },
+            });
+            console.log({ data });
+            // messageApi.open({
+            //     type: "success",
+            //     key: "4_1",
+            //     content: "Berhasil menyimpan data",
+            // });
+            console.log("sucess");
+        } catch (error) {
+            // messageApi.open({
+            //     type: "error",
+            //     key: "4_1",
+            //     content: "Oops terjadi kesalahan, silahkan hubungi admin",
+            // });
+            console.log("error", { error });
+        }
+    };
+    // kumpulan useeffect
+    useEffect(() => {
+        const fetchKonsumsiArt = async (id_art: string) => {
+            const { data } = await axios.get(
+                route("api.mak.konsumsi.art", { id_art: id_art })
+            );
+            console.log({ konsumsiArtFinish: data });
+            const daftarSub: number[] = [159, 192];
+            let konsumsiArt = data.map(
+                (item: {
+                    id_komoditas: any;
+                    id_kelompok: any;
+                    harga_beli: any;
+                    harga_produksi: any;
+                    harga_total: any;
+                    item: any;
+                    satuan: any;
+                    volume_beli: any;
+                    volume_produksi: any;
+                    volume_total: any;
+                }) => {
+                    item.id_kelompok = item.id_komoditas < 192 ? 0 : 1;
+                    return {
+                        [`${
+                            daftarSub.includes(item.id_komoditas)
+                                ? "jumlah"
+                                : ""
+                        }${item.id_komoditas}_beli_harga${item.id_kelompok}`]:
+                            item.harga_beli,
+                        [`${
+                            daftarSub.includes(item.id_komoditas)
+                                ? "jumlah"
+                                : ""
+                        }${item.id_komoditas}_produksi_harga${
+                            item.id_kelompok
+                        }`]: item.harga_produksi,
+                        [`${item.id_komoditas}_total_harga`]: item.harga_total,
+                        [`${item.id_komoditas}_item`]: item.item,
+                        [`${item.id_komoditas}_satuan`]: item.satuan,
+                        [`${item.id_komoditas}_beli_volume`]: item.volume_beli,
+                        [`${item.id_komoditas}_produksi_volume`]:
+                            item.volume_produksi,
+                        [`${item.id_komoditas}_total_volume`]:
+                            item.volume_total,
+                    };
+                }
+            );
+            const konsumsiArtValues = konsumsiArt.reduce(
+                (
+                    result: { [x: string]: any },
+                    obj: {
+                        [x: string]: any;
+                        hasOwnProperty: (arg0: string) => any;
+                    }
+                ) => {
+                    for (const key in obj) {
+                        if (obj.hasOwnProperty(key)) {
+                            result[key] = obj[key];
+                        }
+                    }
+                    return result;
+                },
+                {}
+            );
+            form.setFieldsValue(konsumsiArtValues);
+            calculateRekap();
+        };
+        fetchKonsumsiArt(id_art);
+    }, [id_art]);
+
+    useEffect(() => {
+        form.setFieldsValue({ id_ruta, id_art });
+    }, [form]);
     const konten = [
         {
             nomor: 159,
@@ -332,10 +437,6 @@ const Art: React.FC<{
         const updatedArray = newDaftarArt.map((obj) =>
             obj.artKey === artKey ? { ...obj, rekap: newSubTotalHarga } : obj
         );
-        console.log({
-            updatedArray,
-            daftarArt,
-        });
     };
     const calculateRekap = _debounce(() => {
         // console.log({ subKey, jenis });
@@ -409,8 +510,10 @@ const Art: React.FC<{
 
         setDaftarArt(updatedArt);
     }, 600);
+    const handleSubmit = _debounce(() => form.submit(), 3000);
     const handleValueChange = () => {
         calculateRekap();
+        handleSubmit();
     };
     const title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";
@@ -420,7 +523,7 @@ const Art: React.FC<{
             <Form
                 form={form}
                 name="Art"
-                onFinish={onFinish}
+                onFinish={konsumsiArtFinish}
                 autoComplete="off"
                 layout="vertical"
                 onValuesChange={handleValueChange}
@@ -433,14 +536,17 @@ const Art: React.FC<{
                         Jumlah komoditas bahan makanan,bahan minuman, dan rokok
                         yang terisi pada halaman ini
                     </Text>
+                    <Form.Item style={{ margin: "auto" }} name="id_ruta">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item style={{ margin: "auto" }} name="id_art">
+                        <Input />
+                    </Form.Item>
                     <Form.Item
                         style={{ margin: "auto" }}
                         name="hal6_jml_komoditas"
                     >
-                        <InputNumber
-                            max={30}
-                            style={{ width: "40px" }}
-                        ></InputNumber>
+                        <InputNumber max={30} style={{ width: "40px" }} />
                     </Form.Item>
                     <Button onClick={() => form.submit()}>finish</Button>
                 </Space>

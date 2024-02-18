@@ -30,13 +30,7 @@ const Blok4_1: React.FC<{
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
     subTotalHarga: SubTotal[];
-    calculate: ({
-        subKey,
-        jenis,
-    }: {
-        subKey: number;
-        jenis: keyof SubTotal;
-    }) => void;
+    calculate: () => void;
     rekapMak: RekapMak[];
     setRekapMak: React.Dispatch<React.SetStateAction<RekapMak[]>>;
 
@@ -89,11 +83,9 @@ const Blok4_1: React.FC<{
             onFinish={onFinish}
             autoComplete="off"
             layout="vertical"
-            onValuesChange={() =>
-                _debounce(() => calculate({ subKey: 1, jenis: "beli" }), 600)()
-            }
+            onValuesChange={_debounce(calculate, 600)}
         >
-            <Form.Item name="id_ruta">
+            <Form.Item name="id_ruta" hidden>
                 <Input placeholder="id rt" />
             </Form.Item>
             <Tabs

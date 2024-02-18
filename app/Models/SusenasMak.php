@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SusenasMak extends Model
 {
     use HasFactory;
+    use HasUuids;
     protected $table = "vsusenas_mak";
+
     protected $fillable = [
         'r108', 'r109', 'r110', 'r111', 'kode_prov', 'kode_kabkot', 'nks', 'kode_bs4', 'kode_kec', 'kode_desa',
         'r203', 'r201_nama', 'r201_jabatan', "r202_nama", "r202_jabatan", 'wtf_2',

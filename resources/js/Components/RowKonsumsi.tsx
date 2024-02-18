@@ -82,7 +82,7 @@ const RowKonsumsi: React.FC<{
             <td colSpan={1} style={data.type === "sub" ? blokStyle : cellStyle}>
                 {data.rincian}
                 {data.type === "lain" && (
-                    <Form.Item name={`${data.nomor}_lainnya`}>
+                    <Form.Item name={`${data.nomor}_item`}>
                         <Input placeholder="Sebutkan" />
                     </Form.Item>
                 )}
@@ -92,7 +92,7 @@ const RowKonsumsi: React.FC<{
                 style={data.type === "sub" ? blokStyle : centerCell}
             >
                 {data.type === "lain" ? (
-                    <Form.Item name={`${data.nomor}_lainnya`}>
+                    <Form.Item name={`${data.nomor}_satuan`}>
                         <Input placeholder="Sebutkan" />
                     </Form.Item>
                 ) : (
