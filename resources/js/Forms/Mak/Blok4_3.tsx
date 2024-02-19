@@ -98,53 +98,16 @@ const Blok4_3: React.FC<{
     }
     const [messageApi, contextHolder] = message.useMessage();
 
-    // const calculateSubJumlah = (form: FormInstance) => {
-    //     // console.log({ subKey, jenis });
-    //     // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
+    const handleNonMakInput = (value: any) => {
+        let updatedRekap = [...rekapMak];
+        updatedRekap[16].total = value;
+        updatedRekap[17].total =
+            updatedRekap[15].total + updatedRekap[16].total;
 
-    //     const allFieldValues = form.getFieldsValue();
-    //     // console.log({ pattern, allFieldValues });
-    //     const pattern = {
-    //         produksi: new RegExp(`^[0-9]|1[0-3]_produksi$`),
-    //         beli: new RegExp(`^[0-9]|1[0-3]_beli$`),
-    //     };
+        updatedRekap;
 
-    //     const produksi = Object.entries(allFieldValues)
-    //         .filter(([fieldName]) => {
-    //             let isMatch = pattern.produksi.test(fieldName);
-
-    //             return isMatch;
-    //         })
-    //         .reduce(
-    //             (accumulator, [, value]) =>
-    //                 accumulator + ((value as number) || 0),
-    //             0
-    //         );
-    //     const beli = Object.entries(allFieldValues)
-    //         .filter(([fieldName]) => {
-    //             let isMatch = pattern.beli.test(fieldName);
-
-    //             return isMatch;
-    //         })
-    //         .reduce(
-    //             (accumulator, [, value]) =>
-    //                 accumulator + ((value as number) || 0),
-    //             0
-    //         );
-
-    //     let newRekap = rekapMak;
-    //     newRekap.beli = beli;
-    //     newRekap.produksi = produksi;
-    //     newRekap.total = produksi + beli;
-    //     newRekap.rerata = Math.round((newRekap.total * 30) / 7);
-    //     setRekapMak(newRekap);
-    //     console.log({ newRekap });
-    //     form.setFieldValue(`blok4_32_14_beli`, beli);
-    //     form.setFieldValue(`blok4_32_14_produksi`, produksi);
-
-    //     form.setFieldValue(`blok4_32_14_total`, newRekap.total);
-    //     form.setFieldValue(`blok4_32_15_total`, newRekap.rerata);
-    // };
+        setRekapMak(updatedRekap);
+    };
 
     const renderBlok432: React.FC<{ rincian: Rincian; key: number }> = ({
         rincian,
@@ -192,6 +155,9 @@ const Blok4_3: React.FC<{
                         <RupiahInput
                             key={key}
                             inputName={`blok4_32_${rincian.id - 1}_total`}
+                            onChange={
+                                key === 16 ? handleNonMakInput : undefined
+                            }
                         />
                         <TextRupiah
                             color="red"
@@ -204,71 +170,6 @@ const Blok4_3: React.FC<{
         );
     };
 
-    // // define Values;
-    // useEffect(() => {
-    //     subTotalHarga.forEach((sub, index) => {
-    //         let total = sub.total ?? 0;
-    //         let produksi = sub.produksi ?? 0;
-    //         let beli = sub.beli ?? 0;
-    //         form.setFieldValue(`blok4_32_${index}_beli`, beli);
-    //         form.setFieldValue(`blok4_32_${index}_total`, beli + produksi);
-    //         form.setFieldValue(`blok4_32_${index}_produksi`, produksi);
-    //     });
-    // }, [subTotalHarga]);
-    // useEffect(() => {
-    //     rekapArt.forEach((art: any, index: number) => {
-    //         form.setFieldValue(`blok4_31_${index}_mak_beli`, art[0]["beli"]);
-    //         form.setFieldValue(
-    //             `blok4_31_${index}_mak_produksi`,
-    //             art[0]["produksi"]
-    //         );
-    //         form.setFieldValue(`blok4_31_${index}_rokok_beli`, art[1]["beli"]);
-    //         form.setFieldValue(
-    //             `blok4_31_${index}_rokok_produksi`,
-    //             art[1]["produksi"]
-    //         );
-    //     });
-    //     let summary = rekapArt.reduce(
-    //         (acc: SubTotal[], innerArray: SubTotal[]) => {
-    //             innerArray.forEach((item: SubTotal, index: number) => {
-    //                 acc[index] = acc[index] || { beli: 0, produksi: 0 };
-    //                 acc[index].beli += item.beli;
-    //                 acc[index].produksi += item.produksi;
-    //             });
-    //             return acc;
-    //         },
-    //         []
-    //     );
-    //     if (summary.length < 1) {
-    //         summary = [
-    //             { beli: 0, produksi: 0 },
-    //             { beli: 0, produksi: 0 },
-    //         ];
-    //     }
-
-    //     form.setFieldValue(`blok4_31_jumlah_mak_beli`, summary[0]["beli"]);
-    //     form.setFieldValue(`blok4_32_12_beli`, summary[0]["beli"]);
-    //     form.setFieldValue(
-    //         `blok4_31_jumlah_mak_produksi`,
-    //         summary[0]["produksi"]
-    //     );
-    //     form.setFieldValue(`blok4_32_12_produksi`, summary[0]["produksi"]);
-    //     form.setFieldValue(
-    //         `blok4_32_12_total`,
-    //         summary[0]["produksi"] + summary[0]["beli"]
-    //     );
-    //     form.setFieldValue(`blok4_31_jumlah_rokok_beli`, summary[1]["beli"]);
-    //     form.setFieldValue(`blok4_32_13_beli`, summary[1]["beli"]);
-    //     form.setFieldValue(
-    //         `blok4_31_jumlah_rokok_produksi`,
-    //         summary[1]["produksi"]
-    //     );
-    //     form.setFieldValue(`blok4_32_13_produksi`, summary[1]["produksi"]);
-    //     form.setFieldValue(
-    //         `blok4_32_13_total`,
-    //         summary[1]["produksi"] + summary[1]["beli"]
-    //     );
-    // }, [rekapArt]);
     const [rekapArt, setRekapArt] = useState([
         { beli: 0, produksi: 0, total: 0 },
         { beli: 0, produksi: 0, total: 0 },
@@ -340,11 +241,21 @@ const Blok4_3: React.FC<{
                     {daftarArt.map((art: any, index: number) => (
                         <tr>
                             <td style={centerCell}>{index + 1}</td>
-                            <td style={cellStyle}>{art.nama}</td>
+                            <td style={cellStyle}>
+                                {art.nama}
+                                <Form.Item
+                                    name={`blok4_31_${index}_id_art`}
+                                    label={null}
+                                    initialValue={art.id}
+                                >
+                                    <Input readOnly />
+                                </Form.Item>
+                            </td>
 
                             <td style={cellStyle}>
                                 <RupiahInput
                                     inputName={`blok4_31_${index}_mak_beli`}
+                                    initialValue={art.mak_beli}
                                 />
                                 <TextRupiah
                                     color="red"
@@ -354,6 +265,7 @@ const Blok4_3: React.FC<{
                             <td style={cellStyle}>
                                 <RupiahInput
                                     inputName={`blok4_31_${index}_mak_produksi`}
+                                    initialValue={art.mak_produksi}
                                 />
                                 <TextRupiah
                                     color="red"
@@ -363,6 +275,7 @@ const Blok4_3: React.FC<{
                             <td style={cellStyle}>
                                 <RupiahInput
                                     inputName={`blok4_31_${index}_rokok_beli`}
+                                    initialValue={art.rokok_beli}
                                 />
                                 <TextRupiah
                                     color="red"
@@ -372,6 +285,7 @@ const Blok4_3: React.FC<{
                             <td style={cellStyle}>
                                 <RupiahInput
                                     inputName={`blok4_31_${index}_rokok_produksi`}
+                                    initialValue={art.rokok_produksi}
                                 />
                                 <TextRupiah
                                     color="red"
@@ -427,6 +341,7 @@ const Blok4_3: React.FC<{
                 {/* blok 4.3.2  */}
 
                 <Divider />
+
                 <Blok
                     title={
                         "BLOK IV.3.2. REKAPITULASI PENGELUARAN MAKANAN, MINUMAN, DAN ROKOK (DALAM RUPIAH)"
@@ -442,8 +357,9 @@ const Blok4_3: React.FC<{
                     ]}
                     key={2}
                 >
-                    {daftarRincian432.map((rincian, key) =>
-                        renderBlok432({ rincian, key })
+                    {daftarRincian432.map(
+                        (rincian, key) => renderBlok432({ rincian, key })
+                        // <renderBlok432 key={key} rincian={rincian}/>
                     )}
                 </Blok>
 

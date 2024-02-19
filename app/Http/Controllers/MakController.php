@@ -7,8 +7,7 @@ use App\Models\Konsumsi;
 use App\Models\KonsumsiArt;
 use App\Models\SusenasMak;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class MakController extends Controller
@@ -81,6 +80,39 @@ class MakController extends Controller
             $data_update = SusenasMak::findOrFail($data['id']);
             $data_update->update($data);
             $data_update->save();
+            // update konsumsi art rekap
+            $rekap_art = [];
+            foreach ($data as $key => $value) {
+                # code...
+                if (Str::contains($key, 'jumlah')) {
+                    continue;
+                }
+                if (strlen($key) > 13 && Str::startsWith($key, 'blok4_31_')) {
+
+                    $nama_var = substr($key, 11);
+                    $nomor_art = explode("_", $key)[2];
+                    $existingIndex = array_search($nomor_art, array_column($rekap_art, 'nomor_art'));
+                    if ($nama_var == "id_art") {
+                        $nama_var = "id";
+                    }
+                    if ($existingIndex !== false) {
+                        // If exists, append data to the existing array
+                        $rekap_art[$existingIndex][$nama_var] = $value;
+                    } else {
+                        // If doesn't exist, create a new array
+
+                        $rekap_art[] = [
+                            'nomor_art' => $nomor_art,
+                            $nama_var => $value,
+                        ];
+                    }
+                }
+            }
+            foreach ($rekap_art as $key => $value) {
+                # code...
+                AnggotaRuta::where('id', $value['id'])->update($value);
+            }
+            return response()->json($rekap_art, 200);
         } catch (\Throwable $th) {
             throw $th;
         }

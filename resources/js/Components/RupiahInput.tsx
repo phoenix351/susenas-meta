@@ -11,7 +11,8 @@ interface RupiahInputProps {
 const RupiahInput: React.FC<{
     inputName: string;
     onChange?: any;
-}> = ({ inputName, onChange }) => {
+    initialValue?: number;
+}> = ({ inputName, onChange, initialValue }) => {
     const [value, setValue] = useState(0);
     const handleChange = (nilai: any) => {
         setValue(nilai);
@@ -25,7 +26,10 @@ const RupiahInput: React.FC<{
     }, 600);
 
     return (
-        <Form.Item name={inputName}>
+        <Form.Item
+            name={inputName}
+            initialValue={initialValue ? initialValue : 0}
+        >
             <InputNumber
                 min={0}
                 style={{ width: "100%", textAlign: "right" }}

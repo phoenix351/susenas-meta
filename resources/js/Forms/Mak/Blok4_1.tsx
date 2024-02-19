@@ -75,6 +75,10 @@ const Blok4_1: React.FC<{
     const [messageApi, contextHolder] = message.useMessage();
 
     function handleChange(activeKey: string): void {}
+    // define initializing components
+    useEffect(() => {
+        calculate();
+    }, []);
 
     return (
         <Form

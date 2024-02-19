@@ -152,7 +152,7 @@ const Blok4_1: React.FC<{
         children: (
             <Art
                 onFinish={blok4_1_hal2Finish}
-                artKey={art.key}
+                nomor_art={art.nomor_art}
                 daftarArt={daftarArt}
                 setDaftarArt={setDaftarArt}
                 id_ruta={artForm.getFieldValue("id_ruta")}

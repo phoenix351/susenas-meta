@@ -11,14 +11,14 @@ const { Text, Title } = Typography;
 
 const Art: React.FC<{
     onFinish: (values: any) => void;
-    artKey: any;
+    nomor_art: number;
     daftarArt: any;
     setDaftarArt: (value: any) => void;
     id_ruta: string;
     id_art: string;
 
     // record: any;
-}> = ({ onFinish, artKey, setDaftarArt, daftarArt, id_ruta, id_art }) => {
+}> = ({ onFinish, nomor_art, setDaftarArt, daftarArt, id_ruta, id_art }) => {
     //    const konten =
 
     // first initialize the rekap art
@@ -435,7 +435,7 @@ const Art: React.FC<{
         // setRekapArt(newSubTotalHarga)
         let newDaftarArt = [...daftarArt];
         const updatedArray = newDaftarArt.map((obj) =>
-            obj.artKey === artKey ? { ...obj, rekap: newSubTotalHarga } : obj
+            obj.artKey === nomor_art ? { ...obj, rekap: newSubTotalHarga } : obj
         );
     };
     const calculateRekap = _debounce(() => {
@@ -448,7 +448,7 @@ const Art: React.FC<{
         const produksi_1 = `produksi_harga1`;
 
         const allFieldValues = form.getFieldsValue();
-        // console.log({ pattern, allFieldValues });
+        // console.log({ allFieldValues });
 
         const sum_beli_0 = Object.entries(allFieldValues)
             .filter(
@@ -505,7 +505,9 @@ const Art: React.FC<{
 
         let newDaftarArt = [...daftarArt];
         const updatedArt = newDaftarArt.map((obj) =>
-            obj.key === artKey ? { ...obj, rekap: newSubTotalHarga } : obj
+            obj.nomor_art === nomor_art
+                ? { ...obj, rekap: newSubTotalHarga }
+                : obj
         );
 
         setDaftarArt(updatedArt);
@@ -513,7 +515,7 @@ const Art: React.FC<{
     const handleSubmit = _debounce(() => form.submit(), 3000);
     const handleValueChange = () => {
         calculateRekap();
-        handleSubmit();
+        // handleSubmit();
     };
     const title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";

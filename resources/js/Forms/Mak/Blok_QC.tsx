@@ -107,7 +107,12 @@ const Blok4_3: React.FC<{
                                 key={key}
                                 inputName={`blokqc_${rincian.id}`}
                             />
-                            <TextRupiah value={0} color={"red"} />
+                            <TextRupiah
+                                value={Math.round(
+                                    rekapMak[17].total / daftarArt.length
+                                )}
+                                color={"red"}
+                            />
                         </>
                     ) : (
                         <Form.Item name={`blokqc_${rincian.id}`} label={null}>

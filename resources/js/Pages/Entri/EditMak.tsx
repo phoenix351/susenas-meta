@@ -222,7 +222,7 @@ const Mak = ({
     };
     const blok4_1Finish = async (values: any) => {
         console.log({ values });
-        return;
+        // return;
         messageApi.open({
             type: "loading",
             key: "4_1",
@@ -351,7 +351,6 @@ const Mak = ({
         const jenisArr = ["beli", "produksi"];
         subArr.forEach((sub: any) => {
             let newrekapMak: SubTotal[] = [...rekapMak];
-            console.log({ allFieldValues });
 
             const pattern_beli = `beli_harga${sub}`;
             const sum_beli = Object.entries(allFieldValues)
@@ -379,8 +378,10 @@ const Mak = ({
                     0
                 );
             newrekapMak[sub]["produksi"] = sum_produksi;
-            newrekapMak[sub]["total"] =
-                newrekapMak[sub]["beli"] + newrekapMak[sub]["produksi"];
+            if (sub <= 13) {
+                newrekapMak[sub]["total"] =
+                    newrekapMak[sub]["beli"] + newrekapMak[sub]["produksi"];
+            }
             // newrekapMak[14]["beli"] = Object.entries(newrekapMak)
             newrekapMak[14] = newrekapMak
                 .slice(0, 13)
@@ -405,7 +406,6 @@ const Mak = ({
 
     useEffect(() => {
         let newrekapMak = [...rekapMak];
-        console.log({ newrekapMak });
 
         const summary = daftarArt.reduce((summary: any[], item: any) => {
             item.rekap.forEach((entry: any, index: number) => {
@@ -502,8 +502,6 @@ const Mak = ({
     const [artForms, setArtForms] = useState<FormInstance<any>[]>([]);
     useEffect(() => {
         daftarArt.forEach((item, index) => {
-            console.log({ item });
-
             artForm.setFieldValue(`${index}-id_art`, data.id);
             artForm.setFieldValue(`${index}-nama`, item.nama);
             // const [form] = Form.useForm();
@@ -527,9 +525,9 @@ const Mak = ({
                 <Button
                     onClick={() => {
                         form.submit();
-                        // blok4_1Form.submit();
+                        blok4_1Form.submit();
                         // save art
-                        // artForm.submit();
+                        artForm.submit();
                     }}
                 >
                     Simpan

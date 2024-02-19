@@ -130,7 +130,9 @@ const Dashboard = () => {
                 <Button
                     type="primary"
                     onClick={() =>
-                        router.get(`${route("entri.mak.edit")}/${record.id}`)
+                        router.get(
+                            `${route("entri.mak.edit", { id: record.id })}`
+                        )
                     }
                 >
                     Entri
