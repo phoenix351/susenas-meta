@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnggotaRuta;
+use App\Models\Kabkot;
 use App\Models\Konsumsi;
 use App\Models\KonsumsiArt;
 use App\Models\SusenasMak;
@@ -67,11 +68,12 @@ class MakController extends Controller
         })
             ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas')->distinct()->first();
         $konsumsi_ruta = Konsumsi::where('id_ruta', $id)->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
+        $garis_kemiskinan = Kabkot::where('kode', $data->kode_kabkot)->pluck('garis_kemiskinan');
         $art = AnggotaRuta::where('id_ruta', $id)->get();
         // $konsumsi_ruta = DB::table('konsumsi')->where('id_ruta', $id)->get();
 
         // dd($konsumsi_ruta);
-        return Inertia::render("Entri/EditMak", ['data' => $data, 'konsumsi_ruta' => $konsumsi_ruta, 'art' => $art]);
+        return Inertia::render("Entri/EditMak", ['data' => $data, 'konsumsi_ruta' => $konsumsi_ruta, 'art' => $art, 'garis_kemiskinan' => $garis_kemiskinan]);
     }
     public function update(Request $request)
     {

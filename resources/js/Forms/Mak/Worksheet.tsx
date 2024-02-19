@@ -52,11 +52,11 @@ interface RincianWorksheet {
 const InputComponent: React.FC<{
     type: string;
     name: string;
-    key: number;
+    customKey: number; // Use a different name
     options?: SelectItem[];
     children?: RincianWorksheet[];
     setValue?: (value: any) => void;
-}> = ({ type, name, options, key, children, setValue }) => {
+}> = ({ type, name, options, customKey, children, setValue }) => {
     const inputComponents: { [type: string]: JSX.Element } = {
         number: (
             <Form.Item name={name} label={null}>
@@ -73,7 +73,7 @@ const InputComponent: React.FC<{
                 onChange={setValue && ((value) => setValue(value))}
             />
         ),
-        rupiah: <RupiahInput inputName={name} editable={key === 26} />,
+        rupiah: <RupiahInput inputName={name} editable={customKey === 26} />, // Use customKey
         multi: <MetaSelect name={name} options={options ?? []} />,
     };
     return inputComponents[type];
@@ -102,6 +102,7 @@ const renderRow: any = (props: RincianWorksheet, form: FormInstance) => {
                         name={`wtf_${props.id}`}
                         options={props.options}
                         key={props.id}
+                        customKey={props.id}
                         children={props.children}
                         setValue={setValue}
                     />
@@ -120,6 +121,7 @@ const renderRow: any = (props: RincianWorksheet, form: FormInstance) => {
                                 name={`wtf_${child.id}`}
                                 options={child.options}
                                 key={child.id}
+                                customKey={child.id}
                             />
                         </td>
                     </tr>

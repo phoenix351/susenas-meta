@@ -277,6 +277,7 @@ const Blok4_3: React.FC<{
                                     name={`blok4_31_${index}_id_art`}
                                     label={null}
                                     initialValue={art.id}
+                                    hidden
                                     // hidden
                                 >
                                     <Input />

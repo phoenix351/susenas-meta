@@ -129,7 +129,13 @@ const Mak = ({
     data,
     konsumsi_ruta,
     art,
-}: PageProps & { data: any; konsumsi_ruta: any[]; art: any[] }) => {
+    garis_kemiskinan,
+}: PageProps & {
+    data: any;
+    konsumsi_ruta: any[];
+    art: any[];
+    garis_kemiskinan: number;
+}) => {
     // const [cariForm] = Form.useForm();
     const tabContentStyle: React.CSSProperties = {
         backgroundColor: "#fff",
@@ -397,9 +403,6 @@ const Mak = ({
 
     useEffect(() => {
         let newrekapMak = [...rekapMak];
-        console.log("changed");
-        console.log({ daftarArt });
-        console.log("====================================");
 
         daftarArt?.forEach((item, index) => {
             artForm.setFieldValue(`${index}-id_art`, data.id);
@@ -456,9 +459,6 @@ const Mak = ({
     };
     // initialize the form
     useEffect(() => {
-        console.log("====================================");
-        console.log({ art });
-        console.log("====================================");
         art = art.map((item) => ({
             ...item,
             rekap: [
@@ -488,6 +488,7 @@ const Mak = ({
 
         document.addEventListener("keydown", handleKeyPress);
         form.setFieldsValue(data);
+        form.setFieldValue("wtf_26", garis_kemiskinan);
         console.log({ art });
 
         blok4_1Form.setFieldsValue({ id_ruta: data.id });
@@ -562,13 +563,13 @@ const Mak = ({
                         onClick={async () => {
                             try {
                                 // Submit all forms concurrently using Promise.all
-                                // const [form1, form2, form3] = await Promise.all(
-                                //     [
-                                //         artForm.submit(),
-                                //         form.submit(),
-                                //         blok4_1Form.submit(),
-                                //     ]
-                                //     );
+                                const [form1, form2, form3] = await Promise.all(
+                                    [
+                                        artForm.submit(),
+                                        form.submit(),
+                                        blok4_1Form.submit(),
+                                    ]
+                                );
                                 artForm.submit();
                                 // Now, all forms are submitted successfully
                                 setLastSaved(new Date());

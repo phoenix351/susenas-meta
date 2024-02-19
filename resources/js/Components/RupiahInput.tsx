@@ -36,7 +36,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
             initialValue={initialValue ? initialValue : 0}
         >
             <InputNumber
-                readOnly={editable ? !editable : false}
+                readOnly={editable ? editable : false}
                 min={0}
                 style={{ width: "100%", textAlign: "right" }}
                 formatter={(value: any) =>
@@ -53,6 +53,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
                 value={value}
                 onChange={(value: any) => {
                     debouncedOnChange(value);
+                    console.log({ editable });
                 }}
                 // {...rest}
             />
