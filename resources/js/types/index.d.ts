@@ -36,3 +36,10 @@ interface RekapMak {
     total: number;
     sub?: string;
 }
+interface AnggotaRumahTangga {
+    id: string;
+    id_ruta: string;
+    nama: string;
+    rekap: any[];
+    nomor_art: number;
+}

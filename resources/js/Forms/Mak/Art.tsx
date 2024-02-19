@@ -515,7 +515,7 @@ const Art: React.FC<{
     const handleSubmit = _debounce(() => form.submit(), 3000);
     const handleValueChange = () => {
         calculateRekap();
-        // handleSubmit();
+        handleSubmit();
     };
     const title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";
@@ -538,10 +538,10 @@ const Art: React.FC<{
                         Jumlah komoditas bahan makanan,bahan minuman, dan rokok
                         yang terisi pada halaman ini
                     </Text>
-                    <Form.Item style={{ margin: "auto" }} name="id_ruta">
+                    <Form.Item style={{ margin: "auto" }} name="id_ruta" hidden>
                         <Input />
                     </Form.Item>
-                    <Form.Item style={{ margin: "auto" }} name="id_art">
+                    <Form.Item style={{ margin: "auto" }} name="id_art" hidden>
                         <Input />
                     </Form.Item>
                     <Form.Item
@@ -550,7 +550,6 @@ const Art: React.FC<{
                     >
                         <InputNumber max={30} style={{ width: "40px" }} />
                     </Form.Item>
-                    <Button onClick={() => form.submit()}>finish</Button>
                 </Space>
                 <TabelBlok
                     form={form}

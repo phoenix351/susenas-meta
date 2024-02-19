@@ -193,6 +193,20 @@ const Blok4_3: React.FC<{
 
     useEffect(() => {
         let summary = calculateSummary(daftarArt);
+
+        const fetchArt = async () => {
+            const { data } = await axios.get(
+                route("entri.mak.art.fetch", { id_ruta: daftarArt[0]?.id_ruta })
+            );
+            // console.log({ data });
+
+            data.forEach((art: any, index: number) => {
+                `blok4_31_${index}_id_art`;
+
+                form.setFieldValue(`blok4_31_${index}_id_art`, art.id);
+            });
+        };
+        fetchArt();
         setRekapArt(summary);
         setRekapMak((rekap: RekapMak[]) => {
             let newRekap = [...rekap];
@@ -212,6 +226,21 @@ const Blok4_3: React.FC<{
             return [...newRekap];
         });
     }, [daftarArt]);
+    useEffect(() => {
+        const fetchArt = async () => {
+            const { data } = await axios.get(
+                route("entri.mak.art.fetch", { id_ruta: daftarArt[0]?.id_ruta })
+            );
+            // console.log({ data });
+
+            data.forEach((art: any, index: number) => {
+                `blok4_31_${index}_id_art`;
+
+                form.setFieldValue(`blok4_31_${index}_id_art`, art.id);
+            });
+        };
+        fetchArt();
+    }, []);
 
     return (
         <Space direction="vertical" style={tabContentStyle}>
@@ -244,11 +273,13 @@ const Blok4_3: React.FC<{
                             <td style={cellStyle}>
                                 {art.nama}
                                 <Form.Item
+                                    key={`form-item-${index}`} // Add a unique key here
                                     name={`blok4_31_${index}_id_art`}
                                     label={null}
                                     initialValue={art.id}
+                                    // hidden
                                 >
-                                    <Input readOnly />
+                                    <Input />
                                 </Form.Item>
                             </td>
 

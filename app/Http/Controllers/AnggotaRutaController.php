@@ -46,4 +46,11 @@ class AnggotaRutaController extends Controller
 
         return response()->json($baru, 201);
     }
+    public function fetch(Request $request)
+    {
+        $data_received = $request->all();
+        $data = AnggotaRuta::where('id_ruta', $data_received['id_ruta'])->get();
+
+        return response()->json($data, 200);
+    }
 }

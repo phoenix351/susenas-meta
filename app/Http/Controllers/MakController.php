@@ -8,6 +8,7 @@ use App\Models\KonsumsiArt;
 use App\Models\SusenasMak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Date;
 use Inertia\Inertia;
 
 class MakController extends Controller
@@ -17,8 +18,8 @@ class MakController extends Controller
         try {
             //code...
             $input = $request->all();
-            SusenasMak::create($input);
-            return response()->json($input, 201);
+            $created_mak = SusenasMak::create($input);
+            return response()->json($created_mak, 201);
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -31,7 +32,7 @@ class MakController extends Controller
         $provinsi = $request->query('kode_prov');
         $nks = $request->query('nks');
 
-        $query = SusenasMak::where('vsusenas_mak.kode_kabkot', $kabkot)->where('semester', $semester)
+        $query = SusenasMak::where('vsusenas_mak.kode_kabkot', $kabkot)->where('semester', $semester)->where('vsusenas_mak.nks', $nks)
             ->join('master_wilayah', function ($join) {
                 $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
                     ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
@@ -112,6 +113,8 @@ class MakController extends Controller
                 # code...
                 AnggotaRuta::where('id', $value['id'])->update($value);
             }
+            SusenasMak::where('id', $data['id'])->update(['updated_at' => Date::now()]);
+
             return response()->json($rekap_art, 200);
         } catch (\Throwable $th) {
             throw $th;
@@ -170,6 +173,7 @@ class MakController extends Controller
             }
 
             Konsumsi::upsert($baru, ['id_komoditas', 'id_ruta']);
+            SusenasMak::where('id', $id_ruta)->update(['updated_at' => Date::now()]);
             // 
             return response()->json($baru, 201);
         } catch (\Throwable $th) {
@@ -230,6 +234,7 @@ class MakController extends Controller
             }
 
             KonsumsiArt::upsert($baru, 'id');
+            SusenasMak::where('id', $id_ruta)->update(['updated_at' => Date::now()]);
             // 
             return response()->json($baru, 201);
         } catch (\Throwable $th) {

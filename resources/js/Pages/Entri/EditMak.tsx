@@ -10,8 +10,9 @@ import Blok4_1 from "@/Forms/Mak/Blok4_1";
 import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
 import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
-import { PageProps, SubTotal } from "@/types";
+import { AnggotaRumahTangga, PageProps, SubTotal } from "@/types";
 import Blok_QC from "@/Forms/Mak/Blok_QC";
+import { SaveOutlined } from "@ant-design/icons";
 const daftarRincian432 = [
     {
         id: 1,
@@ -146,19 +147,9 @@ const Mak = ({
 
     const [wtfForm] = Form.useForm();
     const [daftarSampel, setDaftarSampel] = useState([]);
+    const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-    const [daftarArt, setDaftarArt] = useState([
-        {
-            id_ruta: "",
-            id_art: "",
-            nama: "Art-0",
-            key: "Art-0",
-            rekap: [
-                { produksi: 0, beli: 0, total: 0 },
-                { produksi: 0, beli: 0, total: 0 },
-            ],
-        },
-    ]);
+    const [daftarArt, setDaftarArt] = useState<AnggotaRumahTangga[]>([]);
     const [rekapMak, setRekapMak] = useState(
         daftarRincian432.map((rincian) => ({ beli: 0, produksi: 0, total: 0 }))
     );
@@ -406,8 +397,18 @@ const Mak = ({
 
     useEffect(() => {
         let newrekapMak = [...rekapMak];
+        console.log("changed");
+        console.log({ daftarArt });
+        console.log("====================================");
 
-        const summary = daftarArt.reduce((summary: any[], item: any) => {
+        daftarArt?.forEach((item, index) => {
+            artForm.setFieldValue(`${index}-id_art`, data.id);
+            artForm.setFieldValue(`${index}-nama`, item.nama);
+            // const [form] = Form.useForm();
+            // setArtForms([...artForms,form])
+        });
+
+        const summary = daftarArt?.reduce((summary: any[], item: any) => {
             item.rekap.forEach((entry: any, index: number) => {
                 summary[index] = summary[index] || {
                     beli: 0,
@@ -420,8 +421,8 @@ const Mak = ({
             });
             return summary;
         }, []);
-        newrekapMak[12] = summary[0];
-        newrekapMak[13] = summary[1];
+        newrekapMak[12] = summary ? summary[0] : 0;
+        newrekapMak[13] = summary ? summary[1] : 0;
         newrekapMak[14] = newrekapMak
             .slice(0, 13)
             // .filter(([fieldName]: any) => fieldName === "beli");
@@ -455,7 +456,9 @@ const Mak = ({
     };
     // initialize the form
     useEffect(() => {
+        console.log("====================================");
         console.log({ art });
+        console.log("====================================");
         art = art.map((item) => ({
             ...item,
             rekap: [
@@ -463,10 +466,30 @@ const Mak = ({
                 { produksi: 0, beli: 0, total: 0 },
             ],
         }));
-        setDaftarArt(art);
+        setDaftarArt([...art]);
+        if (art.length < 1) {
+            console.log("kurang dari 1");
+
+            setDaftarArt((prev) => [
+                ...prev,
+                {
+                    id: "",
+                    id_ruta: data.id,
+                    nama: data.r110,
+                    nomor_art: 0,
+                    rekap: [
+                        { produksi: 0, beli: 0, total: 0 },
+                        { produksi: 0, beli: 0, total: 0 },
+                    ],
+                },
+            ]);
+        } else {
+        }
 
         document.addEventListener("keydown", handleKeyPress);
         form.setFieldsValue(data);
+        console.log({ art });
+
         blok4_1Form.setFieldsValue({ id_ruta: data.id });
         console.log({ data, konsumsi_ruta });
         const daftarSub = [1, 8, 16];
@@ -498,16 +521,10 @@ const Mak = ({
         artForm.setFieldsValue({
             id_ruta: data.id,
         });
+
+        // initialize last saved
+        setLastSaved(new Date(data.updated_at));
     }, []);
-    const [artForms, setArtForms] = useState<FormInstance<any>[]>([]);
-    useEffect(() => {
-        daftarArt.forEach((item, index) => {
-            artForm.setFieldValue(`${index}-id_art`, data.id);
-            artForm.setFieldValue(`${index}-nama`, item.nama);
-            // const [form] = Form.useForm();
-            // setArtForms([...artForms,form])
-        });
-    }, [daftarArt]);
 
     return (
         <>
@@ -522,16 +539,56 @@ const Mak = ({
                 }}
                 direction="vertical"
             >
-                <Button
-                    onClick={() => {
-                        form.submit();
-                        blok4_1Form.submit();
-                        // save art
-                        artForm.submit();
+                <Space
+                    direction="horizontal"
+                    style={{
+                        width: "100%",
+                        justifyContent: "end",
+                        // backgroundColor: "red",
                     }}
                 >
-                    Simpan
-                </Button>
+                    Last Saved :
+                    {lastSaved?.toLocaleDateString("en-US", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                        second: "numeric",
+                        hour12: false,
+                    }) || "Never"}
+                    <Button
+                        onClick={async () => {
+                            try {
+                                // Submit all forms concurrently using Promise.all
+                                // const [form1, form2, form3] = await Promise.all(
+                                //     [
+                                //         artForm.submit(),
+                                //         form.submit(),
+                                //         blok4_1Form.submit(),
+                                //     ]
+                                //     );
+                                artForm.submit();
+                                // Now, all forms are submitted successfully
+                                setLastSaved(new Date());
+                                router.get(
+                                    route("entri.mak.edit", { id: data.id }),
+                                    {},
+                                    {
+                                        preserveState: true,
+                                        preserveScroll: true,
+                                    }
+                                );
+                            } catch (error) {
+                                console.error("Error submitting forms:", error);
+                                // Handle error if any of the forms fails to submit
+                            }
+                        }}
+                    >
+                        <SaveOutlined /> Simpan
+                    </Button>
+                </Space>
                 <Tabs
                     onChange={handleChange}
                     type="card"
@@ -545,6 +602,7 @@ const Mak = ({
                                     form={form}
                                     onFinish={blok1_2Finish}
                                     setDaftarArt={setDaftarArt}
+                                    editable={false}
                                 />
                             ),
                         },

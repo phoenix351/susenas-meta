@@ -26,8 +26,9 @@ const Blok1_2: React.FC<{
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
     setDaftarArt: (value: any) => void;
+    editable: boolean;
     // record: any;
-}> = ({ form, onFinish, tabContentStyle, setDaftarArt }) => {
+}> = ({ form, onFinish, tabContentStyle, setDaftarArt, editable }) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -252,12 +253,12 @@ const Blok1_2: React.FC<{
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        <tr hidden>
                             <td style={cellStyle}>000</td>
                             <td style={cellStyle}>Identitas Database</td>
                             <td style={cellStyle}>
                                 <Form.Item name="id" label={null}>
-                                    <InputNumber />
+                                    <InputNumber readOnly={editable} />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -274,6 +275,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
+                                        disabled={!editable}
                                         defaultValue={"71"}
                                         options={daftarProv}
                                         onChange={() => {
@@ -309,6 +311,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
+                                        disabled={!editable}
                                         optionFilterProp="label"
                                         options={daftarKabKot}
                                         onChange={(value: string) => {
@@ -346,6 +349,7 @@ const Blok1_2: React.FC<{
                                         showSearch
                                         optionFilterProp="label"
                                         options={daftarKecamatan}
+                                        disabled={!editable}
                                         onChange={(value: string) => {
                                             form.setFieldsValue({
                                                 kode_desa: "",
@@ -374,6 +378,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
+                                        disabled={!editable}
                                         optionFilterProp="label"
                                         options={daftarDesa}
                                         onChange={(value: string) => {
@@ -402,6 +407,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
+                                        disabled={!editable}
                                         optionFilterProp="label"
                                         options={daftarKlas}
                                     />
@@ -419,6 +425,9 @@ const Blok1_2: React.FC<{
                                     style={formItemStyle}
                                 >
                                     <Select
+                                        allowClear
+                                        showSearch
+                                        disabled={!editable}
                                         optionFilterProp="label"
                                         options={daftarBs4}
                                         onChange={(value: string) => {
@@ -442,6 +451,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
+                                        disabled={!editable}
                                         options={daftarNks}
                                     />
                                 </Form.Item>

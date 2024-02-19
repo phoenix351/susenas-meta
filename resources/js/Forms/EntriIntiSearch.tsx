@@ -17,8 +17,9 @@ import { SelectionItem } from "antd/es/table/interface";
 const EntriIntiForm: React.FC<{
     form: any;
     onFinish: (values: any) => void;
+    setDataSource: (data: any) => void;
     // record: any;
-}> = ({ form, onFinish }) => {
+}> = ({ form, onFinish, setDataSource }) => {
     const [messageApi, contextHolder] = message.useMessage();
     const daftarProv: {}[] = [{ label: "[71] SULAWESI UTARA", value: "71" }];
     const [daftarKabKot, setDaftarKabKot] = useState([]);
@@ -86,6 +87,7 @@ const EntriIntiForm: React.FC<{
                                 semester: "",
                                 nks: "",
                             });
+                            setDataSource([]);
 
                             setDaftarNks([]);
                         }}
@@ -104,6 +106,7 @@ const EntriIntiForm: React.FC<{
                                 nks: "",
                             });
 
+                            setDataSource([]);
                             setDaftarNks([]);
                         }}
                     />
@@ -140,5 +143,13 @@ const EntriIntiForm: React.FC<{
         </>
     );
 };
-
+let arr: any[] = [];
+for (let index = 0; index <= 14; index++) {
+    arr = [...arr, `blok4_32_${index}_beli`];
+    arr = [...arr, `blok4_32_${index}_produksi`];
+    arr = [...arr, `blok4_32_${index}_total`];
+}
+console.log("====================================");
+console.log({ arr });
+console.log("====================================");
 export default EntriIntiForm;

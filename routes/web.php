@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
 
     route::post('/entri/mak', [MakController::class, 'store'])->name('entri.mak.store');
     route::post('/entri/mak/art', [AnggotaRutaController::class, 'store'])->name('entri.mak.art.store');
+    route::get('/entri/mak/art', [AnggotaRutaController::class, 'fetch'])->name('entri.mak.art.fetch');
     route::patch('/entri/mak/konsumsi', [MakController::class, 'konsumsi_store'])->name('entri.mak.konsumsi.store');
     route::patch('/entri/mak/konsumsi/art', [MakController::class, 'konsumsi_art_store'])->name('entri.mak.konsumsi_art.store');
     route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');

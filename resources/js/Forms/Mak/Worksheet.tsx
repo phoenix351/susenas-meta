@@ -73,7 +73,7 @@ const InputComponent: React.FC<{
                 onChange={setValue && ((value) => setValue(value))}
             />
         ),
-        rupiah: <RupiahInput inputName={name} />,
+        rupiah: <RupiahInput inputName={name} editable={key === 26} />,
         multi: <MetaSelect name={name} options={options ?? []} />,
     };
     return inputComponents[type];

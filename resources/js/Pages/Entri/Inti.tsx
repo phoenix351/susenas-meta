@@ -2,30 +2,8 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 import { useEffect, useState } from "react";
 import { Head, router } from "@inertiajs/react";
-import { PageProps, User } from "@/types";
-import BarChart from "@/Components/Grafik/BarChart";
-import {
-    ReactElement,
-    JSXElementConstructor,
-    ReactFragment,
-    ReactPortal,
-} from "react";
-import {
-    Button,
-    Card,
-    Col,
-    Form,
-    Row,
-    Space,
-    Statistic,
-    Table,
-    message,
-} from "antd";
-import {
-    WarningOutlined,
-    StopOutlined,
-    CheckCircleOutlined,
-} from "@ant-design/icons";
+import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
+import { Button, Form, Space, Table, message } from "antd";
 import EntriIntiForm from "@/Forms/EntriIntiSearch";
 import axios from "axios";
 
@@ -154,7 +132,11 @@ const Dashboard = () => {
                 }}
                 direction="vertical"
             >
-                <EntriIntiForm form={cariForm} onFinish={cariFinish} />
+                <EntriIntiForm
+                    setDataSource={setDaftarSampel}
+                    form={cariForm}
+                    onFinish={cariFinish}
+                />
                 <Space style={{ width: "100%", justifyContent: "end" }}>
                     <Button
                         type="primary"

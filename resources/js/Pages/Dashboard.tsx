@@ -2,8 +2,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 import { useEffect } from "react";
 import { Head } from "@inertiajs/react";
-import { PageProps, User, KondisiSummary, Summary } from "@/types";
-import BarChart from "@/Components/Grafik/BarChart";
+import { PageProps, User } from "@/types";
 import {
     ReactElement,
     JSXElementConstructor,

@@ -21,10 +21,9 @@ import _debounce from "lodash/debounce";
 import Art from "./Art";
 import Blok from "@/Components/Blok";
 import { SubTotal } from "@/types";
+import { router } from "@inertiajs/react";
 
 const { Text, Title } = Typography;
-
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 const Blok4_1: React.FC<{
     form: FormInstance;
@@ -38,30 +37,7 @@ const Blok4_1: React.FC<{
     setDaftarArt: (value: any) => void;
 
     // record: any;
-}> = ({
-    form,
-    onFinish,
-    artForm,
-    artFormFinish,
-    tabContentStyle,
-    rekapArt,
-    setRekapArt,
-    daftarArt,
-    setDaftarArt,
-}) => {
-    const formItemLayout = {
-        // wrapperCol: { span: 24 },
-    };
-    const [asu, setAsu] = useState([]);
-    const imageProps = {
-        width: "70px",
-        height: "auto",
-        preview: false,
-    };
-    const tableStyle: React.CSSProperties = {
-        borderCollapse: "collapse",
-        width: "100%",
-    };
+}> = ({ artForm, artFormFinish, tabContentStyle, daftarArt, setDaftarArt }) => {
     const cellStyle: React.CSSProperties = {
         borderStyle: "solid",
         border: "solid 1px black",
@@ -77,15 +53,7 @@ const Blok4_1: React.FC<{
         textAlign: "center",
         padding: "5px",
     };
-    const formItemStyle = {
-        margin: "auto",
-        padding: "5px",
-    };
     // konstanta
-    const daftarKlas: any[] | undefined = [
-        { label: "Desa", value: "1" },
-        { label: "Kelurahan", value: "2" },
-    ];
     // define forms
     const blok4_1_hal2Finish = (values: any) => {
         console.log({ values });
@@ -97,29 +65,33 @@ const Blok4_1: React.FC<{
 
     const [messageApi, contextHolder] = message.useMessage();
 
-    const onChange = (key: string) => {
-        setActiveKey(key);
-    };
-
     const add = () => {
         const newActiveKey = `Art-${newTabIndex.current++}`;
 
         setActiveKey(newActiveKey);
+        setDaftarArt((currentDaftarArt: any) => {
+            const updatedDaftarArt = [
+                ...currentDaftarArt,
+                {
+                    id_art: "",
+                    id_ruta: currentDaftarArt[0].id,
+                    nama: newActiveKey,
+                    key: newActiveKey,
+                    rekap: [
+                        { produksi: 0, beli: 0, total: 0 },
+                        { produksi: 0, beli: 0, total: 0 },
+                    ],
+                },
+            ];
 
-        setDaftarArt((currentDaftarArt: any) => [
-            ...currentDaftarArt,
-            {
-                id_art: "",
-                id_ruta: "",
-                nama: newActiveKey,
-                key: newActiveKey,
-                rekap: [
-                    { produksi: 0, beli: 0, total: 0 },
-                    { produksi: 0, beli: 0, total: 0 },
-                ],
-            },
-        ]);
+            // Do any synchronous operations relying on the updatedDaftarArt here
+
+            return updatedDaftarArt;
+        });
+        ArtFormSubmit();
     };
+
+    useEffect(() => {}, [daftarArt]);
 
     const handleCellEdit = (index: number, key: string, value: any) => {
         const updatedArts = [...daftarArt];
@@ -128,7 +100,7 @@ const Blok4_1: React.FC<{
         updatedArts[index][key] = value.trim();
         setDaftarArt(updatedArts);
     };
-    const handleCellDelete = (nomor_art: number) => {
+    const handleCellDelete = (id_art: string) => {
         const updatedArts = [...daftarArt];
         // console.log({ value });
 
@@ -136,14 +108,6 @@ const Blok4_1: React.FC<{
     };
     const debounceCellEdit = _debounce(handleCellEdit, 1000);
     const debounceCellDelete = _debounce(handleCellDelete, 1000);
-
-    const handleCellBlur = (index: number) => {
-        const updatedArts = [...daftarArt];
-        updatedArts[index] = { ...daftarArt[index] };
-        // Save the changes back to the original arts array
-        // You might want to perform validation or additional checks here
-        setDaftarArt(updatedArts);
-    };
 
     // generate art components
     const items = daftarArt.map((art: any, index: number) => ({
@@ -160,9 +124,19 @@ const Blok4_1: React.FC<{
             />
         ),
     }));
+    const ArtFormSubmit = async () => {
+        try {
+            const [form1] = await Promise.all([artForm.submit()]);
+
+            // Now, all forms are submitted successfully
+            console.log("sent");
+        } catch (error) {
+            console.log("something went wrong");
+        }
+    };
 
     return (
-        <Space direction="vertical">
+        <Space direction="vertical" style={tabContentStyle}>
             <Button type="primary" onClick={add}>
                 Tambah Art
             </Button>
@@ -215,9 +189,7 @@ const Blok4_1: React.FC<{
 
                             <td style={centerCell}>
                                 <Button
-                                    onClick={() =>
-                                        debounceCellDelete(art.nomor)
-                                    }
+                                    onClick={() => debounceCellDelete(art.id)}
                                     disabled={index === 0}
                                 >
                                     Hapus
