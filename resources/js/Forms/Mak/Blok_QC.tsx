@@ -15,8 +15,9 @@ import Blok from "@/Components/Blok";
 import TextRupiah from "@/Components/TextRupiah";
 import { ReloadOutlined } from "@ant-design/icons";
 import axios from "axios";
+import { useEffect, useState } from "react";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 const Blok4_3: React.FC<{
     form: FormInstance;
@@ -26,47 +27,11 @@ const Blok4_3: React.FC<{
     rekapMak: RekapMak[];
     setRekapMak: React.Dispatch<React.SetStateAction<RekapMak[]>>;
     daftarRincian432: Rincian[];
-}> = ({
-    form,
-    onFinish,
-    tabContentStyle,
-    rekapMak,
-    setRekapMak,
-    daftarArt,
-    daftarRincian432,
-}) => {
-    const formItemLayout = {
-        // wrapperCol: { span: 24 },
-    };
-    const imageProps = {
-        width: "70px",
-        height: "auto",
-        preview: false,
-    };
-    const tableStyle: React.CSSProperties = {
-        borderCollapse: "collapse",
-        width: "100%",
-    };
+}> = ({ form, onFinish, tabContentStyle, rekapMak, daftarArt }) => {
     const cellStyle = {
         borderStyle: "solid",
         border: "solid 1px black",
         // width: "100%",
-        padding: "5px",
-    };
-    const darkCell = {
-        borderStyle: "solid",
-        border: "solid 1px black",
-        // width: "100%",
-        // textAlign: "center",
-        backgroundColor: "#636f83",
-        padding: "5px",
-    };
-    const rightCell: React.CSSProperties = {
-        borderStyle: "solid",
-        border: "solid 1px black",
-        // width: "100%",
-        textAlign: "right",
-        // backgroundColor: "#636f83",
         padding: "5px",
     };
     const centerCell: React.CSSProperties = {
@@ -77,44 +42,36 @@ const Blok4_3: React.FC<{
         // backgroundColor: "#636f83",
         padding: "5px",
     };
-    const blokStyle: React.CSSProperties = {
-        backgroundColor: "#fc0",
-        fontWeight: "700",
-        padding: "5px",
-    };
-    const formItemStyle = {
-        margin: "auto",
-        padding: "5px",
-    };
     interface Rincian {
         id: number;
-        nomor: number;
+        nomor?: number;
         kode_coicop?: string;
         rincian: string;
         satuan?: string;
-        type: string;
-    }
-    interface RekapMak {
-        beli: number;
-        produksi: number;
-        total: number;
+        type?: string;
+        value: number;
     }
     // please define all usestate here
     const [messageApi, contextHolder] = message.useMessage();
 
-    const daftarQC: any[] = [
-        { rincian: "Kalori per Kapita per Hari", id: 0 },
-        { rincian: "Jumlah Komoditas Bahan Makanan/Minuman", id: 1 },
-        { rincian: "Jumlah Komoditas Makanan/Minuman Jadi dan Rokok", id: 2 },
-        { rincian: "Jumlah Komoditas Non Makanan", id: 3 },
-        { rincian: "Jumlah Semua Komoditas", id: 4 },
-        { rincian: "Pengeluaran per kapita", id: 5 },
-    ];
+    const [daftarQc, setDaftarQc] = useState<Rincian[]>([
+        { rincian: "Kalori per Kapita per Hari", id: 0, value: 0 },
+        { rincian: "Jumlah Komoditas Bahan Makanan/Minuman", id: 1, value: 0 },
+        {
+            rincian: "Jumlah Komoditas Makanan/Minuman Jadi dan Rokok",
+            id: 2,
+            value: 0,
+        },
+        { rincian: "Jumlah Komoditas Non Makanan", id: 3, value: 0 },
+        { rincian: "Jumlah Semua Komoditas", id: 4, value: 0 },
+        { rincian: "Pengeluaran per kapita", id: 5, value: 0 },
+    ]);
 
-    const renderQC: React.FC<{ rincian: Rincian; key: number }> = ({
-        rincian,
-        key,
-    }) => {
+    const renderQC: React.FC<{
+        rincian: Rincian;
+        key: number;
+        // label: number | string;
+    }> = ({ rincian, key }) => {
         return (
             <tr>
                 <td style={{ ...centerCell, width: "30px" }}>{key + 1}</td>
@@ -122,7 +79,9 @@ const Blok4_3: React.FC<{
                     {rincian.rincian}
                 </td>
 
-                <td style={{ ...centerCell, width: "150px" }}>
+                <td
+                    style={{ ...cellStyle, width: "150px", textAlign: "right" }}
+                >
                     {key === 5 ? (
                         <>
                             <RupiahInput
@@ -133,21 +92,51 @@ const Blok4_3: React.FC<{
                                 value={Math.round(
                                     rekapMak[17].total / daftarArt.length
                                 )}
-                                color={"red"}
+                                color="red"
                             />
                         </>
                     ) : (
-                        <Form.Item name={`blokqc_${rincian.id}`} label={null}>
-                            <InputNumber
-                                style={{ textAlign: "right" }}
-                                key={key}
-                            />
-                        </Form.Item>
+                        <Space direction="vertical">
+                            <Form.Item
+                                name={`blokqc_${rincian.id}`}
+                                label={null}
+                                style={{ marginBottom: "5px" }}
+                            >
+                                <InputNumber
+                                    key={key}
+                                    style={{
+                                        justifyContent: "end",
+                                        textAlign: "center",
+                                        // backgroundColor: "red",
+                                    }}
+                                    formatter={(value) =>
+                                        `${value}`.replace(
+                                            /\B(?=(\d{3})+(?!\d))/g,
+                                            ","
+                                        )
+                                    }
+                                />
+                            </Form.Item>
+                            <Text style={{ color: "red" }}>
+                                {`${rincian.value}`.replace(
+                                    /\B(?=(\d{3})+(?!\d))/g,
+                                    ","
+                                )}
+                            </Text>
+                        </Space>
                     )}
                 </td>
             </tr>
         );
     };
+    const [qcValue, setQcValue] = useState({
+        totalKalori: 0,
+        jumlahKomoditasMakananJadiNRokok: 0,
+        jumlahKomoditasBahanMakanan: 0,
+        jumlahKomoditas: 0,
+        pengeluaranPerKapita: 0,
+    });
+
     const calculate = async () => {
         messageApi.open({
             content: `menghitung ulang... ruta ${daftarArt[0].id_ruta}`,
@@ -157,7 +146,17 @@ const Blok4_3: React.FC<{
         const { data } = await axios.get(
             route("api.mak.calculate_qc", { id_ruta: daftarArt[0].id_ruta })
         );
+
+        let newQc = [...daftarQc];
+        newQc[0].value = data.kalori_total;
+        newQc[1].value = data.jumlah_komoditas_bahan_makanan;
+        newQc[2].value = data.jumlah_komoditas_makanan_jadi_rokok;
+        newQc[3].value = form.getFieldValue("blokqc_3");
+        newQc[4].value = newQc[1].value + newQc[2].value + newQc[3].value;
+        setDaftarQc([...newQc]);
+        // newQc[2] = data.jumlah_komoditas_makanan_jadi_rokok;
     };
+
     return (
         <Space direction="vertical" style={tabContentStyle}>
             <Button onClick={calculate}>
@@ -177,7 +176,7 @@ const Blok4_3: React.FC<{
                     columns={["No.", "Rincian", "Isian"]}
                     key={2}
                 >
-                    {daftarQC.map((rincian, key) => renderQC({ rincian, key }))}
+                    {daftarQc.map((rincian, key) => renderQC({ rincian, key }))}
                 </Blok>
 
                 {contextHolder}

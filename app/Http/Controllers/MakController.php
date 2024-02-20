@@ -11,6 +11,7 @@ use App\Models\SusenasMak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class MakController extends Controller
@@ -256,9 +257,18 @@ class MakController extends Controller
             // get all konsumsi
             $kalori_total = 0;
 
-            $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->get(['id_komoditas', 'volume_beli', 'volume_produksi']);
+
+            $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
+                $query->where('volume_beli', '>', '0')
+                    ->orWhere('volume_produksi', '>', '0');
+            })->get(['id_komoditas', 'volume_beli', 'volume_produksi']);
+
             $konsumsi_art = KonsumsiArt::where('anggota_ruta.id_ruta', $id_ruta)
                 ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
+                ->where(function ($query) {
+                    $query->where('volume_beli', '>', '0')
+                        ->orWhere('volume_produksi', '>', '0');
+                })
                 ->get(['id_komoditas', 'volume_beli', 'volume_produksi']);
             foreach ($konsumsi_ruta as $key => $value) {
                 # code...
@@ -273,9 +283,117 @@ class MakController extends Controller
                 $kalori_total += $kalori * ($value['volume_beli'] + $value['volume_produksi']);
             }
             $data = [
-                'konsumsi_ruta' => $konsumsi_ruta,
-                'konsumsi_art' => $konsumsi_art,
+                // 'konsumsi_ruta' => $konsumsi_ruta,
+                // 'konsumsi_art' => $konsumsi_art,
                 'kalori_total' => $kalori_total,
+                'jumlah_komoditas_bahan_makanan' => sizeof($konsumsi_ruta),
+                'jumlah_komoditas_makanan_jadi_rokok' => sizeof($konsumsi_art),
+                'id_ruta' => $id_ruta,
+            ];
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            throw $th;
+
+            // return response()->json(['id_ruta' => $id_ruta,], 404);
+        }
+    }
+    public function revalidasi($id_ruta)
+    {
+        try {
+            //code...
+            // get all konsumsi
+            $evaluasi_rh = [];
+
+
+            $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
+                $query->where('harga_beli', '>', '0')
+                    ->orWhere('harga_produksi', '>', '0');
+            })->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi']);
+
+            $konsumsi_art = KonsumsiArt::where('anggota_ruta.id_ruta', $id_ruta)
+                ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
+                ->where(function ($query) {
+                    $query->where('harga_beli', '>', '0')
+                        ->orWhere('harga_produksi', '>', '0');
+                })
+                ->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi']);
+            foreach ($konsumsi_ruta as $key => $value) {
+                # code...
+                // ambil kalori dari tabel 
+                $feedback = [
+                    'id_komoditas' => $value['id_komoditas'],
+                    'harga_beli' => "",
+                    'harga_produksi' => "",
+
+                ];
+
+                $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $value['id_komoditas'])->first(['min', 'max']);
+                if($range_harga->max==0 && $range_harga->min==0 ) {
+                    continue;
+                }
+                if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
+                    $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
+                    if ($harga_satuan > $range_harga->max) {
+                        $feedback['harga_beli'] = "Harga barang dari pembelian satuan diatas range";
+                    }
+                    if ($harga_satuan < $range_harga->min) {
+
+                        $feedback['harga_beli'] = "Harga barang dari pembelian satuan dibawah range";
+                    }
+                }
+                if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
+                    $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
+                    if ($harga_satuan > $range_harga->max) {
+                        $feedback['harga_produksi'] = "Harga barang dari produksi satuan diatas range";
+                    }
+                    if ($harga_satuan < $range_harga->min) {
+
+                        $feedback['harga_produksi'] = "Harga barang dari produksi satuan dibawah range";
+                    }
+                }
+                $evaluasi_rh[] = $feedback;
+            }
+            foreach ($konsumsi_art as $key => $value) {
+                # code...
+                // ambil kalori dari tabel 
+                $feedback = [
+                    'id_komoditas' => $value['id_komoditas'],
+                    'harga_beli' => "",
+                    'harga_produksi' => "",
+
+                ];
+
+                $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $value['id_komoditas'])->first(['min', 'max']);
+                if($range_harga->max==0 && $range_harga->min==0 ) {
+                    continue;
+                }
+                // return  response()->json($range_harga->max, 200);
+                if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
+                    $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
+                    if ($harga_satuan > $range_harga->max) {
+                        $feedback['harga_beli'] = "Harga barang dari pembelian satuan diatas range";
+                    }
+                    if ($harga_satuan < $range_harga->min) {
+
+                        $feedback['harga_beli'] = "Harga barang dari pembelian satuan dibawah range";
+                    }
+                }
+                if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
+                    $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
+                    if ($harga_satuan > $range_harga->max) {
+                        $feedback['harga_produksi'] = "Harga barang dari produksi satuan diatas range";
+                    }
+                    if ($harga_satuan < $range_harga->min) {
+
+                        $feedback['harga_produksi'] = "Harga barang dari produksi satuan dibawah range";
+                    }
+                }
+                $evaluasi_rh[] = $feedback;
+            }
+            $data = [
+                // 'konsumsi_ruta' => $konsumsi_ruta,
+                // 'konsumsi_art' => $konsumsi_art,
+                'evaluasi_rh' => $evaluasi_rh,
                 'id_ruta' => $id_ruta,
             ];
             return response()->json($data, 200);

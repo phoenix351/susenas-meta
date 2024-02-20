@@ -9,6 +9,26 @@ class AnggotaRutaController extends Controller
 {
     public function store(Request $request)
     {
+        try {
+            //code...
+            $data = $request->all();
+            $new_ruta = AnggotaRuta::create($data);
+            $data['id'] = $new_ruta->id;
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    public function fetch(Request $request)
+    {
+        $data_received = $request->all();
+        $data = AnggotaRuta::where('id_ruta', $data_received['id_ruta'])->get();
+
+        return response()->json($data, 200);
+    }
+    public function update(Request $request)
+    {
         $data_received = $request->all();
         $converted = [];
         foreach ($data_received as $key => $value) {
@@ -45,12 +65,5 @@ class AnggotaRutaController extends Controller
         AnggotaRuta::upsert($baru, 'id');
 
         return response()->json($baru, 201);
-    }
-    public function fetch(Request $request)
-    {
-        $data_received = $request->all();
-        $data = AnggotaRuta::where('id_ruta', $data_received['id_ruta'])->get();
-
-        return response()->json($data, 200);
     }
 }

@@ -2,6 +2,7 @@ import {
     Button,
     Divider,
     Form,
+    FormInstance,
     Input,
     Select,
     SelectProps,
@@ -15,7 +16,7 @@ import axios from "axios";
 import { SelectionItem } from "antd/es/table/interface";
 
 const EntriIntiForm: React.FC<{
-    form: any;
+    form: FormInstance;
     onFinish: (values: any) => void;
     setDataSource: (data: any) => void;
     // record: any;
@@ -34,6 +35,7 @@ const EntriIntiForm: React.FC<{
             label: `[${item.kode_kabkot}] ${item.kabkot}`,
             value: item.kode_kabkot,
         }));
+        form.setFieldValue("kode_kabkot", data.kode_kabkot);
         setDaftarKabKot(daftarKabkot);
     };
     const fetchNks = async () =>
@@ -78,6 +80,7 @@ const EntriIntiForm: React.FC<{
                     <Select
                         allowClear
                         showSearch
+                        disabled
                         optionFilterProp="label"
                         options={daftarProv}
                         onClear={() => {}}
@@ -97,6 +100,7 @@ const EntriIntiForm: React.FC<{
                     <Select
                         allowClear
                         showSearch
+                        disabled
                         optionFilterProp="label"
                         options={daftarKabKot}
                         // disabled={kabkotDisable}
@@ -143,13 +147,5 @@ const EntriIntiForm: React.FC<{
         </>
     );
 };
-let arr: any[] = [];
-for (let index = 0; index <= 14; index++) {
-    arr = [...arr, `blok4_32_${index}_beli`];
-    arr = [...arr, `blok4_32_${index}_produksi`];
-    arr = [...arr, `blok4_32_${index}_total`];
-}
-console.log("====================================");
-console.log({ arr });
-console.log("====================================");
+
 export default EntriIntiForm;

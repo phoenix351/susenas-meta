@@ -67,6 +67,7 @@ const Blok1_2: React.FC<{
     const [daftarNks, setDaftarNks] = useState([]);
     const [daftarBs4, setDaftarBs4] = useState([]);
 
+    const [kabkot, setKabkot] = useState(null);
     const fetchProvinsi = async () => {
         const url = route("api.entri.provinsi");
 
@@ -87,6 +88,8 @@ const Blok1_2: React.FC<{
             label: `[${item.kode_kabkot}] ${item.kabkot}`,
             value: item.kode_kabkot,
         }));
+        form.setFieldValue("kode_kabkot", data.kode_kabkot);
+        setKabkot(data.kode_kabkot);
         setDaftarKabKot(daftarKabkot);
     };
     const fetchSemester = async () => {
@@ -178,6 +181,11 @@ const Blok1_2: React.FC<{
             // fetchSemester();
         } catch (error) {}
     }, []);
+    useEffect(() => {
+        if (kabkot) {
+            fetchKecamatan(kabkot);
+        }
+    }, [kabkot]);
 
     const debouncedSetDaftarArt = _debounce((value) => {
         setDaftarArt((prev: any) => {
@@ -275,7 +283,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
-                                        disabled={!editable}
+                                        disabled
                                         defaultValue={"71"}
                                         options={daftarProv}
                                         onChange={() => {
@@ -311,7 +319,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
-                                        disabled={!editable}
+                                        disabled
                                         optionFilterProp="label"
                                         options={daftarKabKot}
                                         onChange={(value: string) => {

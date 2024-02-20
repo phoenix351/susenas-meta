@@ -12,5 +12,5 @@ class AnggotaRuta extends Model
     use HasUuids;
     protected $table = "anggota_ruta";
     protected $primaryKey = "id";
-    protected $fillable = ['nama', 'id_ruta'];
+    protected $fillable = ['nama', 'id_ruta', 'nomor_art'];
 }

@@ -20,7 +20,7 @@ import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
 import { AnggotaRumahTangga, PageProps, SubTotal } from "@/types";
 import Blok_QC from "@/Forms/Mak/Blok_QC";
-import { SaveOutlined } from "@ant-design/icons";
+import { AuditOutlined, SaveOutlined } from "@ant-design/icons";
 const daftarRincian432 = [
     {
         id: 1,
@@ -206,8 +206,8 @@ const Mak = ({
             content: "Menyimpan data art...",
         });
         try {
-            const url = route("entri.mak.art.store");
-            const response = await axios.post(url, values, {
+            const url = route("entri.mak.art.update");
+            const response = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
             console.log({ response });
@@ -629,6 +629,21 @@ const Mak = ({
                         }}
                     >
                         <SaveOutlined /> Simpan
+                    </Button>
+                    <Button
+                        onClick={async () => {
+                            const id_ruta = form.getFieldValue("id");
+
+                            const { data } = await axios.get(
+                                route("api.mak.revalidasi", {
+                                    id_ruta: id_ruta,
+                                })
+                            );
+                            console.log({ data });
+                        }}
+                    >
+                        <AuditOutlined />
+                        Revalidasi Isian
                     </Button>
                 </Space>
                 <Tabs

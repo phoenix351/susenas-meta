@@ -69,21 +69,29 @@ const Blok4_1: React.FC<{
     };
 
     const [activeKey, setActiveKey] = useState("0");
+    const [items, setItems] = useState<any[]>([]);
     const newTabIndex = useRef(1);
     // const [items, setItems] = useState(defaultItems);
 
     const [messageApi, contextHolder] = message.useMessage();
-
-    const add = () => {
+    const add = async () => {
         const newActiveKey = `Art-${newTabIndex.current++}`;
 
-        setActiveKey(newActiveKey);
-        setDaftarArt((currentDaftarArt: any) => {
+        try {
+            const { data } = await axios.post(route("entri.mak.art.store"), {
+                nama: newActiveKey,
+                nomor_art: daftarArt.length + 1, // Note: It's usually not recommended to modify the array length directly
+                id_ruta: daftarArt[0].id_ruta,
+            });
+            // const { id_art } = data;
+            // console.log({ daftarArt });
+
             const updatedDaftarArt = [
-                ...currentDaftarArt,
+                ...daftarArt,
                 {
-                    id_art: "",
-                    id_ruta: currentDaftarArt[0].id,
+                    id_art: data.id,
+                    id_ruta: daftarArt[0].id,
+                    nomor_art: newTabIndex.current++,
                     nama: newActiveKey,
                     key: newActiveKey,
                     rekap: [
@@ -92,15 +100,16 @@ const Blok4_1: React.FC<{
                     ],
                 },
             ];
+            console.log({ updatedDaftarArt });
+            setDaftarArt(updatedDaftarArt);
 
             // Do any synchronous operations relying on the updatedDaftarArt here
 
-            return updatedDaftarArt;
-        });
-        ArtFormSubmit();
+            setActiveKey(newActiveKey);
+        } catch (error) {
+            console.error("Error in add function:", error);
+        }
     };
-
-    useEffect(() => {}, [daftarArt]);
 
     const handleCellEdit = (index: number, key: string, value: any) => {
         const updatedArts = [...daftarArt];
@@ -119,31 +128,26 @@ const Blok4_1: React.FC<{
     const debounceCellDelete = _debounce(handleCellDelete, 1000);
 
     // generate art components
-    const items = daftarArt.map((art: any, index: number) => ({
-        label: art.nama,
-        key: String(index),
-        children: (
-            <Art
-                onFinish={blok4_1_hal2Finish}
-                nomor_art={art.nomor_art}
-                daftarArt={daftarArt}
-                setDaftarArt={setDaftarArt}
-                id_ruta={artForm.getFieldValue("id_ruta")}
-                id_art={art.id}
-                calculateKalori={calculateKalori}
-            />
-        ),
-    }));
-    const ArtFormSubmit = async () => {
-        try {
-            const [form1] = await Promise.all([artForm.submit()]);
+    useEffect(() => {
+        // console.log({ daftarArt });
 
-            // Now, all forms are submitted successfully
-            console.log("sent");
-        } catch (error) {
-            console.log("something went wrong");
-        }
-    };
+        const items = daftarArt.map((art: any, index: number) => ({
+            label: art.nama,
+            key: String(index),
+            children: (
+                <Art
+                    onFinish={blok4_1_hal2Finish}
+                    nomor_art={art.nomor_art}
+                    daftarArt={daftarArt}
+                    setDaftarArt={setDaftarArt}
+                    id_ruta={artForm.getFieldValue("id_ruta")}
+                    id_art={art.id}
+                    calculateKalori={calculateKalori}
+                />
+            ),
+        }));
+        setItems([...items]);
+    }, [daftarArt]);
 
     return (
         <Space direction="vertical" style={tabContentStyle}>

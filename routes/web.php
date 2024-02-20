@@ -63,10 +63,7 @@ Route::middleware('auth')->group(function () {
         return response()->json([$tingkatList]);
     })->name('admin.master.jabatan.tingkat');
 
-    route::get('/api/entri/kabkot', function () {
-        $data = MasterWilayah::distinct()->get(['kode_kabkot', 'kabkot']);
-        return response()->json(['data' => $data]);
-    })->name('api.entri.kabkot');
+    route::get('/api/entri/kabkot', [MasterWilayahController::class, 'fetch_kabkot'])->name('api.entri.kabkot');
     route::get('/api/entri/semester', function () {
         $data = [];
         return response()->json(['data' => $data]);
@@ -74,6 +71,7 @@ Route::middleware('auth')->group(function () {
 
     route::post('/entri/mak', [MakController::class, 'store'])->name('entri.mak.store');
     route::post('/entri/mak/art', [AnggotaRutaController::class, 'store'])->name('entri.mak.art.store');
+    route::patch('/entri/mak/art', [AnggotaRutaController::class, 'update'])->name('entri.mak.art.update');
     route::get('/entri/mak/art', [AnggotaRutaController::class, 'fetch'])->name('entri.mak.art.fetch');
     route::patch('/entri/mak/konsumsi', [MakController::class, 'konsumsi_store'])->name('entri.mak.konsumsi.store');
     route::patch('/entri/mak/konsumsi/art', [MakController::class, 'konsumsi_art_store'])->name('entri.mak.konsumsi_art.store');
@@ -84,6 +82,7 @@ Route::middleware('auth')->group(function () {
     route::get('/api/mak/komoditas/kalori/{id}', [KomoditasController::class, 'fetch_kalori'])->name('api.mak.komoditas.kalori.fetch');
     route::get('/api/mak/calculate_qc/{id_ruta}', [MakController::class, 'calculate_qc'])->name('api.mak.calculate_qc');
 
+    route::get('/api/mak/revalidasi/{id_ruta}', [MakController::class, 'revalidasi'])->name('api.mak.revalidasi');
 
 
     route::get('/api/entri/kecamatan', function (Request $request) {
