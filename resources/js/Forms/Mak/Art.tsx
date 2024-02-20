@@ -1,4 +1,12 @@
-import { Button, Form, Input, InputNumber, Space, Typography } from "antd";
+import {
+    Button,
+    Form,
+    FormListFieldData,
+    Input,
+    InputNumber,
+    Space,
+    Typography,
+} from "antd";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import TabelBlok from "@/Components/TabelBlok";
 import { useEffect, useState } from "react";
@@ -16,9 +24,18 @@ const Art: React.FC<{
     setDaftarArt: (value: any) => void;
     id_ruta: string;
     id_art: string;
+    calculateKalori: (formValues: FormListFieldData) => Promise<number>;
 
     // record: any;
-}> = ({ onFinish, nomor_art, setDaftarArt, daftarArt, id_ruta, id_art }) => {
+}> = ({
+    onFinish,
+    nomor_art,
+    setDaftarArt,
+    daftarArt,
+    id_ruta,
+    id_art,
+    calculateKalori,
+}) => {
     //    const konten =
 
     // first initialize the rekap art
@@ -118,6 +135,7 @@ const Art: React.FC<{
                 },
                 {}
             );
+            konsumsiArtValues[`blok4_31_${nomor_art}_id_art`] = id_art;
             form.setFieldsValue(konsumsiArtValues);
             calculateRekap();
         };
@@ -126,6 +144,17 @@ const Art: React.FC<{
 
     useEffect(() => {
         form.setFieldsValue({ id_ruta, id_art });
+        calculateKalori(form.getFieldsValue()).then((totalKalori) => {
+            let newDaftarArt = [...daftarArt];
+            newDaftarArt[nomor_art]["kalori"] = totalKalori;
+
+            console.log({
+                totalKalori: totalKalori,
+                id_ruta,
+                id_art,
+                newDaftarArt,
+            });
+        });
     }, [form]);
     const konten = [
         {
@@ -513,9 +542,20 @@ const Art: React.FC<{
         setDaftarArt(updatedArt);
     }, 600);
     const handleSubmit = _debounce(() => form.submit(), 3000);
-    const handleValueChange = () => {
+    const handleValueChange = (values: FormListFieldData) => {
         calculateRekap();
         handleSubmit();
+        calculateKalori(form.getFieldsValue()).then((totalKalori) => {
+            let newDaftarArt = [...daftarArt];
+            newDaftarArt[nomor_art]["kalori"] = totalKalori;
+
+            console.log({
+                totalKalori: totalKalori,
+                id_ruta,
+                id_art,
+                newDaftarArt,
+            });
+        });
     };
     const title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";

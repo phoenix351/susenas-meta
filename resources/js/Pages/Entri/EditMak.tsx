@@ -3,7 +3,15 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { useEffect, useRef, useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
-import { Button, Form, FormInstance, Space, Tabs, message } from "antd";
+import {
+    Button,
+    Form,
+    FormInstance,
+    FormListFieldData,
+    Space,
+    Tabs,
+    message,
+} from "antd";
 import axios from "axios";
 import Blok1_2 from "@/Forms/Mak/Blok1_2";
 import Blok4_1 from "@/Forms/Mak/Blok4_1";
@@ -338,11 +346,44 @@ const Mak = ({
         { beli: 0, produksi: 0, total: 0 },
     ]);
     // const [totalProduksi, setTotalProduksi] = useState(0);
-    const calculateSubTotalHarga = () => {
+    const calculateKalori = async (
+        formValues: FormListFieldData
+    ): Promise<number> => {
+        const withVolume = Object.entries(formValues).filter(
+            ([fieldName, value]) =>
+                fieldName.endsWith("volume") &&
+                typeof value === "number" &&
+                value > 0
+        );
+
+        const promises = withVolume.map(async (item) => {
+            let id_komoditas = item[0].split("_")[0];
+            let kuantitas: number = Number(item[1]) ?? 0;
+            try {
+                const { data } = await axios.get(
+                    route("api.mak.komoditas.kalori.fetch", {
+                        id: id_komoditas,
+                    })
+                );
+                return kuantitas * data;
+            } catch (error) {
+                console.log("error ketika fetch data kalori");
+                return 0;
+            }
+        });
+
+        const kaloriArray = await Promise.all(promises);
+        return kaloriArray.reduce((sum, kalori) => sum + kalori, 0);
+    };
+    const calculateSubTotalHarga = async () => {
         // return;
         // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
         const allFieldValues = blok4_1Form.getFieldsValue();
+
+        calculateKalori(allFieldValues).then((totalKalori) => {
+            console.log("Total Kalori:", totalKalori);
+        });
 
         const subArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17];
         const jenisArr = ["beli", "produksi"];
@@ -648,6 +689,7 @@ const Mak = ({
                                     setRekapArt={setRekapArt}
                                     daftarArt={daftarArt}
                                     setDaftarArt={setDaftarArt}
+                                    calculateKalori={calculateKalori}
                                 />
                             ),
                         },

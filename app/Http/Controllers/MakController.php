@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnggotaRuta;
 use App\Models\Kabkot;
+use App\Models\Komoditas;
 use App\Models\Konsumsi;
 use App\Models\KonsumsiArt;
 use App\Models\SusenasMak;
@@ -247,5 +248,41 @@ class MakController extends Controller
     {
         // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
         return Inertia::render("Entri/CreateMak");
+    }
+    public function calculate_qc($id_ruta)
+    {
+        try {
+            //code...
+            // get all konsumsi
+            $kalori_total = 0;
+
+            $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->get(['id_komoditas', 'volume_beli', 'volume_produksi']);
+            $konsumsi_art = KonsumsiArt::where('anggota_ruta.id_ruta', $id_ruta)
+                ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
+                ->get(['id_komoditas', 'volume_beli', 'volume_produksi']);
+            foreach ($konsumsi_ruta as $key => $value) {
+                # code...
+                // ambil kalori dari tabel 
+                $kalori = Komoditas::where('id', $value['id_komoditas'])->value('kalori');
+                $kalori_total += $kalori * ($value['volume_beli'] + $value['volume_produksi']);
+            }
+            foreach ($konsumsi_art as $key => $value) {
+                # code...
+                // ambil kalori dari tabel 
+                $kalori = Komoditas::where('id', $value['id_komoditas'])->value('kalori');
+                $kalori_total += $kalori * ($value['volume_beli'] + $value['volume_produksi']);
+            }
+            $data = [
+                'konsumsi_ruta' => $konsumsi_ruta,
+                'konsumsi_art' => $konsumsi_art,
+                'kalori_total' => $kalori_total,
+                'id_ruta' => $id_ruta,
+            ];
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            throw $th;
+
+            // return response()->json(['id_ruta' => $id_ruta,], 404);
+        }
     }
 }

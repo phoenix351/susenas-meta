@@ -1,9 +1,20 @@
-import { Form, FormInstance, Input, Space, Typography, message } from "antd";
+import {
+    Button,
+    Form,
+    FormInstance,
+    Input,
+    InputNumber,
+    Space,
+    Typography,
+    message,
+} from "antd";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import RupiahInput from "@/Components/RupiahInput";
 import { RekapMak, Rincian } from "@/types";
 import Blok from "@/Components/Blok";
 import TextRupiah from "@/Components/TextRupiah";
+import { ReloadOutlined } from "@ant-design/icons";
+import axios from "axios";
 
 const { Text, Title } = Typography;
 
@@ -50,6 +61,14 @@ const Blok4_3: React.FC<{
         backgroundColor: "#636f83",
         padding: "5px",
     };
+    const rightCell: React.CSSProperties = {
+        borderStyle: "solid",
+        border: "solid 1px black",
+        // width: "100%",
+        textAlign: "right",
+        // backgroundColor: "#636f83",
+        padding: "5px",
+    };
     const centerCell: React.CSSProperties = {
         borderStyle: "solid",
         border: "solid 1px black",
@@ -80,6 +99,7 @@ const Blok4_3: React.FC<{
         produksi: number;
         total: number;
     }
+    // please define all usestate here
     const [messageApi, contextHolder] = message.useMessage();
 
     const daftarQC: any[] = [
@@ -97,10 +117,12 @@ const Blok4_3: React.FC<{
     }) => {
         return (
             <tr>
-                <td style={centerCell}>{key + 1}</td>
-                <td style={cellStyle}>{rincian.rincian}</td>
+                <td style={{ ...centerCell, width: "30px" }}>{key + 1}</td>
+                <td style={{ ...cellStyle, width: "auto" }}>
+                    {rincian.rincian}
+                </td>
 
-                <td style={cellStyle}>
+                <td style={{ ...centerCell, width: "150px" }}>
                     {key === 5 ? (
                         <>
                             <RupiahInput
@@ -116,15 +138,32 @@ const Blok4_3: React.FC<{
                         </>
                     ) : (
                         <Form.Item name={`blokqc_${rincian.id}`} label={null}>
-                            <Input style={{ textAlign: "right" }} key={key} />
+                            <InputNumber
+                                style={{ textAlign: "right" }}
+                                key={key}
+                            />
                         </Form.Item>
                     )}
                 </td>
             </tr>
         );
     };
+    const calculate = async () => {
+        messageApi.open({
+            content: `menghitung ulang... ruta ${daftarArt[0].id_ruta}`,
+            key: "calculate_qc",
+            type: "loading",
+        });
+        const { data } = await axios.get(
+            route("api.mak.calculate_qc", { id_ruta: daftarArt[0].id_ruta })
+        );
+    };
     return (
         <Space direction="vertical" style={tabContentStyle}>
+            <Button onClick={calculate}>
+                <ReloadOutlined />
+                Hitung ulang
+            </Button>
             <Form
                 form={form}
                 name="Blok4_3"

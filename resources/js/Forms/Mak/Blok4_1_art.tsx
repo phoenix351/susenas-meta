@@ -3,6 +3,7 @@ import {
     Divider,
     Form,
     FormInstance,
+    FormListFieldData,
     Image,
     Input,
     InputNumber,
@@ -35,9 +36,17 @@ const Blok4_1: React.FC<{
     setRekapArt: (value: any) => void;
     daftarArt: any;
     setDaftarArt: (value: any) => void;
+    calculateKalori: (formValues: FormListFieldData) => Promise<number>;
 
     // record: any;
-}> = ({ artForm, artFormFinish, tabContentStyle, daftarArt, setDaftarArt }) => {
+}> = ({
+    artForm,
+    artFormFinish,
+    tabContentStyle,
+    daftarArt,
+    setDaftarArt,
+    calculateKalori,
+}) => {
     const cellStyle: React.CSSProperties = {
         borderStyle: "solid",
         border: "solid 1px black",
@@ -121,6 +130,7 @@ const Blok4_1: React.FC<{
                 setDaftarArt={setDaftarArt}
                 id_ruta={artForm.getFieldValue("id_ruta")}
                 id_art={art.id}
+                calculateKalori={calculateKalori}
             />
         ),
     }));
