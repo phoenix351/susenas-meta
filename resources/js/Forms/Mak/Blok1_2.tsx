@@ -218,19 +218,20 @@ const Blok1_2: React.FC<{
                     </Title>
                     <Text>KETERANGAN KONSUMSI MAKANAN RUMAH TANGGA</Text>
                 </Space>
-                <Button type="primary" style={{ margin: "auto" }}>
-                    <Text
-                        style={{
-                            color: "#fff",
-                            // marginBottom: "0px",
-                            margin: "auto",
-                            fontSize: "20px",
-                            fontWeight: "600",
-                        }}
-                    >
-                        VSUSENAS.MAK
-                    </Text>
-                </Button>
+                <Space
+                    style={{
+                        color: "#fff",
+                        // marginBottom: "0px",
+                        // padding: "10px 10px",
+                        paddingRight: "10px",
+                        paddingLeft: "10px",
+                        fontSize: "20px",
+                        backgroundColor: "rgb(78, 84, 200)",
+                        fontWeight: "600",
+                    }}
+                >
+                    VSUSENAS.MAK
+                </Space>
             </Space>
             <Form
                 form={form}

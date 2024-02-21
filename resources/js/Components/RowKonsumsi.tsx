@@ -75,7 +75,7 @@ const RowKonsumsi: React.FC<{
     }
 
     return (
-        <tr>
+        <tr style={{ backgroundColor: data.flagBasket ? "#ffffcc" : "" }}>
             <td style={centerCell}>{data.nomor}</td>
             <td style={cellStyle}>{data.kode_coicop}</td>
 

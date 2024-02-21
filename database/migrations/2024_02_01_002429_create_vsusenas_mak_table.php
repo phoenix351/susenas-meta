@@ -32,6 +32,7 @@ return new class extends Migration
             $table->string('201_jabatan', 1)->nullable();
             $table->string('202_jabatan', 1)->nullable();
             $table->string('r203', 1)->nullable();
+            $table->string('status', 10)->nullable();
 
             $table->unsignedInteger('wtf_2')->nullable();
             // $table->string('wtf_2', 1)->nullable();

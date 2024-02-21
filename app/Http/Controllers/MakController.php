@@ -16,6 +16,30 @@ use Inertia\Inertia;
 
 class MakController extends Controller
 {
+    public function entri(Request $request)
+    {
+
+        try {
+            //code...
+            $kabkot = $request->kode_kabkot;
+            $nks = $request->nks;
+            $data = SusenasMak::where('vsusenas_mak.kode_kabkot', $kabkot)->where('vsusenas_mak.nks', $nks)
+                ->join('master_wilayah', function ($join) {
+                    $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
+                        ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
+                        ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
+                        ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
+                })
+                ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas')->distinct()->get();
+
+            //  return response()->json($data, 200);
+            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kabkot, 'nks' => $nks]);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
+        return Inertia::render('Entri/Inti');
+    }
     public function store(Request $request)
     {
         try {
@@ -115,7 +139,13 @@ class MakController extends Controller
             }
             foreach ($rekap_art as $key => $value) {
                 # code...
-                AnggotaRuta::where('id', $value['id'])->update($value);
+                $id = $value['id'];
+                $current = $value;
+                unset($current['id']);
+                unset($current['nomor_art']);
+
+
+                AnggotaRuta::where('id', $value['id'])->update($current);
             }
             SusenasMak::where('id', $data['id'])->update(['updated_at' => Date::now()]);
 
@@ -297,12 +327,22 @@ class MakController extends Controller
             // return response()->json(['id_ruta' => $id_ruta,], 404);
         }
     }
+
     public function revalidasi($id_ruta)
     {
         try {
             //code...
-            // get all konsumsi
+            // evaluasi Range harga
             $evaluasi_rh = [];
+            // evaluasi basket komoditas kemiskinan
+            $evaluasi_basket = [];
+
+
+            $komoditas_basket = Komoditas::where('flag_basket', 1)->pluck('id')->toArray();
+
+
+
+            $kode_kabkot = SusenasMak::where('id', $id_ruta)->value('kode_kabkot');
 
 
             $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
@@ -318,82 +358,128 @@ class MakController extends Controller
                 })
                 ->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi']);
             foreach ($konsumsi_ruta as $key => $value) {
+                // ketika ada komoditas basket maka unset komdoditas dari array
+                $id_komoditas = $value['id_komoditas'];
+                if (in_array($id_komoditas, $komoditas_basket)) {
+                    $key = array_search($id_komoditas, $komoditas_basket);
+
+                    // Check if the key is valid before unsetting
+                    if ($key !== false) {
+                        // Remove the element from $komoditas_basket
+                        unset($komoditas_basket[$key]);
+                    }
+                }
                 # code...
-                // ambil kalori dari tabel 
+
+
+                $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
                 $feedback = [
-                    'id_komoditas' => $value['id_komoditas'],
-                    'harga_beli' => "",
-                    'harga_produksi' => "",
-
+                    'id_komoditas' => $id_komoditas,
+                    'rincian' => '',
+                    'min' => $range_harga->min,
+                    'max' => $range_harga->max,
                 ];
-
-                $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $value['id_komoditas'])->first(['min', 'max']);
-                if($range_harga->max==0 && $range_harga->min==0 ) {
+                if ($range_harga->max == 0 && $range_harga->min == 0) {
                     continue;
                 }
                 if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
                     $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
                     if ($harga_satuan > $range_harga->max) {
-                        $feedback['harga_beli'] = "Harga barang dari pembelian satuan diatas range";
+                        $feedback['rincian'] = "Harga satuan komoditas dari pembelian diatas range";
+                        $feedback['harga'] = $harga_satuan;
+                        $evaluasi_rh[] = $feedback;
                     }
                     if ($harga_satuan < $range_harga->min) {
-
-                        $feedback['harga_beli'] = "Harga barang dari pembelian satuan dibawah range";
+                        $feedback['rincian'] = "Harga satuan komoditas dari pembelian dibawah range";
+                        $feedback['harga'] = $harga_satuan;
+                        $evaluasi_rh[] = $feedback;
                     }
                 }
                 if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
                     $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
                     if ($harga_satuan > $range_harga->max) {
-                        $feedback['harga_produksi'] = "Harga barang dari produksi satuan diatas range";
+                        $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. diatas range";
+                        $feedback['harga'] = $harga_satuan;
+                        $evaluasi_rh[] = $feedback;
                     }
                     if ($harga_satuan < $range_harga->min) {
-
-                        $feedback['harga_produksi'] = "Harga barang dari produksi satuan dibawah range";
+                        $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. dibawah range";
+                        $feedback['harga'] = $harga_satuan;
+                        $evaluasi_rh[] = $feedback;
                     }
                 }
-                $evaluasi_rh[] = $feedback;
             }
             foreach ($konsumsi_art as $key => $value) {
                 # code...
                 // ambil kalori dari tabel 
+                $id_komoditas = $value['id_komoditas'];
+
+                if (in_array($id_komoditas, $komoditas_basket)) {
+                    $key = array_search($id_komoditas, $komoditas_basket);
+
+                    // Check if the key is valid before unsetting
+                    if ($key !== false) {
+                        // Remove the element from $komoditas_basket
+                        unset($komoditas_basket[$key]);
+                    }
+                }
+
+                $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
                 $feedback = [
-                    'id_komoditas' => $value['id_komoditas'],
-                    'harga_beli' => "",
-                    'harga_produksi' => "",
+                    'id_komoditas' => $id_komoditas,
+                    'rincian' => '',
+                    'min' => $range_harga->min,
+                    'max' => $range_harga->max,
 
                 ];
-
-                $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $value['id_komoditas'])->first(['min', 'max']);
-                if($range_harga->max==0 && $range_harga->min==0 ) {
+                if ($range_harga->max == 0 && $range_harga->min == 0) {
                     continue;
                 }
-                // return  response()->json($range_harga->max, 200);
                 if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
                     $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
                     if ($harga_satuan > $range_harga->max) {
-                        $feedback['harga_beli'] = "Harga barang dari pembelian satuan diatas range";
+                        $feedback['rincian'] = "Harga satuan komoditas dari pembelian diatas range";
+                        $feedback['harga'] = $harga_satuan;
+                        $evaluasi_rh[] = $feedback;
                     }
                     if ($harga_satuan < $range_harga->min) {
-
-                        $feedback['harga_beli'] = "Harga barang dari pembelian satuan dibawah range";
+                        $feedback['rincian'] = "Harga satuan komoditas dari pembelian dibawah range";
+                        $feedback['harga'] = $harga_satuan;
+                        $evaluasi_rh[] = $feedback;
                     }
                 }
                 if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
                     $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
                     if ($harga_satuan > $range_harga->max) {
-                        $feedback['harga_produksi'] = "Harga barang dari produksi satuan diatas range";
+                        $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. diatas range";
+                        $feedback['harga'] = $harga_satuan;
+                        $evaluasi_rh[] = $feedback;
                     }
                     if ($harga_satuan < $range_harga->min) {
-
-                        $feedback['harga_produksi'] = "Harga barang dari produksi satuan dibawah range";
+                        $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. dibawah range";
+                        $feedback['harga'] = $harga_satuan;
+                        $evaluasi_rh[] = $feedback;
                     }
                 }
-                $evaluasi_rh[] = $feedback;
             }
+            // $komoditas_basket = json_decode(json_encode($komoditas_basket), true);
+            $feedback_basket = [];
+
+            foreach ($komoditas_basket as $key => $value) {
+                # code...
+                $feedback = [
+                    'id_komoditas' => $value,
+                    'rincian' => "Komoditas termasuk 52 Basket komoditas pembentuk kemiskinan, tetapi tidak terisi"
+                ];
+                $feedback_basket[] = $feedback;
+            }
+
+
             $data = [
                 // 'konsumsi_ruta' => $konsumsi_ruta,
                 // 'konsumsi_art' => $konsumsi_art,
                 'evaluasi_rh' => $evaluasi_rh,
+                'evaluasi_basket' => [],
                 'id_ruta' => $id_ruta,
             ];
             return response()->json($data, 200);

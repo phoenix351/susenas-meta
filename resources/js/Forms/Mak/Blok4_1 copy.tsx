@@ -22,7 +22,6 @@ import Blok4_1_hal4 from "./Blok4_1_hal4";
 import Blok4_1_hal6 from "./Blok4_1_hal6";
 import Blok4_1_hal8 from "./Blok4_1_hal8";
 import { RekapMak, SubTotal } from "@/types";
-import Blok4_1Tab from "./Blok4_1Tab";
 
 const { Text, Title } = Typography;
 
@@ -102,9 +101,7 @@ const Blok4_1: React.FC<{
                         label: "Hal 2",
                         key: "1",
                         children: (
-                            <Blok4_1Tab
-                                from={1}
-                                to={34}
+                            <Blok4_1_hal2
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
@@ -115,9 +112,7 @@ const Blok4_1: React.FC<{
                         label: "Hal 4",
                         key: "2",
                         children: (
-                            <Blok4_1Tab
-                                from={35}
-                                to={62}
+                            <Blok4_1_hal4
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
@@ -128,9 +123,7 @@ const Blok4_1: React.FC<{
                         label: "Hal 6",
                         key: "3",
                         children: (
-                            <Blok4_1Tab
-                                from={63}
-                                to={94}
+                            <Blok4_1_hal6
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
@@ -138,12 +131,10 @@ const Blok4_1: React.FC<{
                         ),
                     },
                     {
-                        label: "Hal 8",
+                        label: "Blok 8",
                         key: "4",
                         children: (
-                            <Blok4_1Tab
-                                from={95}
-                                to={127}
+                            <Blok4_1_hal8
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
@@ -154,9 +145,7 @@ const Blok4_1: React.FC<{
                         label: "Blok 10",
                         key: "5",
                         children: (
-                            <Blok4_1Tab
-                                from={128}
-                                to={159}
+                            <Blok4_1_hal10
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}

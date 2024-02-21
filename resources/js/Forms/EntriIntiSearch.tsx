@@ -60,6 +60,7 @@ const EntriIntiForm: React.FC<{
         try {
             fetchKabkot();
             form.setFieldValue("kode_prov", "71");
+
             // fetchSemester();
         } catch (error) {}
     }, []);
@@ -86,7 +87,7 @@ const EntriIntiForm: React.FC<{
                         onClear={() => {}}
                         onChange={() => {
                             form.setFieldsValue({
-                                kode_kab: "",
+                                kode_kabkot: "",
                                 semester: "",
                                 nks: "",
                             });
@@ -136,7 +137,10 @@ const EntriIntiForm: React.FC<{
                         showSearch
                         optionFilterProp="label"
                         options={daftarNks}
-                        onChange={() => form.submit()}
+                        onChange={() => {
+                            fetchNks();
+                            form.submit();
+                        }}
                     />
                 </Form.Item>
 

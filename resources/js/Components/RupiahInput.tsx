@@ -54,7 +54,6 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
                 value={value}
                 onChange={(value: any) => {
                     debouncedOnChange(value);
-                    console.log({ editable });
                 }}
                 // {...rest}
             />

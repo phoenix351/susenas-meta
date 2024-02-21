@@ -9,7 +9,10 @@ import {
     FormInstance,
     FormListFieldData,
     Space,
+    Spin,
+    Table,
     Tabs,
+    Typography,
     message,
 } from "antd";
 import axios from "axios";
@@ -20,7 +23,14 @@ import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
 import { AnggotaRumahTangga, PageProps, SubTotal } from "@/types";
 import Blok_QC from "@/Forms/Mak/Blok_QC";
-import { AuditOutlined, SaveOutlined } from "@ant-design/icons";
+import {
+    ArrowLeftOutlined,
+    AuditOutlined,
+    LeftCircleOutlined,
+    SaveOutlined,
+} from "@ant-design/icons";
+import MyModal from "@/Components/Modal";
+import TextRupiah from "@/Components/TextRupiah";
 const daftarRincian432 = [
     {
         id: 1,
@@ -132,6 +142,32 @@ const daftarRincian432 = [
         type: "average",
     },
 ];
+const tableStyle: React.CSSProperties = {
+    borderCollapse: "collapse",
+    width: "100%",
+};
+const cellStyle = {
+    borderStyle: "solid",
+    border: "solid 1px black",
+    // width: "100%",
+    padding: "5px",
+};
+
+const scrollToFormItem = (fieldName: string, form: FormInstance) => {
+    console.log({ formValues: form.getFieldsValue(), fieldName });
+
+    const fieldInstance = form.getFieldInstance(fieldName);
+
+    if (fieldInstance) {
+        // Scroll to the corresponding Form.Item
+        fieldInstance.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    } else {
+        // console.log("field instance didnt exist");
+    }
+};
 
 const Mak = ({
     data,
@@ -168,163 +204,123 @@ const Mak = ({
         daftarRincian432.map((rincian) => ({ beli: 0, produksi: 0, total: 0 }))
     );
 
+    const [loadingReval, setLoadingReval] = useState<boolean>(true);
+    // const [spinning, setSpinning] = React.useState<boolean>(false);
+
+    const [openModal, setOpenModal] = useState(false);
+    const [warningList, setWarningList] = useState<any[]>([]);
+    const modalCancel = () => {
+        setOpenModal(false);
+    };
+
     const [messageApi, contextHolder] = message.useMessage();
 
     const blok1_2Finish = async (values: any) => {
-        console.log({ values });
         // return;
-        messageApi.open({
-            type: "loading",
-            key: "cari",
-            content: "Menyimpan data...",
-        });
+        // messageApi.open({
+        //     type: "loading",
+        //     key: "cari",
+        //     content: "Menyimpan data...",
+        // });
         try {
             const url = route("entri.mak.update");
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            messageApi.open({
-                type: "success",
-                key: "cari",
-                content: "Berhasil menyimpan",
-            });
+            // messageApi.open({
+            //     type: "success",
+            //     key: "cari",
+            //     content: "Berhasil menyimpan",
+            // });
         } catch (error) {
             messageApi.open({
                 type: "error",
                 key: "cari",
-                content: "Oops terjadi kesalahan, silahkan hubungi admin",
+                content:
+                    "Oops terjadi kesalahan dalam menyimpan kuesioner VSUSENAS-MAK, silahkan hubungi admin",
             });
         }
     };
     const artFormFinish = async (values: any) => {
-        console.log({ values });
         // return;
 
-        messageApi.open({
-            type: "loading",
-            key: "4_1",
-            content: "Menyimpan data art...",
-        });
+        // messageApi.open({
+        //     type: "loading",
+        //     key: "4_1",
+        //     content: "Menyimpan data art...",
+        // });
         try {
             const url = route("entri.mak.art.update");
             const response = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            console.log({ response });
-            // setDaftarSampel(data.data);
-            messageApi.open({
-                type: "success",
-                key: "4_1",
-                content: "Berhasil menyimpan data",
-            });
+            // console.log({ response });
+            // // setDaftarSampel(data.data);
+            // messageApi.open({
+            //     type: "success",
+            //     key: "4_1",
+            //     content: "Berhasil menyimpan data",
+            // });
         } catch (error) {
             messageApi.open({
                 type: "error",
                 key: "4_1",
-                content: "Oops terjadi kesalahan, silahkan hubungi admin",
+                content:
+                    "Oops terjadi kesalahan dalam menyimpan Kuesioner ART, silahkan hubungi admin",
             });
         }
     };
     const blok4_1Finish = async (values: any) => {
-        console.log({ values });
         // return;
-        messageApi.open({
-            type: "loading",
-            key: "4_1",
-            content: "Memuat Data",
-        });
+        // messageApi.open({
+        //     type: "loading",
+        //     key: "4_1",
+        //     content: "Memuat Data",
+        // });
         try {
             const url = route("entri.mak.konsumsi.store");
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            console.log({ data });
+            // console.log({ data });
             setDaftarSampel(data.data);
-            messageApi.open({
-                type: "success",
-                key: "4_1",
-                content: "Berhasil menyimpan data",
-            });
+            // messageApi.open({
+            //     type: "success",
+            //     key: "4_1",
+            //     content: "Berhasil menyimpan data",
+            // });
         } catch (error) {
             messageApi.open({
                 type: "error",
                 key: "4_1",
-                content: "Oops terjadi kesalahan, silahkan hubungi admin",
+                content:
+                    "Oops terjadi kesalahan dalam mmenyimpan konsumsi, silahkan hubungi admin",
             });
         }
     };
     const blok4_1artFinish = async (values: any) => {
-        console.log({ values });
-        messageApi.open({
-            type: "loading",
-            key: "4_1",
-            content: "Memuat Data",
-        });
+        // console.log({ values });
+        // messageApi.open({
+        //     type: "loading",
+        //     key: "4_1",
+        //     content: "menyimpan Data",
+        // });
         try {
             const url = route("api.entri.inti", values);
             const { data } = await axios.get(url);
-            console.log({ data });
+            // console.log({ data });
             setDaftarSampel(data.data);
-            messageApi.open({
-                type: "success",
-                key: "cari",
-                content: "Berhasil mengambil data",
-            });
+            // messageApi.open({
+            //     type: "success",
+            //     key: "cari",
+            //     content: "Berhasil mengambil data",
+            // });
         } catch (error) {
             messageApi.open({
                 type: "error",
                 key: "cari",
-                content: "Oops terjadi kesalahan, silahkan hubungi admin",
-            });
-        }
-    };
-    const blok4_3Finish = async (values: any) => {
-        console.log({ values });
-        messageApi.open({
-            type: "loading",
-            key: "cari",
-            content: "Memuat Data",
-        });
-        try {
-            const url = route("api.entri.inti", values);
-            const { data } = await axios.get(url);
-            console.log({ data });
-            setDaftarSampel(data.data);
-            messageApi.open({
-                type: "success",
-                key: "cari",
-                content: "Berhasil mengambil data",
-            });
-        } catch (error) {
-            messageApi.open({
-                type: "error",
-                key: "cari",
-                content: "Oops terjadi kesalahan, silahkan hubungi admin",
-            });
-        }
-    };
-    const wtfFinish = async (values: any) => {
-        console.log({ values });
-        messageApi.open({
-            type: "loading",
-            key: "cari",
-            content: "Memuat Data",
-        });
-        try {
-            const url = route("api.entri.inti", values);
-            const { data } = await axios.get(url);
-            console.log({ data });
-            setDaftarSampel(data.data);
-            messageApi.open({
-                type: "success",
-                key: "cari",
-                content: "Berhasil mengambil data",
-            });
-        } catch (error) {
-            messageApi.open({
-                type: "error",
-                key: "cari",
-                content: "Oops terjadi kesalahan, silahkan hubungi admin",
+                content:
+                    "Oops terjadi kesalahan dalam menyimpan blok 4 1 art, silahkan hubungi admin",
             });
         }
     };
@@ -382,7 +378,7 @@ const Mak = ({
         const allFieldValues = blok4_1Form.getFieldsValue();
 
         calculateKalori(allFieldValues).then((totalKalori) => {
-            console.log("Total Kalori:", totalKalori);
+            // console.log("Total Kalori:", totalKalori);
         });
 
         const subArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17];
@@ -509,7 +505,7 @@ const Mak = ({
         }));
         setDaftarArt([...art]);
         if (art.length < 1) {
-            console.log("kurang dari 1");
+            // console.log("kurang dari 1");
 
             setDaftarArt((prev) => [
                 ...prev,
@@ -530,10 +526,10 @@ const Mak = ({
         document.addEventListener("keydown", handleKeyPress);
         form.setFieldsValue(data);
         form.setFieldValue("wtf_26", garis_kemiskinan);
-        console.log({ art });
+        // console.log({ art });
 
         blok4_1Form.setFieldsValue({ id_ruta: data.id });
-        console.log({ data, konsumsi_ruta });
+        // console.log({ data, konsumsi_ruta });
         const daftarSub = [1, 8, 16];
         let konsumsiRutaValues = konsumsi_ruta.map((item) => ({
             [`${daftarSub.includes(item.id_komoditas) ? "jumlah" : ""}${
@@ -582,69 +578,151 @@ const Mak = ({
                 direction="vertical"
             >
                 <Space
+                    style={{ width: "100%", justifyContent: "space-between" }}
                     direction="horizontal"
-                    style={{
-                        width: "100%",
-                        justifyContent: "end",
-                        // backgroundColor: "red",
-                    }}
                 >
-                    Last Saved :
-                    {lastSaved?.toLocaleDateString("en-US", {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                        hour: "numeric",
-                        minute: "numeric",
-                        second: "numeric",
-                        hour12: false,
-                    }) || "Never"}
-                    <Button
-                        onClick={async () => {
-                            try {
-                                // Submit all forms concurrently using Promise.all
-                                const [form1, form2, form3] = await Promise.all(
-                                    [
-                                        artForm.submit(),
-                                        form.submit(),
-                                        blok4_1Form.submit(),
-                                    ]
-                                );
-                                artForm.submit();
-                                // Now, all forms are submitted successfully
-                                setLastSaved(new Date());
+                    <Space>
+                        <Button
+                            onClick={() =>
                                 router.get(
-                                    route("entri.mak.edit", { id: data.id }),
-                                    {},
-                                    {
-                                        preserveState: true,
-                                        preserveScroll: true,
-                                    }
-                                );
-                            } catch (error) {
-                                console.error("Error submitting forms:", error);
-                                // Handle error if any of the forms fails to submit
+                                    route("entri", {
+                                        kode_kabkot:
+                                            form.getFieldValue("kode_kabkot"),
+                                        nks: form.getFieldValue("nks"),
+                                    })
+                                )
                             }
+                        >
+                            <ArrowLeftOutlined /> Kembali
+                        </Button>
+                    </Space>
+                    <Space
+                        direction="horizontal"
+                        style={{
+                            width: "100%",
+                            justifyContent: "end",
+                            // backgroundColor: "red",
                         }}
                     >
-                        <SaveOutlined /> Simpan
-                    </Button>
-                    <Button
-                        onClick={async () => {
-                            const id_ruta = form.getFieldValue("id");
+                        Last Saved :
+                        {lastSaved?.toLocaleDateString("en-US", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "numeric",
+                            second: "numeric",
+                            hour12: false,
+                        }) || "Never"}
+                        <Button
+                            type="primary"
+                            onClick={async () => {
+                                messageApi.loading({
+                                    content: "Menyimpan data",
+                                    type: "loading",
+                                    key: "simpan",
+                                    duration: 10000,
+                                });
+                                try {
+                                    // Submit all forms concurrently using Promise.all
+                                    const [form1, form2, form3] =
+                                        await Promise.all([
+                                            artForm.submit(),
+                                            form.submit(),
+                                            blok4_1Form.submit(),
+                                        ]);
 
-                            const { data } = await axios.get(
-                                route("api.mak.revalidasi", {
-                                    id_ruta: id_ruta,
-                                })
-                            );
-                            console.log({ data });
-                        }}
-                    >
-                        <AuditOutlined />
-                        Revalidasi Isian
-                    </Button>
+                                    // Now, all forms are submitted successfully
+                                    setLastSaved(new Date());
+                                    router.get(
+                                        route("entri.mak.edit", {
+                                            id: data.id,
+                                        }),
+                                        {},
+                                        {
+                                            preserveState: true,
+                                            preserveScroll: true,
+                                        }
+                                    );
+                                    messageApi.open({
+                                        content: "Data berhasil tersimpan",
+                                        type: "success",
+                                        key: "simpan",
+                                        duration: 2,
+                                    });
+                                } catch (error) {
+                                    console.error(
+                                        "Error submitting forms:",
+                                        error
+                                    );
+                                    // Handle error if any of the forms fails to submit
+                                }
+                            }}
+                        >
+                            <SaveOutlined /> Simpan
+                        </Button>
+                        <Button
+                            type="primary"
+                            style={{ backgroundColor: "#e64d00" }}
+                            onClick={async () => {
+                                setOpenModal(true);
+                                const id_ruta = form.getFieldValue("id");
+                                try {
+                                    // Submit all forms concurrently using Promise.all
+                                    const [form1, form2, form3] =
+                                        await Promise.all([
+                                            artForm.submit(),
+                                            form.submit(),
+                                            blok4_1Form.submit(),
+                                        ]);
+
+                                    // Now, all forms are submitted successfully
+                                    setLastSaved(new Date());
+                                    router.get(
+                                        route("entri.mak.edit", {
+                                            id: id_ruta,
+                                        }),
+                                        {},
+                                        {
+                                            preserveState: true,
+                                            preserveScroll: true,
+                                        }
+                                    );
+                                    const { data } = await axios.get(
+                                        route("api.mak.revalidasi", {
+                                            id_ruta: id_ruta,
+                                        })
+                                    );
+                                    let newWarningList = [...warningList];
+                                    // console.log({ data });
+
+                                    newWarningList = [
+                                        // ...newWarningList,
+                                        ...data.evaluasi_rh,
+                                        ...data.evaluasi_basket,
+                                    ];
+                                    setWarningList([...newWarningList]);
+
+                                    messageApi.open({
+                                        content: "revalidsai selesai",
+                                        type: "success",
+                                        key: "revalidasi",
+                                    });
+                                    setLoadingReval(false);
+                                } catch (error) {
+                                    console.error(
+                                        "Error submitting forms:",
+                                        error
+                                    );
+                                    // Handle error if any of the forms fails to submit
+                                }
+                            }}
+                        >
+                            <AuditOutlined />
+                            Evaluasi (RH dan Basket Komoditas)
+                        </Button>
+                    </Space>
                 </Space>
                 <Tabs
                     onChange={handleChange}
@@ -742,9 +820,93 @@ const Mak = ({
                 />
                 {/* <Table dataSource={dazftarSampel} columns={columns} />; */}
             </Space>
+
+            <MyModal
+                cancelText="Tutup"
+                okText="Oke"
+                handleCancel={modalCancel}
+                confirmLoadingModal={false}
+                openModal={openModal}
+                handleOk={modalCancel}
+                title="Daftar Warning"
+                key={"range-harga-modal"}
+                width="1200px"
+            >
+                {loadingReval ? (
+                    <Space
+                        style={{
+                            width: "100%",
+                            justifyContent: "center",
+                        }}
+                        direction="vertical"
+                    >
+                        <Space
+                            style={{
+                                width: "100%",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <Spin size="large" />
+                        </Space>
+                        <Space
+                            style={{
+                                width: "100%",
+                                justifyContent: "center",
+                            }}
+                        >
+                            Sedang melakukan evaluasi terhadap isian, harap
+                            bersabar :)
+                        </Space>
+                    </Space>
+                ) : (
+                    <Space style={{ width: "100%" }} direction="vertical">
+                        <Space>Jumlah warning : {warningList.length}</Space>
+                        <Table
+                            bordered
+                            columns={columns}
+                            dataSource={warningList}
+                            style={{ width: "100%" }}
+                        />
+                    </Space>
+                )}
+            </MyModal>
         </>
     );
 };
+const { Text } = Typography;
+const columns = [
+    {
+        title: "Nomor",
+        dataIndex: "nomor",
+        key: "nomor",
+        render: (text: any, record: any, index: number) => index + 1,
+    },
+    {
+        title: "Kode Komoditas",
+        dataIndex: "id_komoditas",
+        key: "id_komoditas",
+    },
+    {
+        title: "Harga per Satuan",
+        dataIndex: "harga",
+        key: "harga",
+        render: (text: string) => (
+            <TextRupiah color="#000" value={Number(text)} />
+        ),
+    },
+    {
+        title: "Rincian",
+        dataIndex: "rincian",
+        key: "rincian",
+        render: (text: any, record: any) => (
+            <Space direction="horizontal">
+                {record.rincian}
+                (<TextRupiah value={record.min} color={"red"} /> s.d
+                <TextRupiah value={record.max} color={"red"} />)
+            </Space>
+        ),
+    },
+];
 
 Mak.layout = (
     page: ReactElement<any, JSXElementConstructor<any>> | ReactPortal

@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function () {
     route::get('/api/entri/mak', [MakController::class, 'fetch'])->name('api.entri.mak');
     route::get('/api/mak/konsumsi/art/{id_art}', [MakController::class, 'konsumsi_art_fetch'])->name('api.mak.konsumsi.art');
 
+    route::get('/api/mak/komoditas/list', [KomoditasController::class, 'list_komoditas'])->name('api.mak.komoditas.list');
     route::get('/api/mak/komoditas/kalori/{id}', [KomoditasController::class, 'fetch_kalori'])->name('api.mak.komoditas.kalori.fetch');
     route::get('/api/mak/calculate_qc/{id_ruta}', [MakController::class, 'calculate_qc'])->name('api.mak.calculate_qc');
 
@@ -118,9 +119,7 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Statistics');
     })->name('statistics');
 
-    route::get('/entri', function () {
-        return Inertia::render('Entri/Inti');
-    })->name('entri');
+    route::get('/entri', [MakController::class, 'entri'])->name('entri');
 
 
 

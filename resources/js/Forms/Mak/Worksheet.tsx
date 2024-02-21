@@ -164,14 +164,14 @@ const daftarRincian = [
         nomor: 3,
         rincian: "ADA BALITA? (R302>0)",
         type: "binary",
-        // children: [
-        //     {
-        //         id: 1,
-        //         nomor: 1,
-        //         rincian: "Konsumsi Susu",
-        //         type: "rupiah",
-        //     },
-        // ],
+        children: [
+            {
+                id: 27,
+                nomor: 27,
+                rincian: "Jumlah Konsumsi Susu",
+                type: "number",
+            },
+        ],
     },
     {
         id: 4,
@@ -184,6 +184,14 @@ const daftarRincian = [
         nomor: 5,
         rincian: "ADA PEMBANTU/SUPIR? (R403=8)",
         type: "binary",
+        children: [
+            {
+                id: 28,
+                nomor: 28,
+                rincian: "Jumlah Gaji/Upah Pembantu Rumah Tangga",
+                type: "rupiah",
+            },
+        ],
     },
     {
         id: 6,
@@ -191,6 +199,14 @@ const daftarRincian = [
         rincian:
             "ADA ART YANG BEROBAT JALAN/RAWAT INAP? (R1105=1 ATAU R1201=1)",
         type: "binary",
+        children: [
+            {
+                id: 29,
+                nomor: 29,
+                rincian: "Rincian 255 s.d 257 Kolom 5 (Setahun terakhir)",
+                type: "number",
+            },
+        ],
     },
     {
         id: 7,
@@ -203,6 +219,14 @@ const daftarRincian = [
         nomor: 8,
         rincian: "ADA ART YANG PERNAH MENGGUNAKAN INTERNET?(R808 =1)",
         type: "binary",
+        children: [
+            {
+                id: 30,
+                nomor: 30,
+                rincian: "Rincian 236+238",
+                type: "number",
+            },
+        ],
     },
     {
         id: 9,
@@ -216,6 +240,14 @@ const daftarRincian = [
         nomor: 10,
         rincian: "ADA ART YANG SEDANG BERSEKOLAH? (R610=2)",
         type: "binary",
+        children: [
+            {
+                id: 31,
+                nomor: 31,
+                rincian: "Rincian 265+270",
+                type: "number",
+            },
+        ],
     },
     {
         id: 11,
@@ -247,6 +279,14 @@ const daftarRincian = [
         nomor: 18,
         rincian: "ADA YANG SEDANG MENGGUNAKAN KB? (Blok XVI Rincian 1601=2)",
         type: "binary",
+        children: [
+            {
+                id: 32,
+                nomor: 32,
+                rincian: "Rincian 263 kolom 5",
+                type: "number",
+            },
+        ],
     },
     {
         id: 16,
@@ -291,6 +331,14 @@ const daftarRincian = [
             { label: "[3] Leding/sumur bor/pompa ", value: "3" },
             { label: "[4] Lainnya", value: "4" },
         ],
+        children: [
+            {
+                id: 33,
+                nomor: 33,
+                rincian: "Rincian 311",
+                type: "number",
+            },
+        ],
     },
     {
         id: 20,
@@ -302,6 +350,14 @@ const daftarRincian = [
             { label: "[2] Listrik PLN tanpa meteran", value: "2" },
             { label: "[3] Listrik non PLN", value: "3" },
             { label: "[4] Bukan listrik", value: "4" },
+        ],
+        children: [
+            {
+                id: 34,
+                nomor: 34,
+                rincian: "Rincian 192 kolom 10",
+                type: "number",
+            },
         ],
     },
     {
@@ -330,6 +386,14 @@ const daftarRincian = [
         nomor: 26,
         rincian: "MEMILIKI KENDARAAN BERMOTOR? (R2001H=1 atau R2001.K=1)",
         type: "binary",
+        children: [
+            {
+                id: 35,
+                nomor: 35,
+                rincian: "Rincian 309",
+                type: "number",
+            },
+        ],
     },
     {
         id: 25,

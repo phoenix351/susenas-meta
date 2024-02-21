@@ -6,11 +6,29 @@ import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
 import { Button, Form, Space, Table, message } from "antd";
 import EntriIntiForm from "@/Forms/EntriIntiSearch";
 import axios from "axios";
+import { PageProps } from "@/types";
 
-const Dashboard = () => {
-    useEffect(() => {}, []);
+const Dashboard = ({
+    data_susenas,
+    nks,
+    kode_kabkot,
+}: PageProps & {
+    data_susenas: any[];
+    nks: string;
+    kode_kabkot: string;
+}) => {
+    useEffect(() => {
+        console.log({ data_susenas });
+        cariForm.setFieldsValue({
+            nks: nks,
+            kode_kabkot: kode_kabkot,
+            semester: "1",
+        });
+
+        setDaftarSampel(data_susenas);
+    }, []);
     const [cariForm] = Form.useForm();
-    const [daftarSampel, setDaftarSampel] = useState([]);
+    const [daftarSampel, setDaftarSampel] = useState<any[]>([]);
     const [messageApi, contextHolder] = message.useMessage();
     const Status = {
         3: (
