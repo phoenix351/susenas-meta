@@ -524,6 +524,8 @@ const Mak = ({
         }
 
         document.addEventListener("keydown", handleKeyPress);
+        console.log({ data });
+
         form.setFieldsValue(data);
         form.setFieldValue("wtf_26", garis_kemiskinan);
         // console.log({ art });

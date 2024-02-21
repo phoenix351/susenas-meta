@@ -41,15 +41,15 @@ return new class extends Migration
                 $table->dropColumn('blok4_31_jumlah_mak_produksi');
                 $table->dropColumn('blok4_31_jumlah_rokok_beli');
                 $table->dropColumn('blok4_31_jumlah_rokok_produksi');
-    
+
                 for ($i = 0; $i <= 14; $i++) {
                     # code...
-    
+
                     $table->dropColumn('blok4_32_' . $i . '_beli');
                     $table->dropColumn('blok4_32_' . $i . '_produksi');
                     $table->dropColumn('blok4_32_' . $i . '_total');
                 }
-    
+
                 $table->dropColumn('blok4_32_15_total');
                 $table->dropColumn('blok4_32_16_total');
                 $table->dropColumn('blok4_32_17_total');

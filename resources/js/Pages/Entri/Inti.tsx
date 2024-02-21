@@ -18,14 +18,15 @@ const Dashboard = ({
     kode_kabkot: string;
 }) => {
     useEffect(() => {
-        console.log({ data_susenas });
-        cariForm.setFieldsValue({
-            nks: nks,
-            kode_kabkot: kode_kabkot,
-            semester: "1",
-        });
+        if (data_susenas.length > 0) {
+            cariForm.setFieldsValue({
+                nks: nks,
+                kode_kabkot: kode_kabkot,
+                semester: "1",
+            });
 
-        setDaftarSampel(data_susenas);
+            setDaftarSampel(data_susenas);
+        }
     }, []);
     const [cariForm] = Form.useForm();
     const [daftarSampel, setDaftarSampel] = useState<any[]>([]);

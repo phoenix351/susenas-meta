@@ -100,13 +100,17 @@ const Blok4_3: React.FC<{
                             <Form.Item
                                 name={`blokqc_${rincian.id}`}
                                 label={null}
-                                style={{ marginBottom: "5px" }}
+                                style={{
+                                    marginBottom: "5px",
+                                    textAlign: "center",
+                                }}
                             >
                                 <InputNumber
+                                    className="custom-input-number" // Add a custom class
                                     key={key}
                                     style={{
-                                        justifyContent: "end",
-                                        textAlign: "center",
+                                        textAlign: "right",
+                                        width: "100%",
                                         // backgroundColor: "red",
                                     }}
                                     formatter={(value) =>
@@ -117,7 +121,13 @@ const Blok4_3: React.FC<{
                                     }
                                 />
                             </Form.Item>
-                            <Text style={{ color: "red" }}>
+                            <Text
+                                style={{
+                                    color: "red",
+                                    paddingLeft: "11px",
+                                    paddingRight: "11px",
+                                }}
+                            >
                                 {`${rincian.value}`.replace(
                                     /\B(?=(\d{3})+(?!\d))/g,
                                     ","

@@ -76,6 +76,16 @@ class SusenasMak extends Model
         "blokqc_3",
         "blokqc_4",
         "blokqc_5",
+        'wtf_3c1',
+        'wtf_5c1',
+        'wtf_6c1',
+        'wtf_8c1',
+        'wtf_14c1',
+        'wtf_15c1',
+        'wtf_16c1',
+        'wtf_16c2',
+        'wtf_16c3',
+        'wtf_23c1',
 
     ];
 

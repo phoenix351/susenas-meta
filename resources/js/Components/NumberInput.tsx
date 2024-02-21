@@ -2,15 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Form, Input, InputNumber } from "antd";
 import _debounce from "lodash/debounce";
 
-interface RupiahInputProps {
+interface NumberInputProps {
     // value: number;
     onChange?: (value: number | undefined) => void;
     [key: string]: any; // Allow additional props
     editable?: boolean;
     initialValue?: number;
+    inputName: string;
 }
 
-const RupiahInput: React.FC<RupiahInputProps> = ({
+const NumberInput: React.FC<NumberInputProps> = ({
     inputName,
     onChange,
     initialValue,
@@ -39,10 +40,9 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
             <InputNumber
                 className="custom-input-number"
                 readOnly={editable ? editable : false}
-                style={{ width: "100%", textAlign: "right" }}
                 min={0}
                 formatter={(value: any) =>
-                    `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 }
                 parser={(value: any) => {
                     if (!value) return undefined;
@@ -62,4 +62,4 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     );
 };
 
-export default RupiahInput;
+export default NumberInput;

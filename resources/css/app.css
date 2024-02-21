@@ -63,5 +63,8 @@ section .air.air4 {
         background-position-x: -1000px;
     }
 }
+.custom-input-number .ant-input-number-input {
+    text-align: right;
+}
 
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,900;1,900&display=swap");

@@ -8,7 +8,7 @@ import {
     Space,
     Typography,
 } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 
 const { Text, Title } = Typography;
@@ -68,25 +68,59 @@ const InputComponent: React.FC<{
                 name={name}
                 options={[
                     { label: "[1] YA", value: "1" },
-                    { label: "[2] TIDAK", value: "2" },
+                    { label: "[5] TIDAK", value: "5" },
                 ]}
                 onChange={setValue && ((value) => setValue(value))}
             />
         ),
         rupiah: <RupiahInput inputName={name} editable={customKey === 26} />, // Use customKey
-        multi: <MetaSelect name={name} options={options ?? []} />,
+        multi: (
+            <MetaSelect
+                name={name}
+                options={options ?? []}
+                onChange={setValue && ((value) => setValue(value))}
+            />
+        ),
     };
     return inputComponents[type];
 };
 
-const renderRow: any = (props: RincianWorksheet, form: FormInstance) => {
-    const [value, setValue] = useState("");
+const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
+    props,
+    defaultValue,
+}) => {
+    const [value, setValue] = useState<null | any>(defaultValue);
+    const [activeChild, setActiveChild] = useState<JSX.Element[]>([]);
     const commonColumns = (
         <>
             <td style={centerCell}>{props.nomor}</td>
             <td style={cellStyle}>{props.rincian}</td>
         </>
     );
+
+    useEffect(() => {
+        if (props.children) {
+            let activeChild = props.children
+                .filter((item, index) => index + 1 === Number(value))
+                .map((child: any) => (
+                    <tr key={props.id}>
+                        <td style={centerCell}>{}</td>
+                        <td style={cellStyle}>{child.rincian}</td>
+                        <td style={centerCell}>
+                            <InputComponent
+                                type={child.type}
+                                name={`wtf_${child.nomor}`}
+                                options={child.options}
+                                key={child.nomor}
+                                customKey={child.id}
+                            />
+                        </td>
+                    </tr>
+                ));
+            setActiveChild(activeChild);
+        }
+    }, [value, props.children]);
+    // setValue("1");
 
     return (
         <>
@@ -108,50 +142,11 @@ const renderRow: any = (props: RincianWorksheet, form: FormInstance) => {
                     />
                 </td>
             </tr>
-            {props.children &&
-                props.type === "binary" &&
-                value === "1" &&
-                props.children.map((child: any) => (
-                    <tr>
-                        <td style={centerCell}>{}</td>
-                        <td style={cellStyle}>{child.rincian}</td>
-                        <td style={centerCell}>
-                            <InputComponent
-                                type={child.type}
-                                name={`wtf_${child.id}`}
-                                options={child.options}
-                                key={child.id}
-                                customKey={child.id}
-                            />
-                        </td>
-                    </tr>
-                ))}
+            {activeChild.map((child) => child)}
         </>
     );
 };
-{
-    /* {(props.children || false) &&
-    // form.getFieldValue(`wtf_${props.id}`) &&
-    props.children?.map((item) => (
-        <tr
-            style={{
-                backgroundColor:
-                    item.id % 2 === 0 ? " #fffae6" : "",
-            }}
-        >
-            <td style={centerCell}>{}</td>
-            <td style={cellStyle}>{item.rincian}</td>{" "}
-            <td style={centerCell}>
-                <InputComponent
-                    type={item.type}
-                    name={`wtf_${item.id}`}
-                    options={item.options}
-                    key={item.id}
-                />
-            </td>
-        </tr>
-    ))} */
-}
+
 const daftarRincian = [
     {
         id: 2,
@@ -167,7 +162,7 @@ const daftarRincian = [
         children: [
             {
                 id: 27,
-                nomor: 27,
+                nomor: "3c1",
                 rincian: "Jumlah Konsumsi Susu",
                 type: "number",
             },
@@ -187,7 +182,7 @@ const daftarRincian = [
         children: [
             {
                 id: 28,
-                nomor: 28,
+                nomor: "5c1",
                 rincian: "Jumlah Gaji/Upah Pembantu Rumah Tangga",
                 type: "rupiah",
             },
@@ -202,7 +197,7 @@ const daftarRincian = [
         children: [
             {
                 id: 29,
-                nomor: 29,
+                nomor: "6c1",
                 rincian: "Rincian 255 s.d 257 Kolom 5 (Setahun terakhir)",
                 type: "number",
             },
@@ -222,7 +217,7 @@ const daftarRincian = [
         children: [
             {
                 id: 30,
-                nomor: 30,
+                nomor: "8c1",
                 rincian: "Rincian 236+238",
                 type: "number",
             },
@@ -236,14 +231,13 @@ const daftarRincian = [
     },
     {
         id: 10,
-
         nomor: 10,
         rincian: "ADA ART YANG SEDANG BERSEKOLAH? (R610=2)",
         type: "binary",
         children: [
             {
                 id: 31,
-                nomor: 31,
+                nomor: "10c1",
                 rincian: "Rincian 265+270",
                 type: "number",
             },
@@ -273,6 +267,14 @@ const daftarRincian = [
         nomor: 17,
         rincian: "ADA ART YANG MEROKOK? (R1207 = 1 atau 2)",
         type: "binary",
+        children: [
+            {
+                id: 32,
+                nomor: "14c1",
+                rincian: "Rincian 192 kolom 10",
+                type: "number",
+            },
+        ],
     },
     {
         id: 15,
@@ -281,8 +283,8 @@ const daftarRincian = [
         type: "binary",
         children: [
             {
-                id: 32,
-                nomor: 32,
+                id: 33,
+                nomor: "15c1",
                 rincian: "Rincian 263 kolom 5",
                 type: "number",
             },
@@ -299,6 +301,38 @@ const daftarRincian = [
             { label: "[3] Bebas sewa", value: "3" },
             { label: "[4] Dinas", value: "4" },
             { label: "[5] Lainnya", value: "5" },
+        ],
+        children: [
+            {
+                id: 34,
+                nomor: "16c1",
+                rincian: "Rincian 200",
+                type: "number",
+            },
+            {
+                id: 35,
+                nomor: "16c2",
+                rincian: "Rincian 201 + 202",
+                type: "number",
+            },
+            {
+                id: 34,
+                nomor: "16c1",
+                rincian: "Rincian 200",
+                type: "number",
+            },
+            {
+                id: 37,
+                nomor: "16c3",
+                rincian: "Rincian 203",
+                type: "number",
+            },
+            {
+                id: 37,
+                nomor: "16c3",
+                rincian: "Rincian 203",
+                type: "number",
+            },
         ],
     },
     {
@@ -331,14 +365,6 @@ const daftarRincian = [
             { label: "[3] Leding/sumur bor/pompa ", value: "3" },
             { label: "[4] Lainnya", value: "4" },
         ],
-        children: [
-            {
-                id: 33,
-                nomor: 33,
-                rincian: "Rincian 311",
-                type: "number",
-            },
-        ],
     },
     {
         id: 20,
@@ -350,14 +376,6 @@ const daftarRincian = [
             { label: "[2] Listrik PLN tanpa meteran", value: "2" },
             { label: "[3] Listrik non PLN", value: "3" },
             { label: "[4] Bukan listrik", value: "4" },
-        ],
-        children: [
-            {
-                id: 34,
-                nomor: 34,
-                rincian: "Rincian 192 kolom 10",
-                type: "number",
-            },
         ],
     },
     {
@@ -388,15 +406,15 @@ const daftarRincian = [
         type: "binary",
         children: [
             {
-                id: 35,
-                nomor: 35,
+                id: 39,
+                nomor: "23c1",
                 rincian: "Rincian 309",
                 type: "number",
             },
         ],
     },
     {
-        id: 25,
+        id: 24,
         nomor: 19,
         rincian: "MEMILIKI ASURANSI/JAMINAN KESEHATAN? (Blok XI Rincian 1101)",
         type: "binary",
@@ -464,7 +482,12 @@ const Worksheet: React.FC<{
                     <tbody>
                         {/* render rows */}
                         {daftarRincian.map((rincian) =>
-                            renderRow(rincian, form)
+                            renderRow({
+                                props: rincian,
+                                defaultValue: form.getFieldValue(
+                                    `wtf_${rincian.id}`
+                                ),
+                            })
                         )}
                     </tbody>
                 </table>

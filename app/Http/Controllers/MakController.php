@@ -105,7 +105,79 @@ class MakController extends Controller
     {
         try {
             //code...
+            // $data = $request->all();
+            // // cek nilai wtf
+            // $currentWtf = SusenasMak::where('id', $data['id'])->first([
+            //     'wtf_3c1',
+            //     'wtf_5c1',
+            //     'wtf_6c1',
+            //     'wtf_8c1',
+            //     'wtf_14c1',
+            //     'wtf_15c1',
+            //     'wtf_16c1',
+            //     'wtf_16c2',
+            //     'wtf_16c3',
+            //     'wtf_23c1',
+            // ]);
+
+            // // if nilai == 5 set dependency into null 
+            // if (isset($currentWtf['wtf_3c1']) && $data['wtf_3'] == "5") {
+            //     $data['wtf_3c1'] = null;
+            // }
+            // if (isset($currentWtf['wtf_5c1']) && $data['wtf_5'] == "5") {
+            //     $data['wtf_5c1'] = null;
+            // }
+            // if (isset($currentWtf['wtf_6c1']) && $data['wtf_6'] == "5") {
+            //     $data['wtf_6c1'] = null;
+            // }
+            // if (isset($currentWtf['wtf_8c1']) && $data['wtf_8'] == "5") {
+            //     $data['wtf_8c1'] = null;
+            // }
+            // if (isset($currentWtf['wtf_14c1']) && $data['wtf_14'] == "5") {
+            //     $data['wtf_14c1'] = null;
+            // }
+            // if (isset($currentWtf['wtf_15c1']) && $data['wtf_15'] != "1") {
+            //     $data['wtf_15c1'] = null;
+            // }
+            // if (isset($currentWtf['wtf_16c1']) && ($data['wtf_16'] != "1" && $data['wtf_16'] != "3")) {
+            //     $data['wtf_16c1'] = null;
+            // }
+            // if (isset($currentWtf['wtf_16c2']) && $data['wtf_16'] != "2") {
+            //     $data['wtf_16c2'] = null;
+            // }
+            // if (isset($currentWtf['wtf_16c3']) && ($data['wtf_16'] != "5" && $data['wtf_16'] != "4")) {
+            //     $data['wtf_16c3'] = null;
+            // }
+            // if (isset($currentWtf['wtf_23c1']) && $data['wtf_23'] == "5") {
+            //     $data['wtf_23c1'] = null;
+            // }
             $data = $request->all();
+
+            // Columns to check and their corresponding form fields
+            $columnsToCheck = [
+                'wtf_3' => 'wtf_3c1',
+                'wtf_5' => 'wtf_5c1',
+                'wtf_6' => 'wtf_6c1',
+                'wtf_8' => 'wtf_8c1',
+                'wtf_14' => 'wtf_14c1',
+                'wtf_15' => 'wtf_15c1',
+                'wtf_16' => 'wtf_16c1',
+                'wtf_16' => 'wtf_16c2',
+                'wtf_16' => 'wtf_16c3',
+                'wtf_23' => 'wtf_23c1',
+            ];
+
+            $currentWtf = SusenasMak::where('id', $data['id'])->first($columnsToCheck);
+
+            foreach ($columnsToCheck as $inputField => $dependentField) {
+                if (isset($currentWtf[$dependentField]) && $data[$inputField] == "5") {
+                    $data[$dependentField] = null;
+                }
+            }
+
+            // Continue with the rest of your code...
+
+
             $data_update = SusenasMak::findOrFail($data['id']);
             $data_update->update($data);
             $data_update->save();
@@ -149,7 +221,7 @@ class MakController extends Controller
             }
             SusenasMak::where('id', $data['id'])->update(['updated_at' => Date::now()]);
 
-            return response()->json($rekap_art, 200);
+            return response()->json($data, 200);
         } catch (\Throwable $th) {
             throw $th;
         }

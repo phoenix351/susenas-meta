@@ -3,6 +3,7 @@ import { Form, FormInstance, Input, InputNumber, Typography } from "antd"; // Re
 import RupiahInput from "./RupiahInput";
 import { SubTotal } from "@/types";
 import TextRupiah from "./TextRupiah";
+import NumberInput from "./NumberInput";
 
 const { Text } = Typography;
 const tableStyle: React.CSSProperties = {
@@ -101,9 +102,7 @@ const RowKonsumsi: React.FC<{
             </td>
             <td style={data.type === "sub" ? darkCell : cellStyle}>
                 {data.type === "sub" || (
-                    <Form.Item name={`${data.nomor}_beli_volume`}>
-                        <InputNumber min={0} />
-                    </Form.Item>
+                    <NumberInput inputName={`${data.nomor}_beli_volume`} />
                 )}
             </td>
             <td style={cellStyle}>
@@ -141,9 +140,7 @@ const RowKonsumsi: React.FC<{
             </td>
             <td style={data.type === "sub" ? darkCell : cellStyle}>
                 {data.type === "sub" || (
-                    <Form.Item name={`${data.nomor}_produksi_volume`}>
-                        <InputNumber min={0} />
-                    </Form.Item>
+                    <NumberInput inputName={`${data.nomor}_produksi_volume`} />
                 )}
             </td>
             <td style={cellStyle}>
@@ -180,11 +177,7 @@ const RowKonsumsi: React.FC<{
             </td>
             <td style={data.type === "sub" ? darkCell : cellStyle}>
                 {data.type === "sub" || (
-                    <>
-                        <Form.Item name={`${data.nomor}_total_volume`}>
-                            <InputNumber min={0} />
-                        </Form.Item>
-                    </>
+                    <NumberInput inputName={`${data.nomor}_total_volume`} />
                 )}
             </td>
             <td style={rightCell}>
