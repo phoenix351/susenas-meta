@@ -120,7 +120,7 @@ const darkCell: React.CSSProperties = {
 const TabelBlok: React.FC<{
     title: string;
     konten: RowData[];
-    rekapMak: SubTotal[];
+    rekapMak: any;
     calculate: ({
         subKey,
         jenis,

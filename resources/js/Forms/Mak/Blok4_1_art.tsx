@@ -7,6 +7,7 @@ import {
     Image,
     Input,
     InputNumber,
+    Popconfirm,
     Select,
     Space,
     Table,
@@ -21,9 +22,28 @@ import _debounce from "lodash/debounce";
 
 import Art from "./Art";
 import Blok from "@/Components/Blok";
-import { SubTotal } from "@/types";
+import { AnggotaRumahTangga, SubTotal } from "@/types";
 import { router } from "@inertiajs/react";
+import { throttle } from "lodash";
 
+const cellStyle: React.CSSProperties = {
+    borderStyle: "solid",
+    border: "solid 1px black",
+    // width: "100%",
+    whiteSpace: "nowrap",
+
+    padding: "5px",
+};
+const centerCell: React.CSSProperties = {
+    borderStyle: "solid",
+    border: "solid 1px black",
+    // width: "100%",
+    margin: "auto",
+    // backgroundColor: "red",
+    textAlign: "center",
+    padding: "5px",
+};
+// define forms
 const { Text, Title } = Typography;
 
 const Blok4_1: React.FC<{
@@ -47,29 +67,18 @@ const Blok4_1: React.FC<{
     setDaftarArt,
     calculateKalori,
 }) => {
-    const cellStyle: React.CSSProperties = {
-        borderStyle: "solid",
-        border: "solid 1px black",
-        // width: "100%",
-        whiteSpace: "nowrap",
-
-        padding: "5px",
-    };
-    const centerCell: React.CSSProperties = {
-        borderStyle: "solid",
-        border: "solid 1px black",
-        // width: "100%",
-        textAlign: "center",
-        padding: "5px",
-    };
     // konstanta
-    // define forms
     const blok4_1_hal2Finish = (values: any) => {
         console.log({ values });
     };
 
+    // usestate
+
     const [activeKey, setActiveKey] = useState("0");
     const [items, setItems] = useState<any[]>([]);
+    const [listKomoditas, setListKomoditas] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
     const newTabIndex = useRef(1);
     // const [items, setItems] = useState(defaultItems);
 
@@ -84,30 +93,75 @@ const Blok4_1: React.FC<{
                 id_ruta: daftarArt[0].id_ruta,
             });
             // const { id_art } = data;
-            // console.log({ daftarArt });
+            console.log({ data });
 
             const updatedDaftarArt = [
                 ...daftarArt,
                 {
-                    id_art: data.id,
-                    id_ruta: daftarArt[0].id,
+                    id: data.id,
+                    id_ruta: data.id_ruta,
                     nomor_art: newTabIndex.current++,
                     nama: newActiveKey,
                     key: newActiveKey,
-                    rekap: [
-                        { produksi: 0, beli: 0, total: 0 },
-                        { produksi: 0, beli: 0, total: 0 },
-                    ],
+                    rekap: {
+                        12: { produksi: 0, beli: 0, total: 0 },
+                        13: { produksi: 0, beli: 0, total: 0 },
+                    },
                 },
             ];
-            console.log({ updatedDaftarArt });
-            setDaftarArt(updatedDaftarArt);
-
+            // console.log({ updatedDaftarArt });
+            setDaftarArt([...updatedDaftarArt]);
             // Do any synchronous operations relying on the updatedDaftarArt here
 
             setActiveKey(newActiveKey);
         } catch (error) {
             console.error("Error in add function:", error);
+        }
+    };
+    const remove = async (index: number) => {
+        const id_art = artForm.getFieldValue(`${index}-id_art`);
+        if (index === 0) {
+            messageApi.open({
+                content: `anggota ruta pertama tidak boleh dihapus,`,
+                type: "warning",
+                key: id_art,
+                duration: 3,
+            });
+            return;
+        }
+
+        // messageApi.open({
+        //     content: "menghapus anggota rumah tangga...",
+        //     type: "loading",
+        //     key: id_art,
+        // });
+        try {
+            // console.log({ id_art });
+
+            const { data } = await axios.delete(
+                route("entri.mak.art.delete", { id_art: id_art })
+            );
+
+            const updatedDaftarArt = daftarArt.filter(
+                (art: AnggotaRumahTangga) => art.id !== id_art
+            );
+
+            setDaftarArt(updatedDaftarArt);
+            messageApi.open({
+                content: "Berhasil menghapus 1 anggota rumah tangga",
+                type: "success",
+                key: id_art,
+            });
+
+            // Do any synchronous operations relying on the updatedDaftarArt here
+        } catch (error) {
+            console.error("Error in add function:", error);
+            messageApi.open({
+                content: `Terjadi galat ketika menghapus data, tunjukan code ini pada Developer (${error})`,
+                type: "error",
+                key: id_art,
+                duration: 3,
+            });
         }
     };
 
@@ -118,14 +172,9 @@ const Blok4_1: React.FC<{
         updatedArts[index][key] = value.trim();
         setDaftarArt(updatedArts);
     };
-    const handleCellDelete = (id_art: string) => {
-        const updatedArts = [...daftarArt];
-        // console.log({ value });
 
-        setDaftarArt(updatedArts);
-    };
     const debounceCellEdit = _debounce(handleCellEdit, 1000);
-    const debounceCellDelete = _debounce(handleCellDelete, 1000);
+    const debounceCellDelete = throttle(remove, 2000);
 
     // generate art components
     useEffect(() => {
@@ -143,14 +192,38 @@ const Blok4_1: React.FC<{
                     id_ruta={artForm.getFieldValue("id_ruta")}
                     id_art={art.id}
                     calculateKalori={calculateKalori}
+                    konten={listKomoditas}
                 />
             ),
         }));
         setItems([...items]);
     }, [daftarArt]);
+    useEffect(() => {
+        const fetchKomoditasList = async (from: number, to: number) => {
+            const { data } = await axios.get(
+                route("api.mak.komoditas.list", { from: from, to: to })
+            );
+            const konten = data.map((item: any) => ({
+                nomor: item.id,
+                kode_coicop: item.kode_coicop,
+                rincian: item.nama_komoditas,
+                satuan: item.satuan,
+                type: item.type,
+                subKey: item.id_kelompok,
+                // subKey: item.id_kelompok == 13 ? 1 : 0,
+                flagBasket: item.flag_basket,
+            }));
+            // console.log({ konten });
+            setListKomoditas([...konten]);
+            setLoading(false);
+        };
+        fetchKomoditasList(159, 197);
+        // console.log({rekapMak});
+    }, []);
 
     return (
         <Space direction="vertical" style={tabContentStyle}>
+            {contextHolder}
             <Button type="primary" onClick={add}>
                 Tambah Art
             </Button>
@@ -167,7 +240,7 @@ const Blok4_1: React.FC<{
                     {daftarArt.map((art: any, index: number) => (
                         <tr key={index}>
                             <td style={centerCell}>{index + 1}</td>
-                            <td style={cellStyle}>
+                            <td style={centerCell}>
                                 {/* <Typography.Paragraph
                                 editable={{
                                     onChange: (newContent) =>
@@ -181,13 +254,13 @@ const Blok4_1: React.FC<{
                             >
                                 {art.nama}
                             </Typography.Paragraph> */}
-                                <Form.Item
-                                    name={`${index}-id_art`}
-                                    style={{ display: "none" }}
-                                >
+                                <Form.Item name={`${index}-id_art`} hidden>
                                     <Input />
                                 </Form.Item>
-                                <Form.Item name={`${index}-nama`}>
+                                <Form.Item
+                                    name={`${index}-nama`}
+                                    style={{ margin: "auto" }}
+                                >
                                     <Input
                                         placeholder="nama anggota rumah tangga"
                                         onChange={(event: any) =>
@@ -202,12 +275,18 @@ const Blok4_1: React.FC<{
                             </td>
 
                             <td style={centerCell}>
-                                <Button
-                                    onClick={() => debounceCellDelete(art.id)}
-                                    disabled={index === 0}
+                                <Popconfirm
+                                    placement="topLeft"
+                                    title="apakah anda yakin akan menghapus art ini?"
+                                    description="hapus anggota rumah tangga"
+                                    okText="yakin dong"
+                                    cancelText="gajadi"
+                                    onConfirm={() => debounceCellDelete(index)}
                                 >
-                                    Hapus
-                                </Button>
+                                    <Button disabled={index === 0}>
+                                        Hapus
+                                    </Button>
+                                </Popconfirm>
                             </td>
                         </tr>
                     ))}

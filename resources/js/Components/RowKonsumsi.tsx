@@ -134,8 +134,14 @@ const RowKonsumsi: React.FC<{
                 {data.type === "sub" && (
                     <TextRupiah
                         color="red"
-                        value={rekapMak[data.subKey]["beli"]}
+                        value={
+                            rekapMak[data.subKey]
+                                ? rekapMak[data.subKey]["beli"]
+                                : 0
+                        }
+                        // value={0}
                     />
+                    // <Text>{JSON.stringify(rekapMak)}</Text>
                 )}
             </td>
             <td style={data.type === "sub" ? darkCell : cellStyle}>
@@ -171,7 +177,8 @@ const RowKonsumsi: React.FC<{
                 {data.type === "sub" && (
                     <TextRupiah
                         color="red"
-                        value={rekapMak[data.subKey]["produksi"]}
+                        // value={rekapMak[data.subKey]["produksi"] ?? 0}
+                        value={0}
                     />
                 )}
             </td>

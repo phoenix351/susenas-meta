@@ -86,6 +86,8 @@ class SusenasMak extends Model
         'wtf_16c2',
         'wtf_16c3',
         'wtf_23c1',
+        'users_id',
+        'status_dok'
 
     ];
 

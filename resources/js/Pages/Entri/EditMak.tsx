@@ -154,7 +154,7 @@ const cellStyle = {
 };
 
 const scrollToFormItem = (fieldName: string, form: FormInstance) => {
-    console.log({ formValues: form.getFieldsValue(), fieldName });
+    // console.log({ formValues: form.getFieldsValue(), fieldName });
 
     const fieldInstance = form.getFieldInstance(fieldName);
 
@@ -442,14 +442,14 @@ const Mak = ({
         let newrekapMak = [...rekapMak];
 
         daftarArt?.forEach((item, index) => {
-            artForm.setFieldValue(`${index}-id_art`, data.id);
+            artForm.setFieldValue(`${index}-id_art`, item.id);
             artForm.setFieldValue(`${index}-nama`, item.nama);
             // const [form] = Form.useForm();
             // setArtForms([...artForms,form])
         });
 
         const summary = daftarArt?.reduce((summary: any[], item: any) => {
-            item.rekap.forEach((entry: any, index: number) => {
+            Object.values(item.rekap).forEach((entry: any, index: number) => {
                 summary[index] = summary[index] || {
                     beli: 0,
                     produksi: 0,
@@ -498,10 +498,10 @@ const Mak = ({
     useEffect(() => {
         art = art.map((item) => ({
             ...item,
-            rekap: [
-                { produksi: 0, beli: 0, total: 0 },
-                { produksi: 0, beli: 0, total: 0 },
-            ],
+            rekap: {
+                12: { produksi: 0, beli: 0, total: 0 },
+                13: { produksi: 0, beli: 0, total: 0 },
+            },
         }));
         setDaftarArt([...art]);
         if (art.length < 1) {
@@ -514,17 +514,17 @@ const Mak = ({
                     id_ruta: data.id,
                     nama: data.r110,
                     nomor_art: 0,
-                    rekap: [
-                        { produksi: 0, beli: 0, total: 0 },
-                        { produksi: 0, beli: 0, total: 0 },
-                    ],
+                    rekap: {
+                        12: { produksi: 0, beli: 0, total: 0 },
+                        13: { produksi: 0, beli: 0, total: 0 },
+                    },
                 },
             ]);
         } else {
         }
 
         document.addEventListener("keydown", handleKeyPress);
-        console.log({ data });
+        // console.log({ data });
 
         form.setFieldsValue(data);
         form.setFieldValue("wtf_26", garis_kemiskinan);

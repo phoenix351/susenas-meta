@@ -170,14 +170,18 @@ const Blok4_3: React.FC<{
         );
     };
 
-    const [rekapArt, setRekapArt] = useState([
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-    ]);
+    const [rekapArt, setRekapArt] = useState({
+        12: { beli: 0, produksi: 0, total: 0 },
+        13: { beli: 0, produksi: 0, total: 0 },
+    });
+    // const [rekapArt, setRekapArt] = useState([
+    //     { beli: 0, produksi: 0, total: 0 },
+    //     { beli: 0, produksi: 0, total: 0 },
+    // ]);
     const calculateSummary = (data: any) => {
         console.log("call calculate");
-        return data.reduce((summary: any[], item: any) => {
-            item.rekap.forEach((entry: any, index: number) => {
+        let calculate = data.reduce((summary: any[], item: any) => {
+            Object.values(item.rekap).forEach((entry: any, index: number) => {
                 summary[index] = summary[index] || {
                     beli: 0,
                     produksi: 0,
@@ -189,6 +193,10 @@ const Blok4_3: React.FC<{
             });
             return summary;
         }, []);
+        return {
+            12: calculate[0],
+            13: calculate[1],
+        };
     };
 
     useEffect(() => {
@@ -210,8 +218,8 @@ const Blok4_3: React.FC<{
         setRekapArt(summary);
         setRekapMak((rekap: RekapMak[]) => {
             let newRekap = [...rekap];
-            newRekap[12] = summary[0];
-            newRekap[13] = summary[1];
+            newRekap[12] = summary[12];
+            newRekap[13] = summary[13];
             newRekap[14] = newRekap
                 .slice(0, 13)
                 // .filter(([fieldName]: any) => fieldName === "beli");
@@ -291,7 +299,8 @@ const Blok4_3: React.FC<{
                                 />
                                 <TextRupiah
                                     color="red"
-                                    value={art.rekap[0]["beli"]}
+                                    // value={0}
+                                    value={art.rekap[12]["beli"]}
                                 />
                             </td>
                             <td style={cellStyle}>
@@ -301,7 +310,8 @@ const Blok4_3: React.FC<{
                                 />
                                 <TextRupiah
                                     color="red"
-                                    value={art.rekap[0]["produksi"]}
+                                    // value={0}
+                                    value={art.rekap[12]["produksi"]}
                                 />
                             </td>
                             <td style={cellStyle}>
@@ -311,7 +321,8 @@ const Blok4_3: React.FC<{
                                 />
                                 <TextRupiah
                                     color="red"
-                                    value={art.rekap[1]["beli"]}
+                                    // value={0}
+                                    value={art.rekap[13]["beli"]}
                                 />
                             </td>
                             <td style={cellStyle}>
@@ -321,7 +332,8 @@ const Blok4_3: React.FC<{
                                 />
                                 <TextRupiah
                                     color="red"
-                                    value={art.rekap[1]["produksi"]}
+                                    // value={0}
+                                    value={art.rekap[13]["produksi"]}
                                 />
                             </td>
                         </tr>
@@ -337,7 +349,7 @@ const Blok4_3: React.FC<{
                                 />
                                 <TextRupiah
                                     color="red"
-                                    value={rekapArt[0]["beli"]}
+                                    value={rekapArt[12]["beli"]}
                                 />
                             </td>
                             <td style={cellStyle}>
@@ -346,7 +358,7 @@ const Blok4_3: React.FC<{
                                 />
                                 <TextRupiah
                                     color="red"
-                                    value={rekapArt[0]["produksi"]}
+                                    value={rekapArt[12]["produksi"]}
                                 />
                             </td>
                             <td style={cellStyle}>
@@ -355,7 +367,7 @@ const Blok4_3: React.FC<{
                                 />
                                 <TextRupiah
                                     color="red"
-                                    value={rekapArt[1]["beli"]}
+                                    value={rekapArt[13]["beli"]}
                                 />
                             </td>
                             <td style={cellStyle}>
@@ -364,7 +376,7 @@ const Blok4_3: React.FC<{
                                 />
                                 <TextRupiah
                                     color="red"
-                                    value={rekapArt[1]["produksi"]}
+                                    value={rekapArt[13]["produksi"]}
                                 />
                             </td>
                         </tr>

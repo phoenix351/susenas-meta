@@ -75,6 +75,8 @@ Route::middleware('auth')->group(function () {
     route::get('/entri/mak/art', [AnggotaRutaController::class, 'fetch'])->name('entri.mak.art.fetch');
     route::patch('/entri/mak/konsumsi', [MakController::class, 'konsumsi_store'])->name('entri.mak.konsumsi.store');
     route::patch('/entri/mak/konsumsi/art', [MakController::class, 'konsumsi_art_store'])->name('entri.mak.konsumsi_art.store');
+    route::delete('/entri/mak/art/{id_art}', [AnggotaRutaController::class, 'delete'])->name('entri.mak.art.delete');
+
     route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');
     route::get('/api/entri/mak', [MakController::class, 'fetch'])->name('api.entri.mak');
     route::get('/api/mak/konsumsi/art/{id_art}', [MakController::class, 'konsumsi_art_fetch'])->name('api.mak.konsumsi.art');
@@ -111,7 +113,7 @@ Route::middleware('auth')->group(function () {
 
 
     route::get('/', function () {
-        return to_route('dashboard');
+        return to_route('entri');
     })->name('root');
 
 

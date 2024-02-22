@@ -45,6 +45,7 @@ class MakController extends Controller
         try {
             //code...
             $input = $request->all();
+            $input['users_id'] = auth()->user()->id;
             $created_mak = SusenasMak::create($input);
             return response()->json($created_mak, 201);
         } catch (\Throwable $th) {
@@ -77,7 +78,7 @@ class MakController extends Controller
     public function konsumsi_art_fetch($id_art)
     {
         // $konsumsi_ruta = KonsumsiArt::where('id_art', $id_art)->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
-        $data = KonsumsiArt::where('id_art', $id_art)->get();
+        $data = KonsumsiArt::where('id_art', $id_art)->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')->select('konsumsi_art.*', 'komoditas.id_kelompok')->get();
         return response()->json($data, 200);
     }
     public function edit($id)
@@ -170,9 +171,15 @@ class MakController extends Controller
             $currentWtf = SusenasMak::where('id', $data['id'])->first($columnsToCheck);
 
             foreach ($columnsToCheck as $inputField => $dependentField) {
-                if (isset($currentWtf[$dependentField]) && $data[$inputField] == "5") {
-                    $data[$dependentField] = null;
+                try {
+                    //code...
+                    if (isset($currentWtf[$dependentField]) && $data[$inputField] == "5") {
+                        $data[$dependentField] = null;
+                    }
+                } catch (\Throwable $th) {
+                    //throw $th;
                 }
+                continue;
             }
 
             // Continue with the rest of your code...

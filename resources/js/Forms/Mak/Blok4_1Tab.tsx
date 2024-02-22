@@ -35,11 +35,12 @@ const Blok4_1Tab: React.FC<{
                 kode_coicop: item.kode_coicop,
                 rincian: item.nama_komoditas,
                 satuan: item.satuan,
-                type: item.nama_komoditas.toLowerCase().includes("lain")
-                    ? "lain"
-                    : Number(item.kalori) > 0
-                    ? "standar"
-                    : "sub",
+                // type: item.nama_komoditas.toLowerCase().includes("lain")
+                //     ? "lain"
+                //     : Number(item.kalori) > 0
+                //     ? "standar"
+                //     : "sub",
+                type: item.type,
                 subKey: item.id_kelompok,
                 flagBasket: item.flag_basket,
             }));

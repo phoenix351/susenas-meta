@@ -14,16 +14,8 @@ use Illuminate\Database\QueryException;
 class LoginRequest extends FormRequest
 {
     /**
-     * Determine if the user is 
-     * authorized to make this request.
+     * Determine if the user is authorized to make this request.
      */
-    protected $username = 'username';
-    protected $redirectTo = '/dashboard'; // Replace '/dashboard' with your desired redirect path
-
-    public function username()
-    {
-        return 'username';
-    }
     public function authorize(): bool
     {
         return true;
@@ -37,7 +29,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => ['required', 'string'],
+            'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
         ];
     }
@@ -51,14 +43,12 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // dd($this->only('username', 'password'));
         try {
-
-            if (!Auth::attempt($this->only('username', 'password'), $this->boolean('remember'))) {
+            if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
                 RateLimiter::hit($this->throttleKey());
 
                 throw ValidationException::withMessages([
-                    'username' => "Nama Pengguna atau Kata sandi salah !",
+                    'email' => "Email atau Kata sandi salah !",
                 ]);
             }
 
@@ -67,7 +57,7 @@ class LoginRequest extends FormRequest
             // Handle the connection error here
             // You can customize the response or redirect to a specific page
             throw ValidationException::withMessages([
-                'usename' => $e->getMessage(),
+                'email' => $e->getMessage(),
             ]);
         }
     }
@@ -88,7 +78,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'username' => trans('auth.throttle', [
+            'email' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),
@@ -100,6 +90,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->input('username')) . '|' . $this->ip());
+        return Str::transliterate(Str::lower($this->input('email')) . '|' . $this->ip());
     }
 }

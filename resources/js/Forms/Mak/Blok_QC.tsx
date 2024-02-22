@@ -62,7 +62,13 @@ const Blok4_3: React.FC<{
             id: 2,
             value: 0,
         },
-        { rincian: "Jumlah Komoditas Non Makanan", id: 3, value: 0 },
+        {
+            rincian:
+                // "Jumlah Komoditas Non Makanan <b>[Disalin dari dokumen KP Blok III Rincian 305 ]</b>",
+                `Jumlah Komoditas Non Makanan [Disalin dari dokumen KP Blok III Rincian 305 ]`,
+            id: 3,
+            value: 0,
+        },
         { rincian: "Jumlah Semua Komoditas", id: 4, value: 0 },
         { rincian: "Pengeluaran per kapita", id: 5, value: 0 },
     ]);
@@ -113,12 +119,16 @@ const Blok4_3: React.FC<{
                                         width: "100%",
                                         // backgroundColor: "red",
                                     }}
-                                    formatter={(value) =>
-                                        `${value}`.replace(
-                                            /\B(?=(\d{3})+(?!\d))/g,
-                                            ","
-                                        )
-                                    }
+                                    formatter={(value) => {
+                                        const numericValue = Number(value ?? 0);
+                                        const formattedValue = numericValue
+                                            .toFixed(2)
+                                            .replace(
+                                                /\B(?=(\d{3})+(?!\d))/g,
+                                                ","
+                                            );
+                                        return formattedValue;
+                                    }}
                                 />
                             </Form.Item>
                             <Text
@@ -128,7 +138,7 @@ const Blok4_3: React.FC<{
                                     paddingRight: "11px",
                                 }}
                             >
-                                {`${rincian.value}`.replace(
+                                {`${Number(rincian.value).toFixed(2)}`.replace(
                                     /\B(?=(\d{3})+(?!\d))/g,
                                     ","
                                 )}

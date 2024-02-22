@@ -42,7 +42,7 @@ const LoginForm: React.FC = () => {
             messageApi.open({
                 key,
                 type: "error",
-                content: errors.email,
+                content: errors.username,
                 duration: 2,
             });
         }
@@ -61,11 +61,11 @@ const LoginForm: React.FC = () => {
 
     // open errors if any
     useEffect(() => {
-        if (errors.email)
+        if (errors.username)
             messageApi.open({
                 key,
                 type: "error",
-                content: errors.email,
+                content: errors.username,
                 duration: 2,
             });
     }, []);
@@ -94,16 +94,16 @@ const LoginForm: React.FC = () => {
 
                         <Form.Item
                             label={null}
-                            name="email"
+                            name="username"
                             colon={false}
                             rules={[
                                 {
                                     required: true,
-                                    message: "Please input your email!",
+                                    message: "Please input your username!",
                                 },
                             ]}
                         >
-                            <Input type="email" placeholder="nama@bps.go.id" />
+                            <Input placeholder="username" />
                         </Form.Item>
                         <Form.Item
                             label={null}
