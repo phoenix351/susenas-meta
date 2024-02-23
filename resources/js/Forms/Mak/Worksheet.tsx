@@ -163,7 +163,7 @@ const daftarRincian = [
             {
                 id: 27,
                 nomor: "3c1",
-                rincian: "Jumlah Konsumsi Susu",
+                rincian: "Jumlah konsumsi susu (VSEN24.KP Rincian 70 s.d 74)",
                 type: "rupiah",
             },
         ],
@@ -183,7 +183,8 @@ const daftarRincian = [
             {
                 id: 28,
                 nomor: "5c1",
-                rincian: "Jumlah Gaji/Upah Pembantu Rumah Tangga",
+                rincian:
+                    "Jumlah Gaji/Upah pembantu rumah tangga (VSEN24.KP Rincian 277)",
                 type: "rupiah",
             },
         ],
@@ -198,7 +199,8 @@ const daftarRincian = [
             {
                 id: 29,
                 nomor: "6c1",
-                rincian: "Rincian 255 s.d 257 Kolom 5 (Setahun terakhir)",
+                rincian:
+                    "VSEN24.KP Rincian 255 s.d 257 Kolom 5 (Setahun terakhir)",
                 type: "rupiah",
             },
         ],
@@ -218,7 +220,7 @@ const daftarRincian = [
             {
                 id: 30,
                 nomor: "8c1",
-                rincian: "Rincian 236+238",
+                rincian: "VSEN24.KP Rincian 236+238",
                 type: "rupiah",
             },
         ],
@@ -238,7 +240,7 @@ const daftarRincian = [
             {
                 id: 31,
                 nomor: "10c1",
-                rincian: "Rincian 265+270",
+                rincian: "VSEN24.KP Rincian 265 s.d. 270",
                 type: "rupiah",
             },
         ],
@@ -271,7 +273,7 @@ const daftarRincian = [
             {
                 id: 32,
                 nomor: "14c1",
-                rincian: "Rincian 192 kolom 10",
+                rincian: "VSEN24.KP Rincian 192 Kolom 10",
                 type: "rupiah",
             },
         ],
@@ -285,7 +287,7 @@ const daftarRincian = [
             {
                 id: 33,
                 nomor: "15c1",
-                rincian: "Rincian 263 kolom 5",
+                rincian: "VSEN24.KP Rincian 263 Kolom 5",
                 type: "rupiah",
             },
         ],
@@ -306,31 +308,31 @@ const daftarRincian = [
             {
                 id: 34,
                 nomor: "16c1",
-                rincian: "Rincian 200",
+                rincian: "VSEN24.KP Rincian 200",
                 type: "rupiah",
             },
             {
                 id: 35,
                 nomor: "16c2",
-                rincian: "Rincian 201 + 202",
+                rincian: "VSEN24.KP Rincian 201 + 202",
                 type: "rupiah",
             },
             {
                 id: 34,
                 nomor: "16c1",
-                rincian: "Rincian 200",
+                rincian: "VSEN24.KP Rincian 200",
                 type: "rupiah",
             },
             {
                 id: 37,
                 nomor: "16c3",
-                rincian: "Rincian 203",
+                rincian: "VSEN24.KP Rincian 203",
                 type: "rupiah",
             },
             {
                 id: 37,
                 nomor: "16c3",
-                rincian: "Rincian 203",
+                rincian: "VSEN24.KP Rincian 203",
                 type: "rupiah",
             },
         ],
@@ -408,7 +410,7 @@ const daftarRincian = [
             {
                 id: 39,
                 nomor: "23c1",
-                rincian: "Rincian 309",
+                rincian: "VSEN24.KP Rincian 309",
                 type: "rupiah",
             },
         ],
@@ -418,6 +420,14 @@ const daftarRincian = [
         nomor: 19,
         rincian: "MEMILIKI ASURANSI/JAMINAN KESEHATAN? (Blok XI Rincian 1101)",
         type: "binary",
+        children: [
+            {
+                id: 40,
+                nomor: "24c1",
+                rincian: "VSEN24.KP Rincian 311",
+                type: "rupiah",
+            },
+        ],
     },
     {
         id: 26,

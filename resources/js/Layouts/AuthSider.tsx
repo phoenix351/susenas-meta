@@ -12,6 +12,8 @@ import {
     HomeOutlined,
     DesktopOutlined,
     EditOutlined,
+    EyeOutlined,
+    AuditOutlined,
 } from "@ant-design/icons";
 import { User } from "@/types";
 type AuthSiderProps = {
@@ -28,12 +30,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
     handleMenuClick,
 }) => {
     let menuItems = [
-        {
-            key: "dashboard",
-            icon: <DashboardOutlined />,
-            onClick: () => handleMenuClick("dashboard"),
-            label: "Dashboard",
-        },
+        // {
+        //     key: "dashboard",
+        //     icon: <DashboardOutlined />,
+        //     onClick: () => handleMenuClick("dashboard"),
+        //     label: "Dashboard",
+        // },
 
         {
             key: "entri",
@@ -42,7 +44,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
             label: "Entri",
         },
     ];
-    if (user.role !== "basic") {
+    if (user.role === "ADMIN") {
         menuItems = [
             {
                 key: "dashboard",
@@ -56,6 +58,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 icon: <EditOutlined />,
                 onClick: () => handleMenuClick("entri"),
                 label: "Entri",
+            },
+            {
+                key: "periksa",
+                icon: <AuditOutlined />,
+                onClick: () => handleMenuClick("periksa"),
+                label: "Periksa",
             },
         ];
     }

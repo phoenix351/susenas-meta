@@ -103,13 +103,7 @@ Route::middleware('auth')->group(function () {
     route::get('/entri/mak/{id}', [MakController::class, 'edit'])->name('entri.mak.edit');
 
 
-    route::get('/dashboard', function () {
-        Log::info('Showing the user profile for user');
-
-
-        // $kondisi_total = 100;
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
 
 
     route::get('/', function () {

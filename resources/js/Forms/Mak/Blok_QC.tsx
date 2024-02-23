@@ -56,6 +56,11 @@ const Blok4_3: React.FC<{
 
     const [daftarQc, setDaftarQc] = useState<Rincian[]>([
         { rincian: "Kalori per Kapita per Hari", id: 0, value: 0 },
+        {
+            rincian: "Kalori 52 basket komoditas per Kapita per Hari",
+            id: 6,
+            value: 0,
+        },
         { rincian: "Jumlah Komoditas Bahan Makanan/Minuman", id: 1, value: 0 },
         {
             rincian: "Jumlah Komoditas Makanan/Minuman Jadi dan Rokok",
@@ -79,7 +84,7 @@ const Blok4_3: React.FC<{
         // label: number | string;
     }> = ({ rincian, key }) => {
         return (
-            <tr>
+            <tr key={key}>
                 <td style={{ ...centerCell, width: "30px" }}>{key + 1}</td>
                 <td style={{ ...cellStyle, width: "auto" }}>
                     {rincian.rincian}
@@ -88,17 +93,11 @@ const Blok4_3: React.FC<{
                 <td
                     style={{ ...cellStyle, width: "150px", textAlign: "right" }}
                 >
-                    {key === 5 ? (
+                    {rincian.id === 5 ? (
                         <>
                             <RupiahInput
                                 key={key}
                                 inputName={`blokqc_${rincian.id}`}
-                            />
-                            <TextRupiah
-                                value={Math.round(
-                                    rekapMak[17].total / daftarArt.length
-                                )}
-                                color="red"
                             />
                         </>
                     ) : (
@@ -120,7 +119,7 @@ const Blok4_3: React.FC<{
                                         // backgroundColor: "red",
                                     }}
                                     formatter={(value) => {
-                                        const numericValue = Number(value ?? 0);
+                                        const numericValue = Number(value) ?? 0;
                                         const formattedValue = numericValue
                                             .toFixed(2)
                                             .replace(
@@ -131,7 +130,7 @@ const Blok4_3: React.FC<{
                                     }}
                                 />
                             </Form.Item>
-                            <Text
+                            {/* <Text
                                 style={{
                                     color: "red",
                                     paddingLeft: "11px",
@@ -142,7 +141,7 @@ const Blok4_3: React.FC<{
                                     /\B(?=(\d{3})+(?!\d))/g,
                                     ","
                                 )}
-                            </Text>
+                            </Text> */}
                         </Space>
                     )}
                 </td>
@@ -168,12 +167,23 @@ const Blok4_3: React.FC<{
         );
 
         let newQc = [...daftarQc];
-        newQc[0].value = data.kalori_total;
+        newQc[0].value = data.kalori_total / daftarArt.length / 7;
         newQc[1].value = data.jumlah_komoditas_bahan_makanan;
         newQc[2].value = data.jumlah_komoditas_makanan_jadi_rokok;
         newQc[3].value = form.getFieldValue("blokqc_3");
         newQc[4].value = newQc[1].value + newQc[2].value + newQc[3].value;
+        newQc[5].value = data.pengeluaran / daftarArt.length;
+        newQc[6].value = data.kalori_basket / 7;
         setDaftarQc([...newQc]);
+        form.setFieldsValue({
+            blokqc_0: newQc[0].value,
+            blokqc_1: newQc[1].value,
+            blokqc_2: newQc[2].value,
+            blokqc_4: newQc[4].value,
+            blokqc_5: newQc[5].value,
+            blokqc_6: newQc[6].value,
+        });
+
         // newQc[2] = data.jumlah_komoditas_makanan_jadi_rokok;
     };
 

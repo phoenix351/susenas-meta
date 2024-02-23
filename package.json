@@ -28,7 +28,6 @@
         "vite": "^4.0.0"
     },
     "dependencies": {
-        "ant-table-extensions": "^2.0.0",
         "antd": "^5.6.0",
         "echarts-for-react": "^3.0.2",
         "lodash": "^4.17.21",

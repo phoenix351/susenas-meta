@@ -66,6 +66,13 @@ const Blok4_3: React.FC<{
         backgroundColor: "#636f83",
         padding: "5px",
     };
+    const rightCell: React.CSSProperties = {
+        borderStyle: "solid",
+        border: "solid 1px black",
+        // width: "100%",
+        textAlign: "right",
+        padding: "5px",
+    };
     const centerCell: React.CSSProperties = {
         borderStyle: "solid",
         border: "solid 1px black",
@@ -118,7 +125,7 @@ const Blok4_3: React.FC<{
                 <td style={centerCell}>{rincian.nomor}</td>
                 <td style={cellStyle}>{rincian.rincian}</td>
 
-                <td style={cellStyle}>
+                <td style={rightCell}>
                     {rincian.id < 16 && (
                         <>
                             <RupiahInput
@@ -133,7 +140,7 @@ const Blok4_3: React.FC<{
                         </>
                     )}
                 </td>
-                <td style={cellStyle}>
+                <td style={rightCell}>
                     {rincian.id < 16 && (
                         <>
                             <RupiahInput
@@ -150,7 +157,7 @@ const Blok4_3: React.FC<{
                         </>
                     )}
                 </td>
-                <td style={cellStyle}>
+                <td style={rightCell}>
                     <>
                         <RupiahInput
                             key={key}
@@ -292,7 +299,7 @@ const Blok4_3: React.FC<{
                                 </Form.Item>
                             </td>
 
-                            <td style={cellStyle}>
+                            <td style={rightCell}>
                                 <RupiahInput
                                     inputName={`blok4_31_${index}_mak_beli`}
                                     initialValue={art.mak_beli}
@@ -303,7 +310,7 @@ const Blok4_3: React.FC<{
                                     value={art.rekap[12]["beli"]}
                                 />
                             </td>
-                            <td style={cellStyle}>
+                            <td style={rightCell}>
                                 <RupiahInput
                                     inputName={`blok4_31_${index}_mak_produksi`}
                                     initialValue={art.mak_produksi}
@@ -314,7 +321,7 @@ const Blok4_3: React.FC<{
                                     value={art.rekap[12]["produksi"]}
                                 />
                             </td>
-                            <td style={cellStyle}>
+                            <td style={rightCell}>
                                 <RupiahInput
                                     inputName={`blok4_31_${index}_rokok_beli`}
                                     initialValue={art.rokok_beli}
@@ -325,7 +332,7 @@ const Blok4_3: React.FC<{
                                     value={art.rekap[13]["beli"]}
                                 />
                             </td>
-                            <td style={cellStyle}>
+                            <td style={rightCell}>
                                 <RupiahInput
                                     inputName={`blok4_31_${index}_rokok_produksi`}
                                     initialValue={art.rokok_produksi}
@@ -343,7 +350,7 @@ const Blok4_3: React.FC<{
                             <td style={cellStyle}></td>
                             <td style={cellStyle}>JUMLAH</td>
 
-                            <td style={cellStyle}>
+                            <td style={rightCell}>
                                 <RupiahInput
                                     inputName={`blok4_31_jumlah_mak_beli`}
                                 />
@@ -352,7 +359,7 @@ const Blok4_3: React.FC<{
                                     value={rekapArt[12]["beli"]}
                                 />
                             </td>
-                            <td style={cellStyle}>
+                            <td style={rightCell}>
                                 <RupiahInput
                                     inputName={`blok4_31_jumlah_mak_produksi`}
                                 />
@@ -361,7 +368,7 @@ const Blok4_3: React.FC<{
                                     value={rekapArt[12]["produksi"]}
                                 />
                             </td>
-                            <td style={cellStyle}>
+                            <td style={rightCell}>
                                 <RupiahInput
                                     inputName={`blok4_31_jumlah_rokok_beli`}
                                 />
@@ -370,7 +377,7 @@ const Blok4_3: React.FC<{
                                     value={rekapArt[13]["beli"]}
                                 />
                             </td>
-                            <td style={cellStyle}>
+                            <td style={rightCell}>
                                 <RupiahInput
                                     inputName={`blok4_31_jumlah_rokok_produksi`}
                                 />

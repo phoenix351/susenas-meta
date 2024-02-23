@@ -9,7 +9,7 @@ const TextRupiah: React.FC<{ value: number; color: string }> = ({
     return (
         <Space
             style={{
-                width: "100%",
+                // width: "100%",
                 textAlign: "right",
                 justifyContent: "end",
             }}

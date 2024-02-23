@@ -4,6 +4,7 @@ import TabelBlok from "@/Components/TabelBlok";
 import { useEffect, useState } from "react";
 import { SubTotal } from "@/types";
 import axios from "axios";
+import NumberInput from "@/Components/NumberInput";
 
 const { Text, Title } = Typography;
 
@@ -19,8 +20,9 @@ const Blok4_1Tab: React.FC<{
     }) => void;
     from: number;
     to: number;
+    hal: number;
     // record: any;
-}> = ({ form, rekapMak, calculate, from, to }) => {
+}> = ({ form, rekapMak, calculate, from, to, hal }) => {
     //    const konten =
     const [listKomoditas, setListKomoditas] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -44,7 +46,7 @@ const Blok4_1Tab: React.FC<{
                 subKey: item.id_kelompok,
                 flagBasket: item.flag_basket,
             }));
-            console.log({ konten });
+            // console.log({ konten });
             setListKomoditas([...konten]);
             setLoading(false);
         };
@@ -64,12 +66,17 @@ const Blok4_1Tab: React.FC<{
                     Jumlah komoditas bahan makanan dan bahan minuman terisi pada
                     halaman ini
                 </Text>
-                <Form.Item style={{ margin: "auto" }} name="hal2_jml_komoditas">
+                {/* <Form.Item
+                    style={{ margin: "auto" }}
+                    name={`hal${hal}_jml_komoditas`}
+                >
                     <InputNumber
                         max={30}
                         style={{ width: "40px" }}
                     ></InputNumber>
-                </Form.Item>
+                </Form.Item> */}
+
+                <NumberInput inputName={`hal${hal}_jml_komoditas`} />
             </Space>
 
             <TabelBlok

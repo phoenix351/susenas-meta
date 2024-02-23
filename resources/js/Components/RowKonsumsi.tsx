@@ -105,7 +105,7 @@ const RowKonsumsi: React.FC<{
                     <NumberInput inputName={`${data.nomor}_beli_volume`} />
                 )}
             </td>
-            <td style={cellStyle}>
+            <td style={rightCell}>
                 <RupiahInput
                     inputName={`${data.type === "sub" ? "jumlah" : ""}${
                         data.nomor
@@ -149,7 +149,7 @@ const RowKonsumsi: React.FC<{
                     <NumberInput inputName={`${data.nomor}_produksi_volume`} />
                 )}
             </td>
-            <td style={cellStyle}>
+            <td style={rightCell}>
                 <RupiahInput
                     inputName={`${data.type === "sub" ? "jumlah" : ""}${
                         data.nomor

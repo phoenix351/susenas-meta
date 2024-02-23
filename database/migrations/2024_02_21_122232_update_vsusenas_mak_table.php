@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('wtf_16c2')->nullable();
             $table->integer('wtf_16c3')->nullable();
             $table->integer('wtf_23c1')->nullable();
+            $table->integer('wtf_24c1')->nullable();
         });
     }
     
@@ -44,6 +45,7 @@ return new class extends Migration
                 $table->dropColumn('wtf_16c2');
                 $table->dropColumn('wtf_16c3');
                 $table->dropColumn('wtf_23c1');
+                $table->dropColumn('wtf_24c1');
             });
             //code...
         } catch (\Throwable $th) {

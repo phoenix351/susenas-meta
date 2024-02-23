@@ -1,19 +1,7 @@
-import {
-    Button,
-    Divider,
-    Form,
-    FormInstance,
-    Input,
-    Select,
-    SelectProps,
-    Space,
-    Upload,
-    message,
-} from "antd";
-import { useEffect, useRef, useState } from "react";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { Button, Form, FormInstance, Select, message } from "antd";
+import { useEffect, useState } from "react";
+import { ReloadOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { SelectionItem } from "antd/es/table/interface";
 
 const EntriIntiForm: React.FC<{
     form: FormInstance;
@@ -25,6 +13,7 @@ const EntriIntiForm: React.FC<{
     const daftarProv: {}[] = [{ label: "[71] SULAWESI UTARA", value: "71" }];
     const [daftarKabKot, setDaftarKabKot] = useState([]);
     const [daftarSemester, setDaftarSemester] = useState([]);
+    const [kabkotDisable, setKabkotDisable] = useState(true);
     const [daftarNks, setDaftarNks] = useState([]);
 
     const fetchKabkot = async () => {
@@ -35,7 +24,11 @@ const EntriIntiForm: React.FC<{
             label: `[${item.kode_kabkot}] ${item.kabkot}`,
             value: item.kode_kabkot,
         }));
-        form.setFieldValue("kode_kabkot", data.kode_kabkot);
+        if (data.kode_kabkot === "00") {
+            setKabkotDisable(false);
+        } else {
+            form.setFieldValue("kode_kabkot", data.kode_kabkot);
+        }
         setDaftarKabKot(daftarKabkot);
     };
     const fetchNks = async () =>
@@ -101,7 +94,7 @@ const EntriIntiForm: React.FC<{
                     <Select
                         allowClear
                         showSearch
-                        disabled
+                        disabled={kabkotDisable}
                         optionFilterProp="label"
                         options={daftarKabKot}
                         // disabled={kabkotDisable}
@@ -145,7 +138,7 @@ const EntriIntiForm: React.FC<{
                 </Form.Item>
 
                 <Button type="primary" onClick={() => form.submit()}>
-                    Refresh
+                    <ReloadOutlined /> Refresh
                 </Button>
             </Form>
         </>

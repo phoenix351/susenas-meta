@@ -26,6 +26,8 @@ import Blok_QC from "@/Forms/Mak/Blok_QC";
 import {
     ArrowLeftOutlined,
     AuditOutlined,
+    ContainerOutlined,
+    DollarOutlined,
     LeftCircleOutlined,
     SaveOutlined,
 } from "@ant-design/icons";
@@ -527,10 +529,19 @@ const Mak = ({
         // console.log({ data });
 
         form.setFieldsValue(data);
+        console.log({ data });
+
         form.setFieldValue("wtf_26", garis_kemiskinan);
         // console.log({ art });
 
-        blok4_1Form.setFieldsValue({ id_ruta: data.id });
+        blok4_1Form.setFieldsValue({
+            id_ruta: data.id,
+            hal10_jml_komoditas: data.hal10_jml_komoditas ?? undefined,
+            hal8_jml_komoditas: data.hal8_jml_komoditas ?? undefined,
+            hal6_jml_komoditas: data.hal6_jml_komoditas ?? undefined,
+            hal4_jml_komoditas: data.hal4_jml_komoditas ?? undefined,
+            hal2_jml_komoditas: data.hal2_jml_komoditas ?? undefined,
+        });
         // console.log({ data, konsumsi_ruta });
         const daftarSub = [1, 8, 16];
         let konsumsiRutaValues = konsumsi_ruta.map((item) => ({
@@ -705,6 +716,7 @@ const Mak = ({
                                         ...data.evaluasi_basket,
                                     ];
                                     setWarningList([...newWarningList]);
+                                    // console.log({ newWarningList });
 
                                     messageApi.open({
                                         content: "revalidsai selesai",
@@ -721,8 +733,9 @@ const Mak = ({
                                 }
                             }}
                         >
-                            <AuditOutlined />
-                            Evaluasi (RH dan Basket Komoditas)
+                            {/* <ContainerOutline /> */}
+                            <DollarOutlined />
+                            Evaluasi Range Harga
                         </Button>
                     </Space>
                 </Space>
@@ -884,9 +897,11 @@ const columns = [
         render: (text: any, record: any, index: number) => index + 1,
     },
     {
-        title: "Kode Komoditas",
-        dataIndex: "id_komoditas",
-        key: "id_komoditas",
+        title: "Komoditas",
+        dataIndex: "komoditas",
+        key: "komoditas",
+        render: (_: any, record: any) =>
+            `[${record.id_komoditas}] ${record.nama_komoditas}`,
     },
     {
         title: "Harga per Satuan",
@@ -901,11 +916,11 @@ const columns = [
         dataIndex: "rincian",
         key: "rincian",
         render: (text: any, record: any) => (
-            <Space direction="horizontal">
+            <Text>
                 {record.rincian}
                 (<TextRupiah value={record.min} color={"red"} /> s.d
                 <TextRupiah value={record.max} color={"red"} />)
-            </Space>
+            </Text>
         ),
     },
 ];

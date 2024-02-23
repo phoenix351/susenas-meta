@@ -18,6 +18,11 @@ class SusenasMak extends Model
         'wtf_3', 'wtf_4', 'wtf_5', 'wtf_6', 'wtf_7', 'wtf_8', 'wtf_9', 'wtf_10',
         'wtf_11', 'wtf_12', 'wtf_13', 'wtf_14', 'wtf_15', 'wtf_16', 'wtf_17', 'wtf_18',
         'wtf_19', 'wtf_20', 'wtf_21', 'wtf_22', 'wtf_23', 'wtf_24', 'wtf_25',
+        'hal10_jml_komoditas',
+        'hal8_jml_komoditas',
+        'hal6_jml_komoditas',
+        'hal4_jml_komoditas',
+        'hal2_jml_komoditas',
         "blok4_31_jumlah_mak_beli",
         "blok4_31_jumlah_mak_produksi",
         "blok4_31_jumlah_rokok_beli",
@@ -76,6 +81,7 @@ class SusenasMak extends Model
         "blokqc_3",
         "blokqc_4",
         "blokqc_5",
+        "blokqc_6",
         'wtf_3c1',
         'wtf_5c1',
         'wtf_6c1',
@@ -86,6 +92,7 @@ class SusenasMak extends Model
         'wtf_16c2',
         'wtf_16c3',
         'wtf_23c1',
+        'wtf_24c1',
         'users_id',
         'status_dok'
 

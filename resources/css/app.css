@@ -67,4 +67,7 @@ section .air.air4 {
     text-align: right;
 }
 
+.custom-input-number .ant-input-number-handler-wrap {
+    display: none;
+}
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,900;1,900&display=swap");

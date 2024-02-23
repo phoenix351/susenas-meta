@@ -7,6 +7,7 @@ import { Button, Form, Space, Table, message } from "antd";
 import EntriIntiForm from "@/Forms/EntriIntiSearch";
 import axios from "axios";
 import { PageProps } from "@/types";
+import { PlusCircleOutlined } from "@ant-design/icons";
 
 const Dashboard = ({
     data_susenas,
@@ -72,9 +73,10 @@ const Dashboard = ({
 
     const columns = [
         {
-            title: "Nomor",
+            title: "No",
             dataIndex: "id",
             key: "id",
+            render: (_: any, rec: any, index: number) => index + 1,
         },
         {
             title: "Kecamatan",
@@ -112,12 +114,9 @@ const Dashboard = ({
         },
         {
             title: "Status",
-            dataIndex: "status",
-            key: "status",
-            render: (value: number) => {
-                const statusElement = Status[value as keyof typeof Status];
-                return statusElement || <span>No Status</span>;
-            },
+            dataIndex: "status_dok",
+            key: "status_dok",
+            render: (value: any) => <Button>{value}</Button>,
         },
         {
             title: "Entri",
@@ -159,9 +158,10 @@ const Dashboard = ({
                 <Space style={{ width: "100%", justifyContent: "end" }}>
                     <Button
                         type="primary"
+                        disabled={!cariForm.getFieldValue("nks")}
                         onClick={() => router.visit(route("entri.mak.create"))}
                     >
-                        Tambah Ruta
+                        <PlusCircleOutlined /> Tambah Ruta
                     </Button>
                 </Space>
                 <Table dataSource={daftarSampel} columns={columns} />;

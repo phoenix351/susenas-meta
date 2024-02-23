@@ -40,13 +40,99 @@ class MakController extends Controller
 
         return Inertia::render('Entri/Inti');
     }
+    public function dashboard()
+    {
+        // $rekap = SusenasMak::select(
+        //     'vsusenas_mak.kode_prov',
+        //     'vsusenas_mak.kode_kabkot',
+        //     'vsusenas_mak.kode_kec',
+        //     'vsusenas_mak.kode_desa',
+        //     'vsusenas_mak.kode_bs4',
+        //     'master_wilayah.kec',
+        //     'master_wilayah.kabkot',
+        //     'master_wilayah.desa',
+        //     'master_wilayah.klas'
+        // )
+        //     ->join('master_wilayah', function ($join) {
+        //         $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
+        //             ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
+        //             ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
+        //             ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
+        //     })
+        //     ->where('vsusenas_mak.kode_kabkot', '01')
+        //     ->groupBy(
+        //         'vsusenas_mak.kode_prov',
+        //         'vsusenas_mak.kode_kabkot',
+        //         'vsusenas_mak.kode_kec',
+        //         'vsusenas_mak.kode_desa',
+        //         'vsusenas_mak.kode_bs4',
+        //         'master_wilayah.kec',
+        //         'master_wilayah.kabkot',
+        //         'master_wilayah.desa',
+        //         'master_wilayah.klas'
+        //     )
+        //     ->selectRaw('count(distinct vsusenas_mak.id) as jumlah_dok')
+        //     ->get();
+        $kode_kabkot = auth()->user()->kode_kabkot;
+
+
+        $rekap = DB::table('master_wilayah')
+            ->select(
+                'master_wilayah.kode_prov',
+                'master_wilayah.kode_kabkot',
+                'master_wilayah.kode_kec',
+                'master_wilayah.kode_desa',
+                'master_wilayah.kode_bs4',
+                'master_wilayah.kec',
+                'master_wilayah.kabkot',
+                'master_wilayah.desa',
+                'master_wilayah.klas',
+                DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok')
+            )
+            ->leftJoin('vsusenas_mak', function ($join) {
+                $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
+                    ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
+                    ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
+                    ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa')
+                    ->on('master_wilayah.kode_bs4', '=', 'vsusenas_mak.kode_bs4');
+            })
+            ->groupBy(
+                'master_wilayah.kode_prov',
+                'master_wilayah.kode_kabkot',
+                'master_wilayah.kode_kec',
+                'master_wilayah.kode_desa',
+                'master_wilayah.kode_bs4',
+                'master_wilayah.kec',
+                'master_wilayah.kabkot',
+                'master_wilayah.desa',
+                'master_wilayah.klas'
+            )
+            // ->where('master_wilayah.kode_kabkot', $kode_kabkot)
+            ->when($kode_kabkot !== "00", function ($query) use ($kode_kabkot) {
+                $query->where('master_wilayah.kode_kabkot', $kode_kabkot);
+            })
+            ->get();
+
+        $data = ['data' => $rekap];
+
+        // $kondisi_total = 100;
+        return Inertia::render('Dashboard', $data);
+    }
     public function store(Request $request)
     {
         try {
             //code...
             $input = $request->all();
             $input['users_id'] = auth()->user()->id;
+            // create mak
             $created_mak = SusenasMak::create($input);
+            // create default art
+            $art = AnggotaRuta::create([
+                'id_ruta' => $created_mak->id,
+                'nama' => 'art default',
+                'nomor_art' => 0,
+            ]);
+
             return response()->json($created_mak, 201);
         } catch (\Throwable $th) {
             throw $th;
@@ -166,6 +252,7 @@ class MakController extends Controller
                 'wtf_16' => 'wtf_16c2',
                 'wtf_16' => 'wtf_16c3',
                 'wtf_23' => 'wtf_23c1',
+                'wtf_24' => 'wtf_24c1',
             ];
 
             $currentWtf = SusenasMak::where('id', $data['id'])->first($columnsToCheck);
@@ -244,6 +331,7 @@ class MakController extends Controller
 
                 $splitted = explode('_', $key);
                 if ($key == "id_ruta") continue;
+                if (strpos($key, "komoditas")) continue;
                 if (sizeof($splitted) == 2) {
                     $nama_var = $splitted[1];
                 } else {
@@ -286,9 +374,17 @@ class MakController extends Controller
             }
 
             Konsumsi::upsert($baru, ['id_komoditas', 'id_ruta']);
-            SusenasMak::where('id', $id_ruta)->update(['updated_at' => Date::now()]);
+            $newMak = [
+                'hal10_jml_komoditas' => isset($input['hal10_jml_komoditas']) ? $input['hal10_jml_komoditas'] : null,
+                'hal8_jml_komoditas' => isset($input['hal8_jml_komoditas']) ? $input['hal8_jml_komoditas'] : null,
+                'hal6_jml_komoditas' => isset($input['hal6_jml_komoditas']) ? $input['hal6_jml_komoditas'] : null,
+                'hal4_jml_komoditas' => isset($input['hal4_jml_komoditas']) ? $input['hal4_jml_komoditas'] : null,
+                'hal2_jml_komoditas' => isset($input['hal2_jml_komoditas']) ? $input['hal2_jml_komoditas'] : null,
+                'updated_at' => Date::now()
+            ];
+            SusenasMak::where('id', $id_ruta)->update($newMak);
             // 
-            return response()->json($baru, 201);
+            return response()->json($newMak, 201);
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -364,13 +460,17 @@ class MakController extends Controller
         try {
             //code...
             // get all konsumsi
+            $komoditas_basket = Komoditas::where('flag_basket', 1)->pluck('id');
             $kalori_total = 0;
+            $kalori_basket = 0;
+            $pengeluaran = 0;
+
 
 
             $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
                 $query->where('volume_beli', '>', '0')
                     ->orWhere('volume_produksi', '>', '0');
-            })->get(['id_komoditas', 'volume_beli', 'volume_produksi']);
+            })->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
 
             $konsumsi_art = KonsumsiArt::where('anggota_ruta.id_ruta', $id_ruta)
                 ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
@@ -378,23 +478,37 @@ class MakController extends Controller
                     $query->where('volume_beli', '>', '0')
                         ->orWhere('volume_produksi', '>', '0');
                 })
-                ->get(['id_komoditas', 'volume_beli', 'volume_produksi']);
+                ->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
             foreach ($konsumsi_ruta as $key => $value) {
                 # code...
                 // ambil kalori dari tabel 
                 $kalori = Komoditas::where('id', $value['id_komoditas'])->value('kalori');
                 $kalori_total += $kalori * ($value['volume_beli'] + $value['volume_produksi']);
+                $pengeluaran += ($value['harga_beli'] + $value['harga_produksi']);
+
+                $is_basket = $komoditas_basket->contains($value['id_komoditas']);
+                if ($is_basket) {
+                    $kalori_basket += $kalori;
+                }
             }
             foreach ($konsumsi_art as $key => $value) {
                 # code...
                 // ambil kalori dari tabel 
                 $kalori = Komoditas::where('id', $value['id_komoditas'])->value('kalori');
                 $kalori_total += $kalori * ($value['volume_beli'] + $value['volume_produksi']);
+                $is_basket = $komoditas_basket->contains($value['id_komoditas']);
+                $pengeluaran += ($value['harga_beli'] + $value['harga_produksi']);
+
+                if ($is_basket) {
+                    $kalori_basket += $kalori;
+                }
             }
             $data = [
                 // 'konsumsi_ruta' => $konsumsi_ruta,
                 // 'konsumsi_art' => $konsumsi_art,
                 'kalori_total' => $kalori_total,
+                'kalori_basket' => $kalori_basket,
+                'pengeluaran' => $pengeluaran,
                 'jumlah_komoditas_bahan_makanan' => sizeof($konsumsi_ruta),
                 'jumlah_komoditas_makanan_jadi_rokok' => sizeof($konsumsi_art),
                 'id_ruta' => $id_ruta,
@@ -427,7 +541,9 @@ class MakController extends Controller
             $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
                 $query->where('harga_beli', '>', '0')
                     ->orWhere('harga_produksi', '>', '0');
-            })->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi']);
+            })
+                ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
+                ->get(['konsumsi.id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi', 'nama_komoditas']);
 
             $konsumsi_art = KonsumsiArt::where('anggota_ruta.id_ruta', $id_ruta)
                 ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
@@ -435,10 +551,12 @@ class MakController extends Controller
                     $query->where('harga_beli', '>', '0')
                         ->orWhere('harga_produksi', '>', '0');
                 })
-                ->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi']);
+                ->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')
+                ->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi', 'nama_komoditas']);
             foreach ($konsumsi_ruta as $key => $value) {
                 // ketika ada komoditas basket maka unset komdoditas dari array
                 $id_komoditas = $value['id_komoditas'];
+                $nama_komoditas = $value['nama_komoditas'];
                 if (in_array($id_komoditas, $komoditas_basket)) {
                     $key = array_search($id_komoditas, $komoditas_basket);
 
@@ -454,6 +572,7 @@ class MakController extends Controller
                 $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
                 $feedback = [
                     'id_komoditas' => $id_komoditas,
+                    'nama_komoditas' => $nama_komoditas,
                     'rincian' => '',
                     'min' => $range_harga->min,
                     'max' => $range_harga->max,
@@ -492,6 +611,8 @@ class MakController extends Controller
                 # code...
                 // ambil kalori dari tabel 
                 $id_komoditas = $value['id_komoditas'];
+                $nama_komoditas = $value['nama_komoditas'];
+
 
                 if (in_array($id_komoditas, $komoditas_basket)) {
                     $key = array_search($id_komoditas, $komoditas_basket);
@@ -506,6 +627,7 @@ class MakController extends Controller
                 $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
                 $feedback = [
                     'id_komoditas' => $id_komoditas,
+                    'nama_komoditas' => $nama_komoditas,
                     'rincian' => '',
                     'min' => $range_harga->min,
                     'max' => $range_harga->max,

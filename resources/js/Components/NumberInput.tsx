@@ -34,7 +34,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
     return (
         <Form.Item
             name={inputName}
-            initialValue={initialValue ? initialValue : 0}
+            initialValue={initialValue ?? undefined}
             style={{ marginBottom: "4px" }}
         >
             <InputNumber

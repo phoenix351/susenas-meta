@@ -762,16 +762,7 @@
   dependencies:
     "color-convert" "^1.9.0"
 
-"ant-table-extensions@^2.0.0":
-  "integrity" "sha512-G6CQZIbrPg7k7peeTbYU9l+ELJmC7oAon9MbB9vscqibBVYO5eLanp6SnKXuG/eSnfQVG0nja6pKJZ1SxPQj2w=="
-  "resolved" "https://registry.npmjs.org/ant-table-extensions/-/ant-table-extensions-2.0.0.tgz"
-  "version" "2.0.0"
-  dependencies:
-    "fuse.js" "^6.6.2"
-    "lodash" "^4.17.21"
-    "papaparse" "^5.4.1"
-
-"antd@^5.6.0", "antd@>=4.x":
+"antd@^5.6.0":
   "integrity" "sha512-VW8c3pOsSxjIdpn/fyicaXHNjG0lYKb2xzi4pLwmYuChUl6P92S5MfrhB00XQY4TWgsfBucdgX8XSoiLCTRTCg=="
   "resolved" "https://registry.npmjs.org/antd/-/antd-5.6.0.tgz"
   "version" "5.6.0"
@@ -1213,11 +1204,6 @@
   "resolved" "https://registry.npmjs.org/function-bind/-/function-bind-1.1.1.tgz"
   "version" "1.1.1"
 
-"fuse.js@^6.6.2":
-  "integrity" "sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA=="
-  "resolved" "https://registry.npmjs.org/fuse.js/-/fuse.js-6.6.2.tgz"
-  "version" "6.6.2"
-
 "gensync@^1.0.0-beta.2":
   "integrity" "sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg=="
   "resolved" "https://registry.npmjs.org/gensync/-/gensync-1.0.0-beta.2.tgz"
@@ -1522,11 +1508,6 @@
   "version" "1.4.0"
   dependencies:
     "wrappy" "1"
-
-"papaparse@^5.4.1":
-  "integrity" "sha512-HipMsgJkZu8br23pW15uvo6sib6wne/4woLZPlFf3rpDyMe9ywEXUsuD7+6K9PRkJlVT51j/sCOYDKGGS3ZJrw=="
-  "resolved" "https://registry.npmjs.org/papaparse/-/papaparse-5.4.1.tgz"
-  "version" "5.4.1"
 
 "path-is-absolute@^1.0.0":
   "integrity" "sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg=="

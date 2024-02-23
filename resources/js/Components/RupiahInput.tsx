@@ -33,7 +33,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     return (
         <Form.Item
             name={inputName}
-            initialValue={initialValue ? initialValue : 0}
+            initialValue={initialValue ?? undefined}
             style={{ marginBottom: "4px" }}
         >
             <InputNumber
@@ -41,6 +41,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
                 readOnly={editable ? editable : false}
                 style={{ width: "100%", textAlign: "right" }}
                 min={0}
+                max={1000000000}
                 formatter={(value: any) =>
                     `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 }

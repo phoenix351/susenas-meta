@@ -105,6 +105,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1Tab
                                 from={1}
                                 to={34}
+                                hal={2}
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
@@ -117,6 +118,7 @@ const Blok4_1: React.FC<{
                         children: (
                             <Blok4_1Tab
                                 from={35}
+                                hal={4}
                                 to={62}
                                 form={form}
                                 calculate={calculate}
@@ -131,6 +133,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1Tab
                                 from={63}
                                 to={94}
+                                hal={6}
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
@@ -144,6 +147,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1Tab
                                 from={95}
                                 to={127}
+                                hal={8}
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
@@ -157,6 +161,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1Tab
                                 from={128}
                                 to={159}
+                                hal={10}
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
