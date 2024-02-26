@@ -3,11 +3,19 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { useEffect, useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
-import { Button, Form, Space, Table, message } from "antd";
+import { Button, Form, Popconfirm, Space, Table, message } from "antd";
 import EntriIntiForm from "@/Forms/EntriIntiSearch";
 import axios from "axios";
 import { PageProps } from "@/types";
-import { PlusCircleOutlined } from "@ant-design/icons";
+import {
+    DeleteFilled,
+    DeleteOutlined,
+    DeleteRowOutlined,
+    EditFilled,
+    EditOutlined,
+    PlusCircleOutlined,
+} from "@ant-design/icons";
+import { throttle } from "lodash";
 
 const Dashboard = ({
     data_susenas,
@@ -70,6 +78,37 @@ const Dashboard = ({
             });
         }
     };
+    const remove = async (id_ruta: string) => {
+        try {
+            // console.log({ id_ruta });
+
+            const { data } = await axios.delete(
+                route("entri.mak.delete", { id_ruta: id_ruta })
+            );
+
+            messageApi.open({
+                content: "Berhasil menghapus 1 anggota rumah tangga",
+                type: "success",
+                key: "hapus-ruta",
+            });
+            router.get(
+                route("entri", {
+                    kode_kabkot: cariForm.getFieldValue("kode_kabkot"),
+                    nks: cariForm.getFieldValue("nks"),
+                })
+            );
+            // Do any synchronous operations relying on the updatedDaftarArt here
+        } catch (error) {
+            // console.error("Error in add function:", error);
+            messageApi.open({
+                content: `Terjadi galat ketika menghapus data, tunjukan code ini pada Developer (${error})`,
+                type: "error",
+                key: "hapus-ruta",
+                duration: 3,
+            });
+        }
+    };
+    const debounceCellDelete = throttle(remove, 2000);
 
     const columns = [
         {
@@ -112,12 +151,12 @@ const Dashboard = ({
             dataIndex: "r111",
             key: "r111",
         },
-        {
-            title: "Status",
-            dataIndex: "status_dok",
-            key: "status_dok",
-            render: (value: any) => <Button>{value}</Button>,
-        },
+        // {
+        //     title: "Status",
+        //     dataIndex: "status_dok",
+        //     key: "status_dok",
+        //     render: (value: any) => <Button>{value}</Button>,
+        // },
         {
             title: "Entri",
             dataIndex: "entri",
@@ -131,8 +170,27 @@ const Dashboard = ({
                         )
                     }
                 >
-                    Entri
+                    <EditFilled /> entri
                 </Button>
+            ),
+        },
+        {
+            title: "Delete",
+            dataIndex: "entri",
+            key: "entri",
+            render: (_: any, record: any) => (
+                <Popconfirm
+                    placement="topLeft"
+                    title="apakah anda yakin akan menghapus ruta ini?"
+                    description="hapus anggota rumah tangga"
+                    okText="yakin dong"
+                    cancelText="nyanda"
+                    onConfirm={() => debounceCellDelete(record.id)}
+                >
+                    <Button type="primary" style={{ backgroundColor: "red" }}>
+                        <DeleteFilled /> hapus
+                    </Button>
+                </Popconfirm>
             ),
         },
     ];

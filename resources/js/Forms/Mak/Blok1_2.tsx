@@ -88,6 +88,8 @@ const Blok1_2: React.FC<{
             label: `[${item.kode_kabkot}] ${item.kabkot}`,
             value: item.kode_kabkot,
         }));
+        // console.log({ data });
+
         form.setFieldValue("kode_kabkot", data.kode_kabkot);
         setKabkot(data.kode_kabkot);
         setDaftarKabKot(daftarKabkot);
@@ -316,11 +318,18 @@ const Blok1_2: React.FC<{
                                     name="kode_kabkot"
                                     label={null}
                                     style={formItemStyle}
+                                    required
                                 >
                                     <Select
                                         allowClear
                                         showSearch
-                                        disabled
+                                        disabled={
+                                            !(
+                                                form.getFieldValue(
+                                                    "kode_kabkot"
+                                                ) === "00"
+                                            )
+                                        }
                                         optionFilterProp="label"
                                         options={daftarKabKot}
                                         onChange={(value: string) => {
@@ -494,7 +503,7 @@ const Blok1_2: React.FC<{
                                     label={null}
                                     style={formItemStyle}
                                 >
-                                    <InputNumber min={1} />
+                                    <InputNumber disabled={!editable} min={1} />
                                 </Form.Item>
                             </td>
                         </tr>

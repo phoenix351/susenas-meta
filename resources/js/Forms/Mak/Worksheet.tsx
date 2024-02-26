@@ -47,6 +47,7 @@ interface RincianWorksheet {
     rincian?: string;
     type: string;
     options?: SelectItem[] | undefined;
+    dependentValues?: string[];
     children?: RincianWorksheet[];
 }
 const InputComponent: React.FC<{
@@ -101,7 +102,7 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
     useEffect(() => {
         if (props.children) {
             let activeChild = props.children
-                .filter((item, index) => index + 1 === Number(value))
+                .filter((item, index) => item.dependentValues?.includes(value))
                 .map((child: any) => (
                     <tr key={props.id}>
                         <td style={centerCell}>{}</td>
@@ -163,6 +164,7 @@ const daftarRincian = [
             {
                 id: 27,
                 nomor: "3c1",
+                dependentValues: ["1"],
                 rincian: "Jumlah konsumsi susu (VSEN24.KP Rincian 70 s.d 74)",
                 type: "rupiah",
             },
@@ -183,6 +185,7 @@ const daftarRincian = [
             {
                 id: 28,
                 nomor: "5c1",
+                dependentValues: ["1"],
                 rincian:
                     "Jumlah Gaji/Upah pembantu rumah tangga (VSEN24.KP Rincian 277)",
                 type: "rupiah",
@@ -199,6 +202,15 @@ const daftarRincian = [
             {
                 id: 29,
                 nomor: "6c1",
+                dependentValues: ["1"],
+                rincian:
+                    "VSEN24.KP Rincian 248 s.d 254 Kolom 5 (Setahun terakhir)",
+                type: "rupiah",
+            },
+            {
+                id: 29,
+                nomor: "6c2",
+                dependentValues: ["1"],
                 rincian:
                     "VSEN24.KP Rincian 255 s.d 257 Kolom 5 (Setahun terakhir)",
                 type: "rupiah",
@@ -220,6 +232,7 @@ const daftarRincian = [
             {
                 id: 30,
                 nomor: "8c1",
+                dependentValues: ["1"],
                 rincian: "VSEN24.KP Rincian 236+238",
                 type: "rupiah",
             },
@@ -240,6 +253,7 @@ const daftarRincian = [
             {
                 id: 31,
                 nomor: "10c1",
+                dependentValues: ["1"],
                 rincian: "VSEN24.KP Rincian 265 s.d. 270",
                 type: "rupiah",
             },
@@ -255,7 +269,7 @@ const daftarRincian = [
         id: 12,
         nomor: 11,
         rincian:
-            "ADA ART DENGAN STATUS PEKERJAAN BURUH/KARYAWAN/PEGAWAI/PEKERJA BEBAS? (R1706=4 atau 5)",
+            "ADA ART DENGAN STATUS PEKERJAAN BURUH/KARYAWAN/PEGAWAI/PEKERJA BEBAS? (R707=4 atau 5)",
         type: "binary",
     },
     {
@@ -273,6 +287,7 @@ const daftarRincian = [
             {
                 id: 32,
                 nomor: "14c1",
+                dependentValues: ["1"],
                 rincian: "VSEN24.KP Rincian 192 Kolom 10",
                 type: "rupiah",
             },
@@ -287,6 +302,7 @@ const daftarRincian = [
             {
                 id: 33,
                 nomor: "15c1",
+                dependentValues: ["1"],
                 rincian: "VSEN24.KP Rincian 263 Kolom 5",
                 type: "rupiah",
             },
@@ -308,30 +324,22 @@ const daftarRincian = [
             {
                 id: 34,
                 nomor: "16c1",
+                dependentValues: ["1", "3"],
                 rincian: "VSEN24.KP Rincian 200",
                 type: "rupiah",
             },
             {
                 id: 35,
                 nomor: "16c2",
+                dependentValues: ["2"],
                 rincian: "VSEN24.KP Rincian 201 + 202",
                 type: "rupiah",
             },
-            {
-                id: 34,
-                nomor: "16c1",
-                rincian: "VSEN24.KP Rincian 200",
-                type: "rupiah",
-            },
+
             {
                 id: 37,
                 nomor: "16c3",
-                rincian: "VSEN24.KP Rincian 203",
-                type: "rupiah",
-            },
-            {
-                id: 37,
-                nomor: "16c3",
+                dependentValues: ["4", "5"],
                 rincian: "VSEN24.KP Rincian 203",
                 type: "rupiah",
             },
@@ -410,6 +418,7 @@ const daftarRincian = [
             {
                 id: 39,
                 nomor: "23c1",
+                dependentValues: ["1"],
                 rincian: "VSEN24.KP Rincian 309",
                 type: "rupiah",
             },
@@ -424,6 +433,7 @@ const daftarRincian = [
             {
                 id: 40,
                 nomor: "24c1",
+                dependentValues: ["1"],
                 rincian: "VSEN24.KP Rincian 311",
                 type: "rupiah",
             },

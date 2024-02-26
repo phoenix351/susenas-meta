@@ -40,6 +40,8 @@ const Blok4_3: React.FC<{
     daftarArt,
     daftarRincian432,
 }) => {
+    console.log({ daftarArt });
+
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -228,7 +230,7 @@ const Blok4_3: React.FC<{
             newRekap[12] = summary[12];
             newRekap[13] = summary[13];
             newRekap[14] = newRekap
-                .slice(0, 13)
+                .slice(0, 14)
                 // .filter(([fieldName]: any) => fieldName === "beli");
                 .reduce(
                     (prev, current) => ({
@@ -240,13 +242,14 @@ const Blok4_3: React.FC<{
                 );
             return [...newRekap];
         });
+        console.log({ rekapMak });
     }, [daftarArt]);
     useEffect(() => {
         const fetchArt = async () => {
             const { data } = await axios.get(
                 route("entri.mak.art.fetch", { id_ruta: daftarArt[0]?.id_ruta })
             );
-            // console.log({ data });
+            console.log({ daftarArt });
 
             data.forEach((art: any, index: number) => {
                 `blok4_31_${index}_id_art`;

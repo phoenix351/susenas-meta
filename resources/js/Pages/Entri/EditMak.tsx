@@ -176,11 +176,15 @@ const Mak = ({
     konsumsi_ruta,
     art,
     garis_kemiskinan,
+    rekap_konsumsi,
+    rekap_konsumsi_art,
 }: PageProps & {
     data: any;
     konsumsi_ruta: any[];
     art: any[];
     garis_kemiskinan: number;
+    rekap_konsumsi: any[];
+    rekap_konsumsi_art: any[];
 }) => {
     // const [cariForm] = Form.useForm();
     const tabContentStyle: React.CSSProperties = {
@@ -481,6 +485,7 @@ const Mak = ({
         );
         newrekapMak[17]["total"] =
             newrekapMak[15]["total"] + newrekapMak[16]["total"];
+        // console.log({ rekapMak });
 
         setRekapMak(newrekapMak);
     }, [daftarArt]);
@@ -498,38 +503,87 @@ const Mak = ({
     };
     // initialize the form
     useEffect(() => {
-        art = art.map((item) => ({
-            ...item,
-            rekap: {
-                12: { produksi: 0, beli: 0, total: 0 },
-                13: { produksi: 0, beli: 0, total: 0 },
-            },
-        }));
-        setDaftarArt([...art]);
-        if (art.length < 1) {
-            // console.log("kurang dari 1");
-
-            setDaftarArt((prev) => [
-                ...prev,
-                {
-                    id: "",
-                    id_ruta: data.id,
-                    nama: data.r110,
-                    nomor_art: 0,
-                    rekap: {
-                        12: { produksi: 0, beli: 0, total: 0 },
-                        13: { produksi: 0, beli: 0, total: 0 },
-                    },
+        const artSetUp = () => {
+            art = art.map((item) => ({
+                ...item,
+                rekap: {
+                    12: { produksi: 0, beli: 0, total: 0 },
+                    13: { produksi: 0, beli: 0, total: 0 },
                 },
-            ]);
-        } else {
-        }
+            }));
+            // setDaftarArt([...art]);
+            if (art.length < 1) {
+                // console.log("kurang dari 1");
+
+                setDaftarArt((prev) => [
+                    ...prev,
+                    {
+                        id: "",
+                        id_ruta: data.id,
+                        nama: data.r110,
+                        nomor_art: 0,
+                        rekap: {
+                            12: { produksi: 0, beli: 0, total: 0 },
+                            13: { produksi: 0, beli: 0, total: 0 },
+                        },
+                    },
+                ]);
+            }
+            if (art.length > 0) {
+                // olah rekap konsumsi art
+                var newDaftarArt = [...art];
+                let newRekap_konsumsi_art = rekap_konsumsi_art.map((item) => ({
+                    id_art: item.id_art,
+                    id_kelompok: item.id_kelompok,
+                    beli: Number(item.beli),
+                    produksi: Number(item.produksi),
+                }));
+                newRekap_konsumsi_art.forEach((element) => {
+                    // when newdaftar art item.id === element.id
+                    newDaftarArt = newDaftarArt.map((art) => {
+                        // console.log({ element, art });
+                        if (art.id === element.id_art) {
+                            art["rekap"][element.id_kelompok].produksi =
+                                element.produksi;
+                            art["rekap"][element.id_kelompok].beli =
+                                element.beli;
+                            art["rekap"][element.id_kelompok].total =
+                                element.beli + element.produksi;
+                        }
+                        return art;
+                    });
+                    return element;
+                    // assign newdaftarart[index].rekap[element.id_kelompok]['produksi'] = element.produksi;
+                });
+                console.log({ newDaftarArt });
+
+                setDaftarArt(newDaftarArt);
+            }
+        };
+        artSetUp();
 
         document.addEventListener("keydown", handleKeyPress);
-        // console.log({ data });
+        console.log({ data });
 
         form.setFieldsValue(data);
-        console.log({ data });
+
+        // olah rekap konsumsi ruta
+        let newRekapMak = [...rekapMak];
+        let newRekap_konsumsi = rekap_konsumsi.map((item) => ({
+            id_kelompok: item.id_kelompok,
+            beli: Number(item.beli),
+            produksi: Number(item.produksi),
+        }));
+        newRekap_konsumsi.forEach((rekap) => {
+            // console.log({ rekap });
+
+            newRekapMak[rekap.id_kelompok]["beli"] = rekap["beli"];
+            newRekapMak[rekap.id_kelompok]["produksi"] = rekap["produksi"];
+            newRekapMak[rekap.id_kelompok]["total"] =
+                rekap["produksi"] + rekap["beli"];
+        });
+        newRekapMak[16]["total"] = data.blok4_32_16_total;
+        setRekapMak(newRekapMak);
 
         form.setFieldValue("wtf_26", garis_kemiskinan);
         // console.log({ art });

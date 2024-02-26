@@ -21,7 +21,10 @@ const TextRupiah: React.FC<{ value: number; color: string }> = ({
                     paddingRight: "11px",
                 }}
             >
-                {`Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                {`Rp ${(Number(value) ?? 0)?.toFixed(2)}`.replace(
+                    /\B(?=(\d{3})+(?!\d))/g,
+                    ","
+                )}
                 {/* {value} */}
             </Text>
         </Space>

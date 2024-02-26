@@ -41,14 +41,14 @@ const NumberInput: React.FC<NumberInputProps> = ({
                 className="custom-input-number"
                 readOnly={editable ? editable : false}
                 min={0}
+                step={0.01} // Set the step to allow decimal values
                 formatter={(value: any) =>
                     `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 }
                 parser={(value: any) => {
                     if (!value) return undefined;
-                    const parsedValue = parseInt(
-                        value.replace(/[^\d]/g, ""),
-                        10
+                    const parsedValue = parseFloat(
+                        value.replace(/[^\d.]/g, "") // Allow only digits and a dot for decimal
                     );
                     return isNaN(parsedValue) ? 0 : parsedValue;
                 }}

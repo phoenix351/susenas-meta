@@ -44,9 +44,14 @@ class MasterWilayahController extends Controller
         }
         return response()->json($data, 200);
     }
-    public function fetch_kabkot()
+    public function fetch_kabkot(Request $request)
     {
+        $kode_kabkot = $request->input('kode_kabkot');
         $data = MasterWilayah::distinct()->get(['kode_kabkot', 'kabkot']);
+        if ($kode_kabkot !== "00") {
+            $data = MasterWilayah::where('kode_kabkot', $kode_kabkot)->distinct()->get(['kode_kabkot', 'kabkot']);
+        }
+        // return response()->json($kode_kabkot, 200);
         $user = auth()->user();
 
         return response()->json(['data' => $data, 'kode_kabkot' => $user->kode_kabkot]);

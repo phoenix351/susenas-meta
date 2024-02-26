@@ -85,6 +85,7 @@ class SusenasMak extends Model
         'wtf_3c1',
         'wtf_5c1',
         'wtf_6c1',
+        'wtf_6c2',
         'wtf_8c1',
         'wtf_14c1',
         'wtf_15c1',

@@ -42,37 +42,7 @@ class MakController extends Controller
     }
     public function dashboard()
     {
-        // $rekap = SusenasMak::select(
-        //     'vsusenas_mak.kode_prov',
-        //     'vsusenas_mak.kode_kabkot',
-        //     'vsusenas_mak.kode_kec',
-        //     'vsusenas_mak.kode_desa',
-        //     'vsusenas_mak.kode_bs4',
-        //     'master_wilayah.kec',
-        //     'master_wilayah.kabkot',
-        //     'master_wilayah.desa',
-        //     'master_wilayah.klas'
-        // )
-        //     ->join('master_wilayah', function ($join) {
-        //         $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
-        //             ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
-        //             ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
-        //             ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
-        //     })
-        //     ->where('vsusenas_mak.kode_kabkot', '01')
-        //     ->groupBy(
-        //         'vsusenas_mak.kode_prov',
-        //         'vsusenas_mak.kode_kabkot',
-        //         'vsusenas_mak.kode_kec',
-        //         'vsusenas_mak.kode_desa',
-        //         'vsusenas_mak.kode_bs4',
-        //         'master_wilayah.kec',
-        //         'master_wilayah.kabkot',
-        //         'master_wilayah.desa',
-        //         'master_wilayah.klas'
-        //     )
-        //     ->selectRaw('count(distinct vsusenas_mak.id) as jumlah_dok')
-        //     ->get();
+
         $kode_kabkot = auth()->user()->kode_kabkot;
 
 
@@ -80,40 +50,60 @@ class MakController extends Controller
             ->select(
                 'master_wilayah.kode_prov',
                 'master_wilayah.kode_kabkot',
-                'master_wilayah.kode_kec',
-                'master_wilayah.kode_desa',
-                'master_wilayah.kode_bs4',
-                'master_wilayah.kec',
+                'master_wilayah.nks',
                 'master_wilayah.kabkot',
-                'master_wilayah.desa',
-                'master_wilayah.klas',
                 DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok')
             )
             ->leftJoin('vsusenas_mak', function ($join) {
                 $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
                     ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
-                    ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
-                    ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa')
-                    ->on('master_wilayah.kode_bs4', '=', 'vsusenas_mak.kode_bs4');
+                    ->on('master_wilayah.nks', '=', 'vsusenas_mak.nks');
             })
             ->groupBy(
                 'master_wilayah.kode_prov',
                 'master_wilayah.kode_kabkot',
-                'master_wilayah.kode_kec',
-                'master_wilayah.kode_desa',
-                'master_wilayah.kode_bs4',
-                'master_wilayah.kec',
                 'master_wilayah.kabkot',
                 'master_wilayah.desa',
-                'master_wilayah.klas'
+                'master_wilayah.nks',
+
             )
             // ->where('master_wilayah.kode_kabkot', $kode_kabkot)
             ->when($kode_kabkot !== "00", function ($query) use ($kode_kabkot) {
                 $query->where('master_wilayah.kode_kabkot', $kode_kabkot);
             })
+            ->distinct()
+            ->get();
+        $rekap_kabkot = DB::table('master_wilayah')
+            ->select(
+                'master_wilayah.kode_prov',
+                'master_wilayah.kode_kabkot',
+                'master_wilayah.kabkot',
+                DB::raw('COALESCE(COUNT(DISTINCT master_wilayah.nks), 0) as target_nks'),
+
+                DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok')
+            )
+            ->leftJoin('vsusenas_mak', function ($join) {
+                $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
+                    ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot');
+            })
+            ->groupBy(
+                'master_wilayah.kode_prov',
+                'master_wilayah.kode_kabkot',
+                'master_wilayah.kabkot',
+
+
+            )
+            // ->where('master_wilayah.kode_kabkot', $kode_kabkot)
+            ->when($kode_kabkot !== "00", function ($query) use ($kode_kabkot) {
+                $query->where('master_wilayah.kode_kabkot', $kode_kabkot);
+            })
+            ->distinct()
             ->get();
 
-        $data = ['data' => $rekap];
+        $data = [
+            'data' => $rekap,
+            'rekap_kabkot' => $rekap_kabkot
+        ];
 
         // $kondisi_total = 100;
         return Inertia::render('Dashboard', $data);
@@ -124,6 +114,17 @@ class MakController extends Controller
             //code...
             $input = $request->all();
             $input['users_id'] = auth()->user()->id;
+            $is_exist = SusenasMak::where('kode_kabkot', $input['kode_kabkot'])
+                ->where('nks', $input['nks'])
+                ->where('r109', $input['r109'])->first();
+            if ($is_exist) {
+                $response = [
+                    'message' => 'nomor  urut sampel dalam satu NKS sudah terdaftar !',
+                    'status' => 'error'
+                ];
+                return response()->json($response, 200);
+            }
+            // return response()->json(['asu'], 200);
             // create mak
             $created_mak = SusenasMak::create($input);
             // create default art
@@ -183,91 +184,118 @@ class MakController extends Controller
         $konsumsi_ruta = Konsumsi::where('id_ruta', $id)->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
         $garis_kemiskinan = Kabkot::where('kode', $data->kode_kabkot)->pluck('garis_kemiskinan');
         $art = AnggotaRuta::where('id_ruta', $id)->get();
+        $rekap_konsumsi = Konsumsi::where('id_ruta', $id)
+            ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
+            // ->selectRaw('komoditas.id_kelompok', 'count(*) as jumlah')
+            ->selectRaw('komoditas.id_kelompok,sum(konsumsi.harga_beli) as beli,sum(konsumsi.harga_produksi) as produksi')
+            ->groupBy('komoditas.id_kelompok')
+            ->get();
+        $rekap_konsumsi_art = KonsumsiArt::where('id_ruta', $id)
+            ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
+            ->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')
+            // ->selectRaw('komoditas.id_kelompok', 'count(*) as jumlah')
+            ->selectRaw('id_art,komoditas.id_kelompok,sum(konsumsi_art.harga_beli) as beli,sum(konsumsi_art.harga_produksi) as produksi')
+            ->groupBy('id_art', 'komoditas.id_kelompok')
+            ->get();
         // $konsumsi_ruta = DB::table('konsumsi')->where('id_ruta', $id)->get();
 
         // dd($konsumsi_ruta);
-        return Inertia::render("Entri/EditMak", ['data' => $data, 'konsumsi_ruta' => $konsumsi_ruta, 'art' => $art, 'garis_kemiskinan' => $garis_kemiskinan]);
+        return Inertia::render("Entri/EditMak", [
+            'data' => $data,
+            'konsumsi_ruta' => $konsumsi_ruta,
+            'art' => $art,
+            'garis_kemiskinan' => $garis_kemiskinan,
+            'rekap_konsumsi' => $rekap_konsumsi,
+            'rekap_konsumsi_art' => $rekap_konsumsi_art,
+        ]);
     }
     public function update(Request $request)
     {
         try {
-            //code...
-            // $data = $request->all();
-            // // cek nilai wtf
-            // $currentWtf = SusenasMak::where('id', $data['id'])->first([
-            //     'wtf_3c1',
-            //     'wtf_5c1',
-            //     'wtf_6c1',
-            //     'wtf_8c1',
-            //     'wtf_14c1',
-            //     'wtf_15c1',
-            //     'wtf_16c1',
-            //     'wtf_16c2',
-            //     'wtf_16c3',
-            //     'wtf_23c1',
-            // ]);
 
-            // // if nilai == 5 set dependency into null 
-            // if (isset($currentWtf['wtf_3c1']) && $data['wtf_3'] == "5") {
-            //     $data['wtf_3c1'] = null;
-            // }
-            // if (isset($currentWtf['wtf_5c1']) && $data['wtf_5'] == "5") {
-            //     $data['wtf_5c1'] = null;
-            // }
-            // if (isset($currentWtf['wtf_6c1']) && $data['wtf_6'] == "5") {
-            //     $data['wtf_6c1'] = null;
-            // }
-            // if (isset($currentWtf['wtf_8c1']) && $data['wtf_8'] == "5") {
-            //     $data['wtf_8c1'] = null;
-            // }
-            // if (isset($currentWtf['wtf_14c1']) && $data['wtf_14'] == "5") {
-            //     $data['wtf_14c1'] = null;
-            // }
-            // if (isset($currentWtf['wtf_15c1']) && $data['wtf_15'] != "1") {
-            //     $data['wtf_15c1'] = null;
-            // }
-            // if (isset($currentWtf['wtf_16c1']) && ($data['wtf_16'] != "1" && $data['wtf_16'] != "3")) {
-            //     $data['wtf_16c1'] = null;
-            // }
-            // if (isset($currentWtf['wtf_16c2']) && $data['wtf_16'] != "2") {
-            //     $data['wtf_16c2'] = null;
-            // }
-            // if (isset($currentWtf['wtf_16c3']) && ($data['wtf_16'] != "5" && $data['wtf_16'] != "4")) {
-            //     $data['wtf_16c3'] = null;
-            // }
-            // if (isset($currentWtf['wtf_23c1']) && $data['wtf_23'] == "5") {
-            //     $data['wtf_23c1'] = null;
             // }
             $data = $request->all();
 
             // Columns to check and their corresponding form fields
             $columnsToCheck = [
-                'wtf_3' => 'wtf_3c1',
-                'wtf_5' => 'wtf_5c1',
-                'wtf_6' => 'wtf_6c1',
-                'wtf_8' => 'wtf_8c1',
-                'wtf_14' => 'wtf_14c1',
-                'wtf_15' => 'wtf_15c1',
-                'wtf_16' => 'wtf_16c1',
-                'wtf_16' => 'wtf_16c2',
-                'wtf_16' => 'wtf_16c3',
-                'wtf_23' => 'wtf_23c1',
-                'wtf_24' => 'wtf_24c1',
+                [
+                    'target' => 'wtf_3',
+                    'fields' => ['wtf_3c1'],
+                    "dependentValues" => ['1']
+                ],
+                [
+                    'target' => 'wtf_5',
+                    'fields' => ['wtf_5c1'],
+                    "dependentValues" => ['1']
+                ],
+                [
+                    'target' => 'wtf_6',
+                    'fields' => ['wtf_6c1', 'wtf_6c2'],
+                    "dependentValues" => ['1']
+                ],
+                [
+                    'target' => 'wtf_8',
+                    'fields' => ['wtf_8c1'],
+                    "dependentValues" => ['1']
+                ],
+                [
+                    'target' => 'wtf_14',
+                    'fields' => ['wtf_14c1'],
+                    "dependentValues" => ['1']
+                ],
+                [
+                    'target' => 'wtf_15',
+                    'fields' => ['wtf_15c1'],
+                    "dependentValues" => ['1']
+                ],
+                [
+                    'target' => 'wtf_16',
+                    'fields' => ['wtf_16c1'],
+                    "dependentValues" => ['1', '3']
+                ],
+                [
+                    'target' => 'wtf_16',
+                    'fields' => ['wtf_16c2'],
+                    "dependentValues" => ['2']
+                ],
+                [
+                    'target' => 'wtf_16',
+                    'fields' => ['wtf_16c3'],
+                    "dependentValues" => ['4', '5']
+                ],
+
+                [
+                    'target' => 'wtf_23',
+                    'fields' => ['wtf_23c1'],
+                    "dependentValues" => ['1']
+                ],
+                [
+                    'target' => 'wtf_24',
+                    'fields' => ['wtf_24c1'],
+                    "dependentValues" => ['1']
+                ],
             ];
-
-            $currentWtf = SusenasMak::where('id', $data['id'])->first($columnsToCheck);
-
-            foreach ($columnsToCheck as $inputField => $dependentField) {
-                try {
-                    //code...
-                    if (isset($currentWtf[$dependentField]) && $data[$inputField] == "5") {
-                        $data[$dependentField] = null;
-                    }
-                } catch (\Throwable $th) {
-                    //throw $th;
+            $fields_check = [];
+            foreach ($columnsToCheck as $column) {
+                if (isset($column['fields'])) {
+                    $fields_check = array_merge($fields_check, $column['fields']);
                 }
-                continue;
             }
+            if (isset($data['id'])) {
+                $currentWtf = SusenasMak::where('id', $data['id'])->first($fields_check);
+                // dd($currentWtf);
+
+                foreach ($columnsToCheck as $dependency) {
+
+                    foreach ($dependency['fields'] as $dependentField) {
+                        // Check if the field exists in $currentWtf and condition is met
+                        if (isset($currentWtf[$dependentField]) && (isset($data[$dependency['target']]) && !in_array($data[$dependency['target']], $dependency['dependentValues']))) {
+                            $data[$dependentField] = null;
+                        }
+                    }
+                }
+            }            // second check 
+
 
             // Continue with the rest of your code...
 
@@ -688,6 +716,20 @@ class MakController extends Controller
             throw $th;
 
             // return response()->json(['id_ruta' => $id_ruta,], 404);
+        }
+    }
+    public function delete($id_ruta)
+    {
+        try {
+            //code...
+            $mak = SusenasMak::where('id', $id_ruta);
+            $mak->delete();
+            return response()->json([
+                'message' => 'berhasil menghapus satu ruta',
+                'status' => 'success'
+            ], 204);
+        } catch (\Throwable $th) {
+            throw $th;
         }
     }
 }

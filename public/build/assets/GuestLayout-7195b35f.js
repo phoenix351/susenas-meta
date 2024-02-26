@@ -1,1 +1,0 @@
-import{a as t}from"./app-d4815cab.js";import{L as e}from"./index-17f8c862.js";const{Header:i,Footer:s,Sider:m,Content:n}=e;function l({children:r}){return t(e,{style:{backgroundColor:"transparent"},children:t(n,{style:{maxWidth:"500px",margin:"auto",minHeight:"100vh",display:"flex",justifyContent:"center",alignItems:"center"},children:r})})}export{l as G};

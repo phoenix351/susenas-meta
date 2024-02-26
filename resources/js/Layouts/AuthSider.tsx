@@ -65,6 +65,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("periksa"),
                 label: "Periksa",
             },
+            {
+                key: "users.index",
+                icon: <UsergroupAddOutlined />,
+                onClick: () => handleMenuClick("users.index"),
+                label: "Kelola Petugas",
+            },
         ];
     }
     return (
@@ -76,29 +82,6 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 collapsed={collapsed}
                 theme="light"
             >
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "16px",
-                    }}
-                >
-                    {/* <ApplicationLogo width="50px" preview={false} /> <br /> */}
-                    <span
-                        style={{
-                            display: collapsed ? "none" : "block",
-                            fontSize: "1.5rem",
-                            fontFamily: "Roboto",
-                            color: "#3219d4",
-                            fontWeight: "bold",
-                            marginLeft: "10px",
-                        }}
-                    >
-                        SSN-META
-                    </span>
-                </div>
-
                 <Menu
                     style={{
                         backgroundColor: "transparent",

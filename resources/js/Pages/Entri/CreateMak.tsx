@@ -51,11 +51,23 @@ const Mak = () => {
             const { data } = await axios.post(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
+            // console.log({ st: data.status });
+
+            if (data.status === "error") {
+                messageApi.open({
+                    type: "error",
+                    key: "cari",
+                    content: data.message,
+                });
+                return;
+            }
             messageApi.open({
                 type: "success",
                 key: "cari",
                 content: "Berhasil menyimpan",
             });
+            // console.log({ data });
+
             router.get(route("entri.mak.edit", { id: data.id }));
         } catch (error) {
             messageApi.open({

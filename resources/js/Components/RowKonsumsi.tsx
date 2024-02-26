@@ -136,7 +136,7 @@ const RowKonsumsi: React.FC<{
                         color="red"
                         value={
                             rekapMak[data.subKey]
-                                ? rekapMak[data.subKey]["beli"]
+                                ? rekapMak[data.subKey]["beli"] ?? 0
                                 : 0
                         }
                         // value={0}
@@ -177,8 +177,15 @@ const RowKonsumsi: React.FC<{
                 {data.type === "sub" && (
                     <TextRupiah
                         color="red"
-                        // value={rekapMak[data.subKey]["produksi"] ?? 0}
-                        value={0}
+                        value={rekapMak[data.subKey]["produksi"] ?? 0}
+                        // <TextRupiah
+                        //     color="red"
+                        //     value={
+                        //         rekapMak[data.subKey]
+                        //             ? rekapMak[data.subKey]["produksi"]
+                        //             : 0
+                        //     }
+                        // value={0}
                     />
                 )}
             </td>
@@ -190,7 +197,15 @@ const RowKonsumsi: React.FC<{
             <td style={rightCell}>
                 <RupiahInput inputName={`${data.nomor}_total_harga`} />
 
-                <TextRupiah color="red" value={totalHarga} />
+                <TextRupiah
+                    color="red"
+                    value={
+                        data.type === "sub"
+                            ? rekapMak[data.subKey]["produksi"] +
+                              rekapMak[data.subKey]["beli"]
+                            : totalHarga
+                    }
+                />
             </td>
         </tr>
     );

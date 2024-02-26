@@ -6,6 +6,7 @@ use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterJabatanController;
 use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use App\Models\Konsumsi;
 use App\Models\MasterJabatan;
 use App\Models\MasterWilayah;
@@ -28,9 +29,13 @@ use Inertia\Inertia;
 */
 
 
-
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+});
 
 Route::middleware('auth')->group(function () {
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -69,6 +74,7 @@ Route::middleware('auth')->group(function () {
         return response()->json(['data' => $data]);
     })->name('api.entri.semester');
 
+    route::delete('/entri/mak/delete/{id_ruta}', [MakController::class, 'delete'])->name('entri.mak.delete');
     route::post('/entri/mak', [MakController::class, 'store'])->name('entri.mak.store');
     route::post('/entri/mak/art', [AnggotaRutaController::class, 'store'])->name('entri.mak.art.store');
     route::patch('/entri/mak/art', [AnggotaRutaController::class, 'update'])->name('entri.mak.art.update');
@@ -111,9 +117,7 @@ Route::middleware('auth')->group(function () {
     })->name('root');
 
 
-    route::get('/statistics', function () {
-        return Inertia::render('Statistics');
-    })->name('statistics');
+
 
     route::get('/entri', [MakController::class, 'entri'])->name('entri');
 
