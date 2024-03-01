@@ -50,7 +50,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 key: "dashboard",
                 icon: <DashboardOutlined />,
                 onClick: () => handleMenuClick("dashboard"),
-                label: "Dashboard",
+                label: "Monitoring",
             },
 
             {
@@ -63,10 +63,10 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 key: "periksa",
                 icon: <AuditOutlined />,
                 onClick: () => handleMenuClick("periksa"),
-                label: "Periksa",
+                label: "periksa",
             },
             {
-                key: "users.index",
+                key: "users",
                 icon: <UsergroupAddOutlined />,
                 onClick: () => handleMenuClick("users.index"),
                 label: "Kelola Petugas",

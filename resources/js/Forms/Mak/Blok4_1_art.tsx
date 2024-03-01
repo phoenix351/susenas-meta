@@ -10,6 +10,7 @@ import {
     Popconfirm,
     Select,
     Space,
+    Spin,
     Table,
     Tabs,
     Typography,
@@ -68,8 +69,9 @@ const Blok4_1: React.FC<{
     calculateKalori,
 }) => {
     // konstanta
+    // console.log({ daftarArt });
     const blok4_1_hal2Finish = (values: any) => {
-        console.log({ values });
+        // console.log({ values });
     };
 
     // usestate
@@ -77,13 +79,15 @@ const Blok4_1: React.FC<{
     const [activeKey, setActiveKey] = useState("0");
     const [items, setItems] = useState<any[]>([]);
     const [listKomoditas, setListKomoditas] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [artLoading, setArtLoading] = useState(false);
 
     const newTabIndex = useRef(1);
     // const [items, setItems] = useState(defaultItems);
 
     const [messageApi, contextHolder] = message.useMessage();
     const add = async () => {
+        setArtLoading(true);
         const newActiveKey = `Art-${newTabIndex.current++}`;
 
         try {
@@ -93,7 +97,7 @@ const Blok4_1: React.FC<{
                 id_ruta: daftarArt[0].id_ruta,
             });
             // const { id_art } = data;
-            console.log({ data });
+            // console.log({ data });
 
             const updatedDaftarArt = [
                 ...daftarArt,
@@ -116,6 +120,8 @@ const Blok4_1: React.FC<{
             setActiveKey(newActiveKey);
         } catch (error) {
             console.error("Error in add function:", error);
+        } finally {
+            setArtLoading(false);
         }
     };
     const remove = async (index: number) => {
@@ -177,29 +183,10 @@ const Blok4_1: React.FC<{
     const debounceCellDelete = throttle(remove, 2000);
 
     // generate art components
-    useEffect(() => {
-        // console.log({ daftarArt });
 
-        const items = daftarArt.map((art: any, index: number) => ({
-            label: art.nama,
-            key: String(index),
-            children: (
-                <Art
-                    onFinish={blok4_1_hal2Finish}
-                    nomor_art={art.nomor_art}
-                    daftarArt={daftarArt}
-                    setDaftarArt={setDaftarArt}
-                    id_ruta={artForm.getFieldValue("id_ruta")}
-                    id_art={art.id}
-                    calculateKalori={calculateKalori}
-                    konten={listKomoditas}
-                />
-            ),
-        }));
-        setItems([...items]);
-    }, [daftarArt]);
     useEffect(() => {
         const fetchKomoditasList = async (from: number, to: number) => {
+            // setLoading(true);
             const { data } = await axios.get(
                 route("api.mak.komoditas.list", { from: from, to: to })
             );
@@ -215,10 +202,27 @@ const Blok4_1: React.FC<{
             }));
             // console.log({ konten });
             setListKomoditas([...konten]);
-            setLoading(false);
         };
         fetchKomoditasList(159, 197);
-        // console.log({rekapMak});
+        setLoading(false);
+        const items = daftarArt.map((art: any, index: number) => ({
+            label: art.nama,
+            key: String(index),
+            children: (
+                <Art
+                    onFinish={blok4_1_hal2Finish}
+                    nomor_art={art.nomor_art}
+                    daftarArt={daftarArt}
+                    setDaftarArt={setDaftarArt}
+                    id_ruta={artForm.getFieldValue("id_ruta")}
+                    art={art}
+                    id_art={art.id}
+                    calculateKalori={calculateKalori}
+                    konten={listKomoditas}
+                />
+            ),
+        }));
+        setItems([...items]);
     }, []);
 
     return (
@@ -232,16 +236,49 @@ const Blok4_1: React.FC<{
                 <Form.Item name={`id_ruta`} hidden>
                     <Input />
                 </Form.Item>
-                <Blok
-                    title="DAFTAR ANGGOTA RUMAH TANGGA"
-                    columns={["Nomor", "Nama Anggota Rumah Tangga", "aksi"]}
-                    columnsCount={3}
-                >
-                    {daftarArt.map((art: any, index: number) => (
-                        <tr key={index}>
-                            <td style={centerCell}>{index + 1}</td>
-                            <td style={centerCell}>
-                                {/* <Typography.Paragraph
+                {
+                    <Blok
+                        title="DAFTAR ANGGOTA RUMAH TANGGA"
+                        columns={["Nomor", "Nama Anggota Rumah Tangga", "aksi"]}
+                        columnsCount={3}
+                    >
+                        {artLoading ? (
+                            <tr>
+                                <td colSpan={3}>
+                                    <Space
+                                        style={{
+                                            width: "100%",
+                                            justifyContent: "center",
+                                            // backgroundColor: "red",
+                                            marginTop: "30px",
+                                        }}
+                                        direction="vertical"
+                                    >
+                                        <Space
+                                            style={{
+                                                width: "100%",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            <Spin size="large" />
+                                        </Space>
+                                        <Space
+                                            style={{
+                                                width: "100%",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            Menambahkan anggota rumah tangga...
+                                        </Space>
+                                    </Space>
+                                </td>
+                            </tr>
+                        ) : (
+                            daftarArt.map((art: any, index: number) => (
+                                <tr key={index}>
+                                    <td style={centerCell}>{index + 1}</td>
+                                    <td style={centerCell}>
+                                        {/* <Typography.Paragraph
                                 editable={{
                                     onChange: (newContent) =>
                                         handleCellEdit(
@@ -254,47 +291,70 @@ const Blok4_1: React.FC<{
                             >
                                 {art.nama}
                             </Typography.Paragraph> */}
-                                <Form.Item name={`${index}-id_art`} hidden>
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    name={`${index}-nama`}
-                                    style={{ margin: "auto" }}
-                                >
-                                    <Input
-                                        placeholder="nama anggota rumah tangga"
-                                        onChange={(event: any) =>
-                                            debounceCellEdit(
-                                                index,
-                                                "nama",
-                                                event.target.value
-                                            )
-                                        }
-                                    />
-                                </Form.Item>
-                            </td>
+                                        <Form.Item
+                                            name={`${index}-id_art`}
+                                            hidden
+                                        >
+                                            <Input />
+                                        </Form.Item>
+                                        <Form.Item
+                                            name={`${index}-nama`}
+                                            style={{ margin: "auto" }}
+                                        >
+                                            <Input
+                                                placeholder="nama anggota rumah tangga"
+                                                onChange={(event: any) =>
+                                                    debounceCellEdit(
+                                                        index,
+                                                        "nama",
+                                                        event.target.value
+                                                    )
+                                                }
+                                            />
+                                        </Form.Item>
+                                    </td>
 
-                            <td style={centerCell}>
-                                <Popconfirm
-                                    placement="topLeft"
-                                    title="apakah anda yakin akan menghapus art ini?"
-                                    description="hapus anggota rumah tangga"
-                                    okText="yakin dong"
-                                    cancelText="gajadi"
-                                    onConfirm={() => debounceCellDelete(index)}
-                                >
-                                    <Button disabled={index === 0}>
-                                        Hapus
-                                    </Button>
-                                </Popconfirm>
-                            </td>
-                        </tr>
-                    ))}
-                </Blok>
+                                    <td style={centerCell}>
+                                        <Popconfirm
+                                            placement="topLeft"
+                                            title="apakah anda yakin akan menghapus art ini?"
+                                            description="hapus anggota rumah tangga"
+                                            okText="yakin dong"
+                                            cancelText="gajadi"
+                                            onConfirm={() =>
+                                                debounceCellDelete(index)
+                                            }
+                                        >
+                                            <Button disabled={index === 0}>
+                                                Hapus
+                                            </Button>
+                                        </Popconfirm>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </Blok>
+                }
             </Form>
             <Tabs
                 style={{ backgroundColor: "#fff", padding: "10px" }}
-                items={items}
+                items={daftarArt.map((art: any, index: number) => ({
+                    label: art.nama,
+                    key: String(index),
+                    children: (
+                        <Art
+                            onFinish={blok4_1_hal2Finish}
+                            nomor_art={art.nomor_art}
+                            daftarArt={daftarArt}
+                            setDaftarArt={setDaftarArt}
+                            id_ruta={art.id_ruta}
+                            art={art}
+                            id_art={art.id}
+                            calculateKalori={calculateKalori}
+                            konten={listKomoditas}
+                        />
+                    ),
+                }))}
                 type="line"
             />
         </Space>

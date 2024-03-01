@@ -18,6 +18,7 @@ import {
     Space,
     Statistic,
     Typography,
+    Tabs,
 } from "antd";
 // import { Table } from "ant-table-extensions";
 import {
@@ -42,6 +43,24 @@ function createSorter<T>(property: keyof T): Sorter<T> {
 
         if (sortOrder === "descend") {
             return -valueB.localeCompare(valueA);
+        }
+
+        return 0;
+    };
+}
+function createNumberSorter<T>(
+    property: keyof T
+): (a: T, b: T, sortOrder?: SortOrder) => number {
+    return (a: T, b: T, sortOrder?: SortOrder): number => {
+        const valueA = a[property] !== undefined ? Number(a[property]) : 0;
+        const valueB = b[property] !== undefined ? Number(b[property]) : 0;
+
+        if (sortOrder === "ascend") {
+            return valueA - valueB;
+        }
+
+        if (sortOrder === "descend") {
+            return valueB - valueA;
         }
 
         return 0;
@@ -92,19 +111,26 @@ const handleExport = (columns: any[], tableData: any[]) => {
 const Dashboard = ({
     data,
     rekap_kabkot,
+    users,
 }: PageProps & {
     data: any;
     rekap_kabkot: any;
+    users: any;
 }) => {
     const [tableData, setTableData] = useState<any[]>([]);
     const [tableDataKabkot, setTableDataKabkot] = useState<any[]>([]);
+    const [tableDataUser, setTableDataUser] = useState<any[]>([]);
     useEffect(() => {
-        console.log({ data, rekap_kabkot });
+        console.log({ rekap_kabkot });
         setTableData(data);
         setTableDataKabkot(rekap_kabkot);
+        setTableDataUser(users);
     }, []);
-    const jumlahSorter = createSorter("jumlah_dok");
-    const nksSorter = createSorter("nks");
+    const jumlahSorter = createNumberSorter("jumlah_dok");
+    const cleanSorter = createNumberSorter("dok_clean");
+    const warningSorter = createNumberSorter("dok_warning");
+    const errorSorter = createNumberSorter("dok_error");
+    const nksSorter = createNumberSorter("nks");
     const persentaseSorter = createSorter("persentase");
     const columns = [
         // {
@@ -148,29 +174,47 @@ const Dashboard = ({
             sorter: nksSorter as CompareFn<object>,
         },
         {
-            title: "Jumlah Dokumen",
-            dataIndex: "jumlah_dok",
-            key: "jumlah_dok",
-            sorter: jumlahSorter as CompareFn<object>,
-        },
-        {
             title: "Target Dokumen",
             dataIndex: "target_dok",
             key: "target_dok",
             render: () => 10,
         },
+        {
+            title: "Jumlah Dokumen Dientri",
+            dataIndex: "jumlah_dok",
+            key: "jumlah_dok",
+            sorter: jumlahSorter as CompareFn<object>,
+        },
+        {
+            title: "Dokumen Clean",
+            dataIndex: "dok_clean",
+            key: "dok_clean",
+            sorter: cleanSorter as CompareFn<object>,
+        },
+        {
+            title: "Dokumen Warning",
+            dataIndex: "dok_warning",
+            key: "dok_warning",
+            sorter: warningSorter as CompareFn<object>,
+        },
+        {
+            title: "Dokumen Error",
+            dataIndex: "dok_error",
+            key: "dok_error",
+            sorter: errorSorter as CompareFn<object>,
+        },
 
         {
-            title: "%",
+            title: "% clean",
             dataIndex: "persentase",
             key: "persentase",
-            sorter: (a: { jumlah_dok: any }, b: { jumlah_dok: any }) => {
-                const valueA = ((Number(a.jumlah_dok) / 10) * 100).toFixed(2);
-                const valueB = ((Number(b.jumlah_dok) / 10) * 100).toFixed(2);
+            sorter: (a: { dok_clean: any }, b: { dok_clean: any }) => {
+                const valueA = ((Number(a.dok_clean) / 10) * 100).toFixed(2);
+                const valueB = ((Number(b.dok_clean) / 10) * 100).toFixed(2);
                 return parseFloat(valueA) - parseFloat(valueB);
             },
             render: (_: any, record: any) =>
-                `${((Number(record.jumlah_dok) / 10) * 100).toFixed(2)} %`,
+                `${((Number(record.dok_clean) / 10) * 100).toFixed(2)} %`,
         },
     ];
     const columnsKabkot = [
@@ -188,20 +232,79 @@ const Dashboard = ({
             render: (_: any, record: any) =>
                 `[${record.kode_prov}${record.kode_kabkot}] ${record.kabkot}`,
         },
+        {
+            title: "Target Dokumen",
+            dataIndex: "target_dok",
+            key: "target_dok",
+            render: (_: any, record: any) => record.target_nks * 10,
+        },
+        {
+            title: "Jumlah Dokumen Dientri",
+            dataIndex: "jumlah_dok",
+            key: "jumlah_dok",
+            sorter: jumlahSorter as CompareFn<object>,
+        },
+        {
+            title: "Dokumen Clean",
+            dataIndex: "dok_clean",
+            key: "dok_clean",
+            sorter: cleanSorter as CompareFn<object>,
+        },
+        {
+            title: "Dokumen Warning",
+            dataIndex: "dok_warning",
+            key: "dok_warning",
+            sorter: warningSorter as CompareFn<object>,
+        },
+        {
+            title: "Dokumen Error",
+            dataIndex: "dok_error",
+            key: "dok_error",
+            sorter: errorSorter as CompareFn<object>,
+        },
+
+        {
+            title: "%clean",
+            dataIndex: "persentase",
+            key: "persentase",
+            sorter: (a: { dok_clean: any }, b: { dok_clean: any }) => {
+                const valueA = ((Number(a.dok_clean) / 10) * 100).toFixed(2);
+                const valueB = ((Number(b.dok_clean) / 10) * 100).toFixed(2);
+                return parseFloat(valueA) - parseFloat(valueB);
+            },
+            render: (_: any, record: any) =>
+                `${(
+                    (Number(record.dok_clean) / record.target_nks / 10) *
+                    100
+                ).toFixed(2)} %`,
+        },
+    ];
+    const columnUsers = [
         // {
-        //     title: "Kecamatan",
-        //     dataIndex: "kecamatan",
-        //     key: "kecamatan",
-        //     render: (_: any, record: any) =>
-        //         `[${record.kode_kec}] ${record.kec}`,
+        //     title: "No",
+        //     dataIndex: "id",
+        //     key: "id",
+        //     render: (_: any, rec: any, index: number) => index + 1,
         // },
-        // {
-        //     title: "Desa",
-        //     dataIndex: "desa",
-        //     key: "desa",
-        //     render: (_: any, record: any) =>
-        //         `[${record.kode_desa}] ${record.desa}`,
-        // },
+        {
+            title: "Kabupaten",
+            dataIndex: "kode_kabkot",
+            key: "kabupaten",
+
+            // render: (_: any, record: any) =>
+            //     `[${record.kode_prov}${record.kode_kabkot}] ${record.kabkot}`,
+        },
+        {
+            title: "Nama Lengkap",
+            dataIndex: "nama_lengkap",
+            key: "nama_lengkap",
+            // render: (_: any, record: any) => _.toUpperCase(),
+        },
+        {
+            title: "Username",
+            dataIndex: "username",
+            key: "username",
+        },
         // {
         //     title: "NKS",
         //     dataIndex: "nks",
@@ -209,113 +312,173 @@ const Dashboard = ({
         //     render: (_: any, record: any) => `${record.nks}`,
         //     sorter: nksSorter as CompareFn<object>,
         // },
+
         {
-            title: "Jumlah Dokumen",
-            dataIndex: "jumlah_dok",
-            key: "jumlah_dok",
+            title: "Jumlah Dokumen Dientri",
+            dataIndex: "jumlah_dokumen",
+            key: "jumlah_dokumen",
             sorter: jumlahSorter as CompareFn<object>,
         },
         {
-            title: "Target Dokumen",
-            dataIndex: "target_nks",
-            key: "target_nks",
-            render: (_: any, record: any) => `${record.target_nks * 10}`,
-            sorter: (a: { target_nks: any }, b: { target_nks: any }) => {
-                const valueA = (Number(a.target_nks) * 10 * 100).toFixed(2);
-                const valueB = (Number(b.target_nks) * 10 * 100).toFixed(2);
-                return parseFloat(valueA) - parseFloat(valueB);
-            },
+            title: "Dokumen Clean",
+            dataIndex: "dok_clean",
+            key: "dok_clean",
+            sorter: cleanSorter as CompareFn<object>,
         },
-
         {
-            title: "%",
-            dataIndex: "persentase",
-            key: "persentase",
-            sorter: (a: { jumlah_dok: any }, b: { jumlah_dok: any }) => {
-                const valueA = ((Number(a.jumlah_dok) / 10) * 100).toFixed(2);
-                const valueB = ((Number(b.jumlah_dok) / 10) * 100).toFixed(2);
-                return parseFloat(valueA) - parseFloat(valueB);
-            },
-            render: (_: any, record: any) =>
-                `${(
-                    (Number(record.jumlah_dok) / record.target_nks / 10) *
-                    100
-                ).toFixed(2)} %`,
+            title: "Dokumen Warning",
+            dataIndex: "dok_warning",
+            key: "dok_warning",
+            sorter: warningSorter as CompareFn<object>,
+        },
+        {
+            title: "Dokumen Error",
+            dataIndex: "dok_error",
+            key: "dok_error",
+            sorter: errorSorter as CompareFn<object>,
+        },
+    ];
+    const items = [
+        {
+            label: "Progress per Kabupaten/Kota",
+            key: "1",
+            children: (
+                <>
+                    <Title level={2}>
+                        Progress pendataan menurut Kabupaten/Kota{" "}
+                    </Title>
+                    <Space
+                        style={{
+                            marginBottom: "10px",
+                            marginTop: "10px",
+                            width: "100%",
+                            justifyContent: "end",
+                        }}
+                    >
+                        <Button
+                            type="primary"
+                            onClick={() =>
+                                handleExport(columnsKabkot, tableDataKabkot)
+                            }
+                        >
+                            <ExportOutlined />
+                            Export as CSV
+                        </Button>
+                    </Space>
+                    <Space
+                        style={{
+                            backgroundColor: "#fff",
+                            width: "100%",
+                            minHeight: "300px",
+                            padding: "10px 15px",
+                            marginBottom: "30px",
+                        }}
+                        direction="vertical"
+                    >
+                        <Table
+                            columns={columnsKabkot}
+                            // size="large"
+                            // style={{ width: "100%", backgroundColor: "red" }}
+                            dataSource={tableDataKabkot}
+                            scroll={{ x: "100%" }}
+                        />
+                    </Space>
+                </>
+            ),
+        },
+        {
+            label: "Progress per NKS",
+            key: "2",
+            children: (
+                <>
+                    <Title level={2}>Progress pendataan menurut NKS </Title>
+                    <Space
+                        style={{
+                            marginBottom: "10px",
+                            marginTop: "10px",
+                            width: "100%",
+                            justifyContent: "end",
+                        }}
+                    >
+                        <Button
+                            type="primary"
+                            onClick={() => handleExport(columns, tableData)}
+                        >
+                            <ExportOutlined />
+                            Export as CSV
+                        </Button>
+                    </Space>
+                    <Space
+                        style={{
+                            backgroundColor: "#fff",
+                            width: "100%",
+                            minHeight: "300px",
+                            padding: "10px 15px",
+                        }}
+                        direction="vertical"
+                    >
+                        <Table
+                            columns={columns}
+                            // size="large"
+                            // style={{ width: "100%", backgroundColor: "red" }}
+                            dataSource={tableData}
+                            scroll={{ x: "100%" }}
+                        />
+                    </Space>
+                </>
+            ),
+        },
+        {
+            label: "Progress per PML",
+            key: "3",
+            children: (
+                <>
+                    <Title level={2}>Progress pendataan menurut PML </Title>
+                    <Space
+                        style={{
+                            marginBottom: "10px",
+                            marginTop: "10px",
+                            width: "100%",
+                            justifyContent: "end",
+                        }}
+                    >
+                        <Button
+                            type="primary"
+                            onClick={() => handleExport(columns, tableData)}
+                        >
+                            <ExportOutlined />
+                            Export as CSV
+                        </Button>
+                    </Space>
+                    <Space
+                        style={{
+                            backgroundColor: "#fff",
+                            width: "100%",
+                            minHeight: "300px",
+                            padding: "10px 15px",
+                        }}
+                        direction="vertical"
+                    >
+                        <Table
+                            columns={columnUsers}
+                            // size="large"
+                            // style={{ width: "100%", backgroundColor: "red" }}
+                            dataSource={tableDataUser}
+                            scroll={{ x: "100%" }}
+                        />
+                    </Space>
+                </>
+            ),
         },
     ];
 
     return (
         <>
             <Head title="Dashboard" />
-            <Title level={2}>Progress pendataan menurut Kabupaten/Kota </Title>
-            <Space
-                style={{
-                    marginBottom: "10px",
-                    marginTop: "10px",
-                    width: "100%",
-                    justifyContent: "end",
-                }}
-            >
-                <Button
-                    type="primary"
-                    onClick={() => handleExport(columnsKabkot, tableDataKabkot)}
-                >
-                    <ExportOutlined />
-                    Export as CSV
-                </Button>
-            </Space>
-            <Space
-                style={{
-                    backgroundColor: "#fff",
-                    width: "100%",
-                    minHeight: "300px",
-                    padding: "10px 15px",
-                    marginBottom: "30px",
-                }}
-                direction="vertical"
-            >
-                <Table
-                    columns={columnsKabkot}
-                    // size="large"
-                    // style={{ width: "100%", backgroundColor: "red" }}
-                    dataSource={tableDataKabkot}
-                    scroll={{ x: "100%" }}
-                />
-            </Space>
-            <Title level={2}>Progress pendataan menurut NKS </Title>
-            <Space
-                style={{
-                    marginBottom: "10px",
-                    marginTop: "10px",
-                    width: "100%",
-                    justifyContent: "end",
-                }}
-            >
-                <Button
-                    type="primary"
-                    onClick={() => handleExport(columns, tableData)}
-                >
-                    <ExportOutlined />
-                    Export as CSV
-                </Button>
-            </Space>
-            <Space
-                style={{
-                    backgroundColor: "#fff",
-                    width: "100%",
-                    minHeight: "300px",
-                    padding: "10px 15px",
-                }}
-                direction="vertical"
-            >
-                <Table
-                    columns={columns}
-                    // size="large"
-                    // style={{ width: "100%", backgroundColor: "red" }}
-                    dataSource={tableData}
-                    scroll={{ x: "100%" }}
-                />
-            </Space>
+            <Tabs
+                style={{ backgroundColor: "#fff", padding: "10px" }}
+                items={items}
+            />
         </>
     );
 };

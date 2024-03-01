@@ -18,6 +18,7 @@ import axios from "axios";
 import _debounce from "lodash/debounce";
 
 import MetaSelect from "@/Components/MetaSelect";
+import cekNomorSampel from "@/Functions/cekNomorSampel";
 
 const { Text, Title } = Typography;
 
@@ -27,8 +28,16 @@ const Blok1_2: React.FC<{
     tabContentStyle: React.CSSProperties;
     setDaftarArt: (value: any) => void;
     editable: boolean;
+    identitas_wilayah?: any;
     // record: any;
-}> = ({ form, onFinish, tabContentStyle, setDaftarArt, editable }) => {
+}> = ({
+    form,
+    onFinish,
+    tabContentStyle,
+    setDaftarArt,
+    editable,
+    identitas_wilayah,
+}) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
     };
@@ -53,21 +62,31 @@ const Blok1_2: React.FC<{
     };
     // konstanta
     const daftarKlas: any[] | undefined = [
-        { label: "[1] Desa", value: "1" },
-        { label: "[2] Kelurahan", value: "2" },
+        { label: "[1] Perdesaan", value: "1" },
+        { label: "[2] Perkotaan", value: "2" },
     ];
     const [messageApi, contextHolder] = message.useMessage();
     const [daftarProv, setDaftarProv] = useState([
         { label: "[71] SULAWESI UTARA", value: "71" },
     ]);
-    const [daftarKabKot, setDaftarKabKot] = useState([]);
-    const [daftarKecamatan, setDaftarKecamatan] = useState([]);
-    const [daftarDesa, setDaftarDesa] = useState([]);
+    const [daftarKabKot, setDaftarKabKot] = useState<
+        { label: string; value: string | number }[]
+    >([]);
+    const [daftarKecamatan, setDaftarKecamatan] = useState<
+        { label: string; value: string | number }[]
+    >([]);
+    const [daftarDesa, setDaftarDesa] = useState<
+        { label: string; value: string | number }[]
+    >([]);
 
-    const [daftarNks, setDaftarNks] = useState([]);
-    const [daftarBs4, setDaftarBs4] = useState([]);
+    const [daftarNks, setDaftarNks] = useState<
+        { label: string; value: string | number }[]
+    >([]);
+    const [daftarBs4, setDaftarBs4] = useState<
+        { label: string; value: string | number }[]
+    >([]);
 
-    const [kabkot, setKabkot] = useState(null);
+    const [kabkot, setKabkot] = useState<string>("");
     const fetchProvinsi = async () => {
         const url = route("api.entri.provinsi");
 
@@ -90,7 +109,7 @@ const Blok1_2: React.FC<{
         }));
         // console.log({ data });
 
-        form.setFieldValue("kode_kabkot", data.kode_kabkot);
+        // form.setFieldValue("kode_kabkot", data.kode_kabkot);
         setKabkot(data.kode_kabkot);
         setDaftarKabKot(daftarKabkot);
     };
@@ -180,6 +199,22 @@ const Blok1_2: React.FC<{
             // fetchProvinsi();
             fetchKabkot();
             form.setFieldValue("kode_prov", "71");
+            if (identitas_wilayah) {
+                // console.log({ identitas_wilayah });
+                setDaftarKecamatan([
+                    {
+                        label: `[${identitas_wilayah["kode_kec"]}] ${identitas_wilayah["kec"]}`,
+                        value: identitas_wilayah["kode_kec"],
+                    },
+                ]);
+                setDaftarDesa([
+                    {
+                        label: `[${identitas_wilayah["kode_desa"]}] ${identitas_wilayah["desa"]}`,
+                        value: identitas_wilayah["kode_desa"],
+                    },
+                ]);
+                form.setFieldsValue(identitas_wilayah);
+            }
             // fetchSemester();
         } catch (error) {}
     }, []);
@@ -188,6 +223,9 @@ const Blok1_2: React.FC<{
             fetchKecamatan(kabkot);
         }
     }, [kabkot]);
+    useEffect(() => {
+        // console.log({ formvalues: form.getFieldsValue() });
+    }, [form]);
 
     const debouncedSetDaftarArt = _debounce((value) => {
         setDaftarArt((prev: any) => {
@@ -199,6 +237,28 @@ const Blok1_2: React.FC<{
     const handleNamaKk = (event: { target: { value: any } }) => {
         const value = event.target.value;
         debouncedSetDaftarArt(value);
+    };
+    const debounceCekNomorSampel = _debounce(
+        async (value, currentRecordId, kode_kabkot, nks) =>
+            cekNomorSampel(value, currentRecordId, kode_kabkot, nks),
+        400
+    );
+    const validateNomorSampel = async (_: any, value: any) => {
+        const currentRecordId = form.getFieldValue("id"); // replace 'id' with the actual field name of the record identifier
+        const kode_kabkot = form.getFieldValue("kode_kabkot");
+        const nks = form.getFieldValue("nks");
+        // Check if the value already exists in the database for records other than the current one
+        const isUnique = await cekNomorSampel(
+            value,
+            currentRecordId,
+            kode_kabkot,
+            nks
+        );
+        // console.log({ isUnique, value });
+
+        return isUnique
+            ? Promise.resolve()
+            : Promise.reject("The value already exists in the database.");
     };
     return (
         <Space direction="vertical" style={tabContentStyle}>
@@ -323,15 +383,9 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
-                                        disabled={
-                                            !(
-                                                form.getFieldValue(
-                                                    "kode_kabkot"
-                                                ) === "00"
-                                            )
-                                        }
                                         optionFilterProp="label"
                                         options={daftarKabKot}
+                                        disabled
                                         onChange={(value: string) => {
                                             form.setFieldsValue({
                                                 kode_kec: "",
@@ -367,7 +421,7 @@ const Blok1_2: React.FC<{
                                         showSearch
                                         optionFilterProp="label"
                                         options={daftarKecamatan}
-                                        disabled={!editable}
+                                        disabled
                                         onChange={(value: string) => {
                                             form.setFieldsValue({
                                                 kode_desa: "",
@@ -396,7 +450,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
-                                        disabled={!editable}
+                                        disabled
                                         optionFilterProp="label"
                                         options={daftarDesa}
                                         onChange={(value: string) => {
@@ -414,7 +468,7 @@ const Blok1_2: React.FC<{
                         <tr>
                             <td style={cellStyle}>105</td>
                             <td style={cellStyle}>
-                                Klasifikasi Desa/Kelurahan
+                                Klasifikasi Perdesaan/Perkotaan
                             </td>
                             <td style={cellStyle}>
                                 <Form.Item
@@ -425,7 +479,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
-                                        disabled={!editable}
+                                        disabled
                                         optionFilterProp="label"
                                         options={daftarKlas}
                                     />
@@ -445,7 +499,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
-                                        disabled={!editable}
+                                        disabled
                                         optionFilterProp="label"
                                         options={daftarBs4}
                                         onChange={(value: string) => {
@@ -469,7 +523,7 @@ const Blok1_2: React.FC<{
                                     <Select
                                         allowClear
                                         showSearch
-                                        disabled={!editable}
+                                        disabled
                                         options={daftarNks}
                                     />
                                 </Form.Item>
@@ -486,8 +540,15 @@ const Blok1_2: React.FC<{
                                     name="r108"
                                     label={null}
                                     style={formItemStyle}
+                                    rules={[
+                                        {
+                                            pattern: /^\d+[A-Z]*$/,
+                                            message:
+                                                "Please enter only numbers with optional follow with uppercase alphabet.",
+                                        },
+                                    ]}
                                 >
-                                    <InputNumber min={1} max={1000} />
+                                    <Input style={{ width: "100px" }} />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -502,8 +563,13 @@ const Blok1_2: React.FC<{
                                     name="r109"
                                     label={null}
                                     style={formItemStyle}
+                                    rules={[
+                                        {
+                                            validator: validateNomorSampel,
+                                        },
+                                    ]}
                                 >
-                                    <InputNumber disabled={!editable} min={1} />
+                                    <InputNumber min={1} />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -525,7 +591,7 @@ const Blok1_2: React.FC<{
                             </td>
                         </tr>
                         <tr>
-                            <td style={cellStyle}>110</td>
+                            <td style={cellStyle}>111</td>
                             <td style={cellStyle}>
                                 {" "}
                                 Alamat (Nama Jalan/Gang/RT/RW/Dusun){" "}

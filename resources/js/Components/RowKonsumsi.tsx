@@ -77,8 +77,8 @@ const RowKonsumsi: React.FC<{
 
     return (
         <tr style={{ backgroundColor: data.flagBasket ? "#ffffcc" : "" }}>
-            <td style={centerCell}>{data.nomor}</td>
-            <td style={cellStyle}>{data.kode_coicop}</td>
+            <td style={{ ...centerCell, width: "55px" }}>{data.nomor}</td>
+            <td style={{ ...cellStyle, width: "130px" }}>{data.kode_coicop}</td>
 
             <td colSpan={1} style={data.type === "sub" ? blokStyle : cellStyle}>
                 {data.rincian}
@@ -90,7 +90,10 @@ const RowKonsumsi: React.FC<{
             </td>
             <td
                 colSpan={1}
-                style={data.type === "sub" ? blokStyle : centerCell}
+                style={{
+                    ...(data.type === "sub" ? blokStyle : centerCell),
+                    // width: "55px",
+                }}
             >
                 {data.type === "lain" ? (
                     <Form.Item name={`${data.nomor}_satuan`}>
@@ -105,7 +108,7 @@ const RowKonsumsi: React.FC<{
                     <NumberInput inputName={`${data.nomor}_beli_volume`} />
                 )}
             </td>
-            <td style={rightCell}>
+            <td style={{ ...rightCell, width: "150px" }}>
                 <RupiahInput
                     inputName={`${data.type === "sub" ? "jumlah" : ""}${
                         data.nomor

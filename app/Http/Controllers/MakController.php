@@ -3,19 +3,145 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnggotaRuta;
+use App\Models\DaftarValidasiModel;
 use App\Models\Kabkot;
 use App\Models\Komoditas;
 use App\Models\Konsumsi;
 use App\Models\KonsumsiArt;
+use App\Models\MasterWilayah;
 use App\Models\SusenasMak;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
+use function PHPSTORM_META\type;
+
 class MakController extends Controller
 {
+    private $wtfDependecies = [
+        [
+            'target' => 'wtf_3',
+            'fields' => ['wtf_3c1'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_5',
+            'fields' => ['wtf_5c1'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_6',
+            'fields' => ['wtf_6c1'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_7',
+            'fields' => ['wtf_6c2'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_8',
+            'fields' => ['wtf_8c1'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_10',
+            'fields' => ['wtf_10c1'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_14',
+            'fields' => ['wtf_14c1'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_15',
+            'fields' => ['wtf_15c1'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_16',
+            'fields' => ['wtf_16c1'],
+            "dependentValues" => ['1', '3']
+        ],
+        [
+            'target' => 'wtf_16',
+            'fields' => ['wtf_16c2'],
+            "dependentValues" => ['2']
+        ],
+        [
+            'target' => 'wtf_16',
+            'fields' => ['wtf_16c3'],
+            "dependentValues" => ['4', '5']
+        ],
+
+        [
+            'target' => 'wtf_23',
+            'fields' => ['wtf_23c1'],
+            "dependentValues" => ['1']
+        ],
+        [
+            'target' => 'wtf_24',
+            'fields' => ['wtf_24c1'],
+            "dependentValues" => ['1']
+        ],
+    ];
+    public function is_any_zero($a, $b)
+    {
+        if (!isset($a)) {
+            $a = 0;
+        }
+        if (!isset($b)) {
+            $b = 0;
+        }
+        $a = (float)$a;
+        $b = (float)$b;
+        if ($a == 0 && $b == 0) {
+            return false;
+        }
+
+        return ($a !== 0 && $b == 0) || ($b !== 0 && $a == 0);
+    }
+    public function cek_nomor_sampel(Request $request)
+    {
+        $value = $request->input('value');
+        $kode_kabkot = $request->input('kode_kabkot');
+        $nks = $request->input('nks');
+        $id = $request->input('currentRecordId');
+        // dd($id);
+
+        $exists = SusenasMak::where('r109', $value)
+            ->where('id', '<>', $id)
+            ->where('kode_kabkot', $kode_kabkot)
+            ->where('nks', $nks)
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+    private function get_konsumsi_ruta($id_ruta)
+    {
+        return Konsumsi::where('id_ruta', $id_ruta)
+            ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
+            // ->selectRaw('komoditas.id_kelompok', 'count(*) as jumlah')
+            ->selectRaw('komoditas.id_kelompok,sum(konsumsi.harga_beli) as beli,sum(konsumsi.harga_produksi) as produksi')
+            ->where('type', '<>', 'sub')
+            ->groupBy('komoditas.id_kelompok')
+            ->get();
+    }
+
+    private function get_konsumsi_art($id_ruta)
+    {
+        return KonsumsiArt::where('id_ruta', $id_ruta)
+            ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
+            ->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')
+            ->selectRaw('id_art,komoditas.id_kelompok,sum(konsumsi_art.harga_beli) as beli,sum(konsumsi_art.harga_produksi) as produksi')
+            ->where('type', '<>', 'sub')
+            ->groupBy('id_art', 'komoditas.id_kelompok')
+            ->get();
+    }
     public function entri(Request $request)
     {
 
@@ -30,7 +156,8 @@ class MakController extends Controller
                         ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
                         ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
                 })
-                ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas')->distinct()->get();
+                ->join('users', 'vsusenas_mak.users_id', 'users.id')
+                ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct()->get();
 
             //  return response()->json($data, 200);
             return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kabkot, 'nks' => $nks]);
@@ -52,7 +179,10 @@ class MakController extends Controller
                 'master_wilayah.kode_kabkot',
                 'master_wilayah.nks',
                 'master_wilayah.kabkot',
-                DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok')
+                DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok'),
+                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
+                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
+                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
             )
             ->leftJoin('vsusenas_mak', function ($join) {
                 $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
@@ -79,8 +209,11 @@ class MakController extends Controller
                 'master_wilayah.kode_kabkot',
                 'master_wilayah.kabkot',
                 DB::raw('COALESCE(COUNT(DISTINCT master_wilayah.nks), 0) as target_nks'),
-
-                DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok')
+                DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok'),
+                // DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "entri" THEN vsusenas_mak.id END) as dok_entri'),
+                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
+                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
+                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
             )
             ->leftJoin('vsusenas_mak', function ($join) {
                 $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
@@ -89,20 +222,39 @@ class MakController extends Controller
             ->groupBy(
                 'master_wilayah.kode_prov',
                 'master_wilayah.kode_kabkot',
-                'master_wilayah.kabkot',
-
-
+                'master_wilayah.kabkot'
             )
-            // ->where('master_wilayah.kode_kabkot', $kode_kabkot)
             ->when($kode_kabkot !== "00", function ($query) use ($kode_kabkot) {
                 $query->where('master_wilayah.kode_kabkot', $kode_kabkot);
             })
-            ->distinct()
+            ->get();
+        // dd($rekap_kabkot);
+        $usersQuery = User::join('vsusenas_mak', 'vsusenas_mak.users_id', 'users.id');
+
+        // Add the condition only if $kode_kabkot is not "00"
+        if ($kode_kabkot !== "00") {
+            $usersQuery->where('users.kode_kabkot', $kode_kabkot);
+        }
+
+        // Select the columns
+        $users = $usersQuery->select(
+            'users.id',
+            'users.nama_lengkap',
+            'users.username',
+            'users.kode_kabkot',
+            DB::raw('count(vsusenas_mak.id) as jumlah_dokumen'),
+            DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
+            DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
+            DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
+        )
+            ->groupBy('users.id', 'users.nama_lengkap', 'users.username', 'users.kode_kabkot')
             ->get();
 
         $data = [
             'data' => $rekap,
-            'rekap_kabkot' => $rekap_kabkot
+            'rekap_kabkot' => $rekap_kabkot,
+            'users' => $users
+
         ];
 
         // $kondisi_total = 100;
@@ -126,6 +278,7 @@ class MakController extends Controller
             }
             // return response()->json(['asu'], 200);
             // create mak
+            DB::beginTransaction();
             $created_mak = SusenasMak::create($input);
             // create default art
             $art = AnggotaRuta::create([
@@ -133,10 +286,13 @@ class MakController extends Controller
                 'nama' => 'art default',
                 'nomor_art' => 0,
             ]);
+            DB::commit();
 
             return response()->json($created_mak, 201);
         } catch (\Throwable $th) {
-            throw $th;
+            // throw $th;
+            DB::rollBack();
+            return response()->json(['error' => 'Error processing data'], 500);
         }
     }
 
@@ -154,7 +310,8 @@ class MakController extends Controller
                     ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
                     ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
             })
-            ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas')->distinct();
+            ->join('users', 'vsusenas_mak.users_id', 'users.id')
+            ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct();
 
         $data = $query->get();
         return response()->json([
@@ -180,23 +337,18 @@ class MakController extends Controller
                 ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
                 ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
         })
-            ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas')->distinct()->first();
+            ->join('users', 'vsusenas_mak.users_id', 'users.id')
+            ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct()->first();
+
         $konsumsi_ruta = Konsumsi::where('id_ruta', $id)->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
+
         $garis_kemiskinan = Kabkot::where('kode', $data->kode_kabkot)->pluck('garis_kemiskinan');
+
         $art = AnggotaRuta::where('id_ruta', $id)->get();
-        $rekap_konsumsi = Konsumsi::where('id_ruta', $id)
-            ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
-            // ->selectRaw('komoditas.id_kelompok', 'count(*) as jumlah')
-            ->selectRaw('komoditas.id_kelompok,sum(konsumsi.harga_beli) as beli,sum(konsumsi.harga_produksi) as produksi')
-            ->groupBy('komoditas.id_kelompok')
-            ->get();
-        $rekap_konsumsi_art = KonsumsiArt::where('id_ruta', $id)
-            ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
-            ->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')
-            // ->selectRaw('komoditas.id_kelompok', 'count(*) as jumlah')
-            ->selectRaw('id_art,komoditas.id_kelompok,sum(konsumsi_art.harga_beli) as beli,sum(konsumsi_art.harga_produksi) as produksi')
-            ->groupBy('id_art', 'komoditas.id_kelompok')
-            ->get();
+
+        $rekap_konsumsi = $this->get_konsumsi_ruta($id);
+
+        $rekap_konsumsi_art = $this->get_konsumsi_art($id);
         // $konsumsi_ruta = DB::table('konsumsi')->where('id_ruta', $id)->get();
 
         // dd($konsumsi_ruta);
@@ -217,64 +369,7 @@ class MakController extends Controller
             $data = $request->all();
 
             // Columns to check and their corresponding form fields
-            $columnsToCheck = [
-                [
-                    'target' => 'wtf_3',
-                    'fields' => ['wtf_3c1'],
-                    "dependentValues" => ['1']
-                ],
-                [
-                    'target' => 'wtf_5',
-                    'fields' => ['wtf_5c1'],
-                    "dependentValues" => ['1']
-                ],
-                [
-                    'target' => 'wtf_6',
-                    'fields' => ['wtf_6c1', 'wtf_6c2'],
-                    "dependentValues" => ['1']
-                ],
-                [
-                    'target' => 'wtf_8',
-                    'fields' => ['wtf_8c1'],
-                    "dependentValues" => ['1']
-                ],
-                [
-                    'target' => 'wtf_14',
-                    'fields' => ['wtf_14c1'],
-                    "dependentValues" => ['1']
-                ],
-                [
-                    'target' => 'wtf_15',
-                    'fields' => ['wtf_15c1'],
-                    "dependentValues" => ['1']
-                ],
-                [
-                    'target' => 'wtf_16',
-                    'fields' => ['wtf_16c1'],
-                    "dependentValues" => ['1', '3']
-                ],
-                [
-                    'target' => 'wtf_16',
-                    'fields' => ['wtf_16c2'],
-                    "dependentValues" => ['2']
-                ],
-                [
-                    'target' => 'wtf_16',
-                    'fields' => ['wtf_16c3'],
-                    "dependentValues" => ['4', '5']
-                ],
-
-                [
-                    'target' => 'wtf_23',
-                    'fields' => ['wtf_23c1'],
-                    "dependentValues" => ['1']
-                ],
-                [
-                    'target' => 'wtf_24',
-                    'fields' => ['wtf_24c1'],
-                    "dependentValues" => ['1']
-                ],
-            ];
+            $columnsToCheck = $this->wtfDependecies;
             $fields_check = [];
             foreach ($columnsToCheck as $column) {
                 if (isset($column['fields'])) {
@@ -331,6 +426,7 @@ class MakController extends Controller
                     }
                 }
             }
+            DB::beginTransaction();
             foreach ($rekap_art as $key => $value) {
                 # code...
                 $id = $value['id'];
@@ -338,14 +434,17 @@ class MakController extends Controller
                 unset($current['id']);
                 unset($current['nomor_art']);
 
-
                 AnggotaRuta::where('id', $value['id'])->update($current);
+                // DB::commit();
             }
             SusenasMak::where('id', $data['id'])->update(['updated_at' => Date::now()]);
 
+            DB::commit();
             return response()->json($data, 200);
         } catch (\Throwable $th) {
+            DB::rollback();
             throw $th;
+            return response()->json(['error' => 'Error processing data'], 500);
         }
     }
 
@@ -400,7 +499,7 @@ class MakController extends Controller
                 // $baru[] = $item;
                 $baru[] = $item;
             }
-
+            DB::beginTransaction();
             Konsumsi::upsert($baru, ['id_komoditas', 'id_ruta']);
             $newMak = [
                 'hal10_jml_komoditas' => isset($input['hal10_jml_komoditas']) ? $input['hal10_jml_komoditas'] : null,
@@ -411,10 +510,12 @@ class MakController extends Controller
                 'updated_at' => Date::now()
             ];
             SusenasMak::where('id', $id_ruta)->update($newMak);
+            DB::commit();
             // 
             return response()->json($newMak, 201);
         } catch (\Throwable $th) {
-            throw $th;
+            DB::rollBack();
+            return response()->json(['error' => 'Error processing data'], 500);
         }
     }
     public function konsumsi_art_store(Request $request)
@@ -424,6 +525,7 @@ class MakController extends Controller
             $converted = [];
             $id_ruta = $input['id_ruta'];
             $id_art = $input['id_art'];
+
             foreach ($input as $key => $value) {
 
                 $splitted = explode('_', $key);
@@ -469,19 +571,24 @@ class MakController extends Controller
                 // $baru[] = $item;
                 $baru[] = $item;
             }
-
+            DB::beginTransaction();
             KonsumsiArt::upsert($baru, 'id');
             SusenasMak::where('id', $id_ruta)->update(['updated_at' => Date::now()]);
             // 
+            DB::commit();
             return response()->json($baru, 201);
         } catch (\Throwable $th) {
-            throw $th;
+            DB::rollBack();
+
+            return response()->json(['error' => 'Error processing data'], 500);
         }
     }
-    public function create()
+    public function create(Request $request)
     {
         // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
-        return Inertia::render("Entri/CreateMak");
+        $identitas_wilayah = $request->all();
+        $master_wilayah = MasterWilayah::where('kode_kabkot', $identitas_wilayah['kode_kabkot'])->where('nks', $identitas_wilayah['nks'])->first();
+        return Inertia::render("Entri/CreateMak", ['identitas_wilayah' => $master_wilayah]);
     }
     public function calculate_qc($id_ruta)
     {
@@ -531,6 +638,9 @@ class MakController extends Controller
                     $kalori_basket += $kalori;
                 }
             }
+            $pengeluaran_non_makanan = SusenasMak::where('id', $id_ruta)->value('blok4_32_16_total');
+            $pengeluaran = $pengeluaran * 30 / 7;
+            $pengeluaran = $pengeluaran + $pengeluaran_non_makanan;
             $data = [
                 // 'konsumsi_ruta' => $konsumsi_ruta,
                 // 'konsumsi_art' => $konsumsi_art,
@@ -543,13 +653,498 @@ class MakController extends Controller
             ];
             return response()->json($data, 200);
         } catch (\Throwable $th) {
-            throw $th;
 
-            // return response()->json(['id_ruta' => $id_ruta,], 404);
+
+            return response()->json(['error' => 'Error processing data'], 500);
         }
     }
-
     public function revalidasi($id_ruta)
+    {
+        try {
+            //code...
+            $evaluasi_rh  = $this->range_harga($id_ruta);
+            $evaluasi_isian = $this->cek_isian_new($id_ruta);
+            $daftar_error = $evaluasi_isian['daftar_error'];
+            $daftar_warning = $evaluasi_isian['daftar_warning'];
+
+            $status_dok = 'entri';
+            if (sizeof($daftar_error) > 0) {
+                // set dokumen error
+                $status_dok = 'error';
+            } else if (sizeof($evaluasi_rh) > 0 || sizeof($daftar_warning) > 0) {
+                // set dokumen warning
+                $status_dok = 'warning';
+            } else {
+                // set dokumen clean
+                $status_dok = 'clean';
+            }
+            if (strlen($id_ruta) > 10) {
+                DB::beginTransaction();
+                SusenasMak::where('id', $id_ruta)->update([
+                    'status_dok' => $status_dok
+                ]);
+                DB::commit();
+            }
+            $data = [
+                'evaluasi_rh' => $evaluasi_rh,
+                'daftar_error' => $daftar_error,
+                'daftar_warning' => $daftar_warning,
+
+            ];
+
+
+            return response()->json($data, 200);
+        } catch (\Throwable $th) {
+            throw $th;
+            DB::rollBack();
+            return response()->json(['error' => 'Error processing data'], 500);
+        }
+    }
+    private function cek_isian_new($id_ruta)
+    {
+        $daftar_error = [];
+        $daftar_warning = [];
+        $daftar_rule = new DaftarValidasiModel();
+        $data_mak = SusenasMak::where('id', $id_ruta)->first()->toArray();
+
+        if (sizeof($data_mak) > 0) {
+            // loop each var
+            foreach ($data_mak as $nama_var => $value) {
+                // each var find rules 
+                // $current_rules = array_filter($daftar_rule, fn ($element) => $value['nama_variabel'] == $nama_var);
+                $current_rules = $daftar_rule->where('nama_variabel', '=', $nama_var)->get();
+
+                foreach ($current_rules as $rule) {
+                    $pesan = [
+                        'variable' => $rule['deskripsi_variabel'],
+                        'type' => $rule['type'],
+                    ];
+                    if ($rule['nama_rule'] == 'required' && !isset($value)) {
+                        $pesan['rincian'] = "Isian ini harus diisi";
+                        if ($rule['type'] == 'error') {
+
+                            $daftar_error[] = $pesan;
+                        } else {
+                            $daftar_warning[] = $pesan;
+                        }
+                    } else {
+
+                        if ($rule['nama_rule'] == 'min' && $value < $rule['value']) {
+                            $pesan['rincian'] = "Isian ini bernilai < " . $rule['value'];
+                            if ($rule['type'] == 'error') {
+
+                                $daftar_error[] = $pesan;
+                            } else {
+                                $daftar_warning[] = $pesan;
+                            }
+                        }
+                        if ($rule['nama_rule'] == 'max' && $value > $rule['value']) {
+                            $pesan['rincian'] = "Isian ini bernilai > " . $rule['value'];
+
+                            if ($rule['type'] == 'error') {
+
+                                $daftar_error[] = $pesan;
+                            } else {
+                                $daftar_warning[] = $pesan;
+                            }
+                        }
+                    }
+                }
+            }
+            // cek kesesuaian rekap dengan isian
+            $rincian15 = [
+                'beli' => 0,
+                'produksi' => 0,
+                'total' => 0,
+            ];
+            $konsumsi_art = $this->get_konsumsi_art($id_ruta);
+            $konsumsi_ruta = $this->get_konsumsi_ruta($id_ruta);
+            foreach ($konsumsi_art as $key => $value) {
+                $rincian15['beli'] += $value['beli'];
+                $rincian15['produksi'] += $value['produksi'];
+            }
+            foreach ($konsumsi_ruta as $key => $value) {
+                $rincian15['beli'] += $value['beli'];
+                $rincian15['produksi'] += $value['produksi'];
+            }
+            $rincian15['total'] = $rincian15['beli'] + $rincian15['produksi'];
+            $rincian16 = $rincian15['total'] * 30 / 7;
+            $blok4_32_15 = [
+                'beli' => $data_mak['blok4_32_14_beli'],
+                'produksi' => $data_mak['blok4_32_14_produksi'],
+                'total' => $data_mak['blok4_32_14_total'],
+            ];
+            $blok4_32_16 = $data_mak['blok4_32_15_total'];
+
+            foreach ($rincian15 as $key => $value) {
+                if ($value != $blok4_32_15[$key]) {
+                    // add warning
+                    $pesan = [
+                        'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 15 " . $key,
+                        'type' => 'warning',
+
+                    ];
+                    $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                    $daftar_warning[] = $pesan;
+                }
+            }
+            if ($blok4_32_16 != $rincian16) {
+                $pesan = [
+                    'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 16",
+                    'type' => 'warning',
+
+                ];
+                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                $daftar_warning[] = $pesan;
+            }
+            // dd([$rincian15, (int)$rincian16, $blok4_32_15, $blok4_32_16]);
+        }
+        return [
+            'daftar_warning' => $daftar_warning,
+            'daftar_error' => $daftar_error,
+        ];
+        // return false
+    }
+    private function cek_isian($id_ruta)
+    {
+
+        $variable = [
+            'blok_1' => [
+                'kode_prov',
+                'kode_kabkot',
+                'kode_kec',
+                'kode_desa',
+                'kode_bs4',
+                'nks',
+                'semester',
+                'r108',
+                'r109',
+                'r110',
+                'r111',
+            ],
+            'blok_2' => [
+                'r201_nama',
+                'r202_nama',
+                'r201_jabatan',
+                'r202_jabatan',
+                'r203'
+            ],
+            'wtf' => [
+                'wtf_2',
+                'wtf_3', 'wtf_4', 'wtf_5', 'wtf_6', 'wtf_7', 'wtf_8', 'wtf_9', 'wtf_10',
+                'wtf_11', 'wtf_12', 'wtf_13', 'wtf_14', 'wtf_15', 'wtf_16', 'wtf_17', 'wtf_18',
+                'wtf_19', 'wtf_20', 'wtf_21', 'wtf_22', 'wtf_23', 'wtf_24',
+            ],
+            'blok_qc' => [
+                "blokqc_0",
+                "blokqc_1",
+                "blokqc_2",
+                "blokqc_3",
+                "blokqc_4",
+                "blokqc_5",
+                "blokqc_6",
+            ],
+            'blok4_31' => [
+                "blok4_31_jumlah_mak_beli",
+                "blok4_31_jumlah_mak_produksi",
+                "blok4_31_jumlah_rokok_beli",
+                "blok4_31_jumlah_rokok_produksi",
+            ],
+            'art' => [
+                "nama",
+                "mak_beli",
+                "mak_produksi",
+                "rokok_beli",
+                "rokok_produksi",
+            ],
+            'blok4_32' => [
+                "blok4_32_0_beli",
+                "blok4_32_0_produksi",
+                "blok4_32_0_total",
+                "blok4_32_1_beli",
+                "blok4_32_1_produksi",
+                "blok4_32_1_total",
+                "blok4_32_2_beli",
+                "blok4_32_2_produksi",
+                "blok4_32_2_total",
+                "blok4_32_3_beli",
+                "blok4_32_3_produksi",
+                "blok4_32_3_total",
+                "blok4_32_4_beli",
+                "blok4_32_4_produksi",
+                "blok4_32_4_total",
+                "blok4_32_5_beli",
+                "blok4_32_5_produksi",
+                "blok4_32_5_total",
+                "blok4_32_6_beli",
+                "blok4_32_6_produksi",
+                "blok4_32_6_total",
+                "blok4_32_7_beli",
+                "blok4_32_7_produksi",
+                "blok4_32_7_total",
+                "blok4_32_8_beli",
+                "blok4_32_8_produksi",
+                "blok4_32_8_total",
+                "blok4_32_9_beli",
+                "blok4_32_9_produksi",
+                "blok4_32_9_total",
+                "blok4_32_10_beli",
+                "blok4_32_10_produksi",
+                "blok4_32_10_total",
+                "blok4_32_11_beli",
+                "blok4_32_11_produksi",
+                "blok4_32_11_total",
+                "blok4_32_12_beli",
+                "blok4_32_12_produksi",
+                "blok4_32_12_total",
+                "blok4_32_13_beli",
+                "blok4_32_13_produksi",
+                "blok4_32_13_total",
+                "blok4_32_14_beli",
+                "blok4_32_14_produksi",
+                "blok4_32_14_total",
+                "blok4_32_15_total",
+                "blok4_32_16_total",
+                "blok4_32_17_total",
+            ]
+        ];
+        try {
+            //
+            // ambil data susenas_mak
+            $mak = SusenasMak::where('id', $id_ruta)->firstOrFail();
+            $daftar_art = AnggotaRuta::where('id_ruta', $id_ruta)->get();
+            $daftar_error = [];
+            // periksa blok I
+            $blok_1 = $mak->only($variable['blok_1']);
+            foreach ($blok_1 as $key => $value) {
+                if (!isset($value)) {
+                    $error = [
+                        'rincian' => "Isian ini harus diisi",
+                        'variable' => $key,
+                    ];
+                    $daftar_error[] = $error;
+                }
+            }
+
+            $blok_2 = $mak->only($variable['blok_2']);
+            foreach ($blok_2 as $key => $value) {
+                if (!isset($value)) {
+                    $error = [
+                        'rincian' => "Isian ini harus diisi",
+                        'variable' => $key,
+                    ];
+                    $daftar_error[] = $error;
+                }
+            }
+            // cek isian wtf basic;
+            $wtf = $mak->only($variable['wtf']);
+            foreach ($wtf as $key => $value) {
+                if (!isset($value)) {
+                    $error = [
+                        'rincian' => "Isian ini harus diisi",
+                        'variable' => $key,
+                    ];
+                    $daftar_error[] = $error;
+                }
+            }
+            // cek isian wtf lanjutan
+
+            $columnsToCheck = $this->wtfDependecies;
+            $fields_check = [];
+            foreach ($columnsToCheck as $column) {
+                if (isset($column['fields'])) {
+                    $fields_check = array_merge($fields_check, $column['fields']);
+                }
+            }
+
+            $currentWtf = $mak->only($fields_check);
+            // dd($currentWtf);
+
+            foreach ($columnsToCheck as $dependency) {
+
+                foreach ($dependency['fields'] as $dependentField) {
+                    // Check if the field exists in $currentWtf and condition is met
+                    if (isset($mak[$dependency['target']]) && in_array($mak[$dependency['target']], $dependency['dependentValues'])) {
+                        // if (isset($currentWtf[$dependentField]) && isset($mak[$dependency['target']])) {
+                        if (!isset($currentWtf[$dependentField])) {
+                            // return value tidak sesuai
+                            $error = [
+                                'rincian' => "Isian ini harus diisi",
+                                'variable' => $dependentField,
+                            ];
+                            $daftar_error[] = $error;
+                        }
+                    } else {
+                        // return value null tetapi dependency terisi
+                    }
+                }
+            }
+
+            //cek isian konsumsi ruta
+            // satu persatu 
+            $konsumsi_ruta = Konsumsi::where('konsumsi.id_ruta', $id_ruta)
+                ->join('komoditas', 'konsumsi.id_komoditas', 'komoditas.id')
+                ->select('konsumsi.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
+                ->get();
+            // dd($konsumsi_ruta);
+            foreach ($konsumsi_ruta as $key => $konsumsi) {
+                if ($konsumsi["type"] == "sub") {
+                    continue;
+                }
+                // kesesuaian harga dan volume
+                // dd($this->is_any_zero(0, 0));
+                if ($this->is_any_zero($konsumsi['harga_produksi'], $konsumsi['volume_produksi'])) {
+                    $error = [
+                        'rincian' => "Isian harga produksi,pemberian dsb bernilai 0 tetapi volume > 0 atau sebaliknya",
+                        'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                    ];
+                    $daftar_error[] = $error;
+                }
+
+                if ($this->is_any_zero($konsumsi['harga_beli'], $konsumsi['volume_beli'])) {
+                    $error = [
+                        'rincian' => "Isian harga pembelian bernilai 0 tetapi volume > 0 atau sebaliknya",
+                        'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                    ];
+                    $daftar_error[] = $error;
+                }
+
+                if ($this->is_any_zero($konsumsi['harga_total'], $konsumsi['volume_total'])) {
+                    $error = [
+                        'rincian' => "Isian harga total bernilai 0 tetapi volume > 0 atau sebaliknya",
+                        'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                    ];
+                    $daftar_error[] = $error;
+                }
+
+
+                // kesesuaian total 
+            }
+            // keseluruhan tidak boleh 0 
+
+            // cek isian QC
+            $blok_qc = $mak->only($variable['blok_qc']);
+            foreach ($blok_qc as $key => $value) {
+                if (!isset($value)) {
+                    $error = [
+                        'rincian' => "Isian ini harus diisi",
+                        'variable' => $key,
+                    ];
+                    $daftar_error[] = $error;
+                } else if ($key == 'blokqc_3' && $value <= 0) {
+                    $error = [
+                        'rincian' => "Isian jumlah komoditas non makanan tidak boleh bernilai 0",
+                        'variable' => $key,
+                    ];
+                    $daftar_error[] = $error;
+                }
+            }
+            // cek isian blok 4.3.1
+            // cek art
+
+            $blok4_31 = $mak->only($variable['blok4_31']);
+            foreach ($blok4_31 as $key => $value) {
+                if (!isset($value)) {
+                    $error = [
+                        'rincian' => "Isian ini harus diisi",
+                        'variable' => $key,
+                    ];
+                    $daftar_error[] = $error;
+                }
+            }
+            // cek isian blok 4.3.2
+            $nomor = 1;
+            foreach ($daftar_art as $key => $art) {
+                # code...
+                $art_check = $art->only($variable['art']);
+                $konsumsi_art = KonsumsiArt::where('konsumsi_art.id_art', $art['id'])
+                    ->join('komoditas', 'konsumsi_art.id_komoditas', 'komoditas.id')
+                    ->select('konsumsi_art.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
+                    ->get();
+                // dd($konsumsi_ruta);
+                foreach ($konsumsi_art as $key => $konsumsi) {
+                    if ($konsumsi["type"] == "sub") {
+                        if ($konsumsi['id_kelompok'] == 12 & $konsumsi['harga_beli'] == 0 & $konsumsi['harga_produksi'] == 0) {
+                            $error = [
+                                'rincian' => "Isian harga pembelian / produksi, pemberian dsb harus ada (tidak boleh 0 semua)",
+                                'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                                'nomor_art' => $nomor
+                            ];
+                            $daftar_error[] = $error;
+                        }
+                        continue;
+                    }
+                    // kesesuaian harga dan volume
+                    // dd($this->is_any_zero(0, 0));
+                    if ($this->is_any_zero($konsumsi['harga_produksi'], $konsumsi['volume_produksi'])) {
+                        $error = [
+                            'rincian' => "Isian harga produksi,pemberian dsb bernilai 0 tetapi volume > 0 atau sebaliknya",
+                            'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                            'nomor_art' => $nomor
+                        ];
+                        $daftar_error[] = $error;
+                    }
+
+                    if ($this->is_any_zero($konsumsi['harga_beli'], $konsumsi['volume_beli'])) {
+                        $error = [
+                            'rincian' => "Isian harga pembelian bernilai 0 tetapi volume > 0 atau sebaliknya",
+                            'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                            'nomor_art' => $nomor
+                        ];
+                        $daftar_error[] = $error;
+                    }
+
+                    if ($this->is_any_zero($konsumsi['harga_total'], $konsumsi['volume_total'])) {
+                        $error = [
+                            'rincian' => "Isian harga total bernilai 0 tetapi volume > 0 atau sebaliknya",
+                            'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                            'nomor_art' => $nomor
+                        ];
+                        $daftar_error[] = $error;
+                    }
+
+
+                    // kesesuaian total 
+                }
+                foreach ($art_check as $key => $value) {
+                    if (!isset($value)) {
+                        $error = [
+                            'rincian' => "Isian ini harus diisi",
+                            'variable' => $key,
+                            'nomor_art' => $nomor
+                        ];
+                        $daftar_error[] = $error;
+                    }
+                }
+                $nomor++;
+            }
+            $blok4_32 = $mak->only($variable['blok4_32']);
+            foreach ($blok4_32 as $key => $value) {
+                if (!isset($value)) {
+                    $error = [
+                        'rincian' => "Isian ini harus diisi",
+                        'variable' => $key,
+                    ];
+                    $daftar_error[] = $error;
+                } else if ($key == 'blok4_32_16_total' && $value <= 0) {
+                    $error = [
+                        'rincian' => "Isian pengeluaran bukan makanan tidak boleh bernilai 0",
+                        'variable' => $key,
+                    ];
+                    $daftar_error[] = $error;
+                }
+            }
+
+
+
+
+
+            return $daftar_error;
+        } catch (\Exception $ex) {
+            return response()->json(['error' => 'Error processing data'], 500);
+        }
+    }
+    private function range_harga($id_ruta)
     {
         try {
             //code...
@@ -564,6 +1159,8 @@ class MakController extends Controller
 
 
             $kode_kabkot = SusenasMak::where('id', $id_ruta)->value('kode_kabkot');
+
+            // $kode_kabkot->value('kode_kabkot');
 
 
             $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
@@ -704,16 +1301,17 @@ class MakController extends Controller
             }
 
 
-            $data = [
-                // 'konsumsi_ruta' => $konsumsi_ruta,
-                // 'konsumsi_art' => $konsumsi_art,
-                'evaluasi_rh' => $evaluasi_rh,
-                'evaluasi_basket' => [],
-                'id_ruta' => $id_ruta,
-            ];
-            return response()->json($data, 200);
-        } catch (\Throwable $th) {
-            throw $th;
+            // $data = [
+            //     // 'konsumsi_ruta' => $konsumsi_ruta,
+            //     // 'konsumsi_art' => $konsumsi_art,
+            //     'evaluasi_rh' => $evaluasi_rh,
+            //     // 'evaluasi_basket' => [],
+            //     // 'id_ruta' => $id_ruta,
+            // ];
+            return $evaluasi_rh;
+        } catch (\Exception $ex) {
+            return response()->json(['error' => 'Error processing data'], 500);
+
 
             // return response()->json(['id_ruta' => $id_ruta,], 404);
         }
@@ -722,14 +1320,21 @@ class MakController extends Controller
     {
         try {
             //code...
+            DB::beginTransaction();
             $mak = SusenasMak::where('id', $id_ruta);
             $mak->delete();
+            DB::commit();
             return response()->json([
                 'message' => 'berhasil menghapus satu ruta',
                 'status' => 'success'
             ], 204);
         } catch (\Throwable $th) {
-            throw $th;
+            DB::rollBack();
+            return response()->json(['error' => 'Error processing data'], 500);
         }
+    }
+    public function maintenance()
+    {
+        return Inertia::render('Maintenance');
     }
 }

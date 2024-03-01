@@ -7,9 +7,13 @@ import { Button, Form, Space, message } from "antd";
 import axios from "axios";
 import Blok1_2 from "@/Forms/Mak/Blok1_2";
 import { PageProps } from "@/types";
-import { SaveOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 
-const Mak = () => {
+const Mak = ({
+    identitas_wilayah,
+}: PageProps & {
+    identitas_wilayah: any;
+}) => {
     // const [cariForm] = Form.useForm();
     const tabContentStyle: React.CSSProperties = {
         backgroundColor: "#fff",
@@ -39,7 +43,7 @@ const Mak = () => {
     const [messageApi, contextHolder] = message.useMessage();
 
     const blok1_2Finish = async (values: any) => {
-        console.log({ values });
+        // console.log({ values });
         // return;
         messageApi.open({
             type: "loading",
@@ -81,8 +85,7 @@ const Mak = () => {
     // const [totalProduksi, setTotalProduksi] = useState(0);
 
     // initialize the form
-    useEffect(() => {}, []);
-
+   
     return (
         <>
             {contextHolder}
@@ -96,6 +99,21 @@ const Mak = () => {
                 }}
                 direction="vertical"
             >
+                <Space>
+                    <Button
+                        onClick={() =>
+                            router.get(
+                                route("entri", {
+                                    kode_kabkot:
+                                        form.getFieldValue("kode_kabkot"),
+                                    nks: form.getFieldValue("nks"),
+                                })
+                            )
+                        }
+                    >
+                        <ArrowLeftOutlined /> Kembali
+                    </Button>
+                </Space>
                 <Space
                     direction="horizontal"
                     style={{
@@ -140,6 +158,7 @@ const Mak = () => {
                     onFinish={blok1_2Finish}
                     setDaftarArt={setDaftarArt}
                     editable={true}
+                    identitas_wilayah={identitas_wilayah}
                 />
                 {/* <Table dataSource={dazftarSampel} columns={columns} />; */}
             </Space>

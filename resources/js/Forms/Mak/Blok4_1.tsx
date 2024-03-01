@@ -78,7 +78,7 @@ const Blok4_1: React.FC<{
     function handleChange(activeKey: string): void {}
     // define initializing components
     useEffect(() => {
-        calculate();
+        // calculate();
     }, []);
 
     return (
@@ -160,7 +160,7 @@ const Blok4_1: React.FC<{
                         children: (
                             <Blok4_1Tab
                                 from={128}
-                                to={159}
+                                to={158}
                                 hal={10}
                                 form={form}
                                 calculate={calculate}

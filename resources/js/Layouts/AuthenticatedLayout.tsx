@@ -29,7 +29,7 @@ export default function Authenticated({
 
     const handleMenuClick = async (key: string) => {
         router.visit(route(key));
-        
+        // console.log({ selectedKey });
     };
 
     useEffect(() => {

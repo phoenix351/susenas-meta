@@ -50,22 +50,35 @@ const Blok4_3: React.FC<{
         satuan?: string;
         type?: string;
         value: number;
+        dataType: string;
     }
     // please define all usestate here
     const [messageApi, contextHolder] = message.useMessage();
 
     const [daftarQc, setDaftarQc] = useState<Rincian[]>([
-        { rincian: "Kalori per Kapita per Hari", id: 0, value: 0 },
+        {
+            rincian: "Kalori per Kapita per Hari",
+            id: 0,
+            value: 0,
+            dataType: "decimal",
+        },
         {
             rincian: "Kalori 52 basket komoditas per Kapita per Hari",
             id: 6,
             value: 0,
+            dataType: "decimal",
         },
-        { rincian: "Jumlah Komoditas Bahan Makanan/Minuman", id: 1, value: 0 },
+        {
+            rincian: "Jumlah Komoditas Bahan Makanan/Minuman",
+            id: 1,
+            value: 0,
+            dataType: "integer",
+        },
         {
             rincian: "Jumlah Komoditas Makanan/Minuman Jadi dan Rokok",
             id: 2,
             value: 0,
+            dataType: "integer",
         },
         {
             rincian:
@@ -73,9 +86,20 @@ const Blok4_3: React.FC<{
                 `Jumlah Komoditas Non Makanan [Disalin dari dokumen KP Blok III Rincian 305 ]`,
             id: 3,
             value: 0,
+            dataType: "integer",
         },
-        { rincian: "Jumlah Semua Komoditas", id: 4, value: 0 },
-        { rincian: "Pengeluaran per kapita", id: 5, value: 0 },
+        {
+            rincian: "Jumlah Semua Komoditas",
+            id: 4,
+            value: 0,
+            dataType: "integer",
+        },
+        {
+            rincian: "Pengeluaran per kapita",
+            id: 5,
+            value: 0,
+            dataType: "rupiah",
+        },
     ]);
 
     const renderQC: React.FC<{
@@ -126,7 +150,10 @@ const Blok4_3: React.FC<{
                                                 /\B(?=(\d{3})+(?!\d))/g,
                                                 ","
                                             );
-                                        return formattedValue;
+
+                                        return rincian.dataType === "decimal"
+                                            ? formattedValue
+                                            : String(numericValue);
                                     }}
                                 />
                             </Form.Item>
@@ -172,8 +199,10 @@ const Blok4_3: React.FC<{
         newQc[2].value = data.jumlah_komoditas_makanan_jadi_rokok;
         newQc[3].value = form.getFieldValue("blokqc_3");
         newQc[4].value = newQc[1].value + newQc[2].value + newQc[3].value;
-        newQc[5].value = data.pengeluaran / daftarArt.length;
-        newQc[6].value = data.kalori_basket / 7;
+        newQc[5].value = parseInt(String(data.pengeluaran / daftarArt.length));
+        newQc[6].value = data.kalori_basket / 7 / daftarArt.length;
+        // console.log({ newQc });
+
         setDaftarQc([...newQc]);
         form.setFieldsValue({
             blokqc_0: newQc[0].value,

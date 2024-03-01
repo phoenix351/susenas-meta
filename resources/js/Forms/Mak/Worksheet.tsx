@@ -94,7 +94,7 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
     const [activeChild, setActiveChild] = useState<JSX.Element[]>([]);
     const commonColumns = (
         <>
-            <td style={centerCell}>{props.nomor}</td>
+            <td style={centerCell}>{props.id}</td>
             <td style={cellStyle}>{props.rincian}</td>
         </>
     );
@@ -207,6 +207,14 @@ const daftarRincian = [
                     "VSEN24.KP Rincian 248 s.d 254 Kolom 5 (Setahun terakhir)",
                 type: "rupiah",
             },
+        ],
+    },
+    {
+        id: 7,
+        nomor: 7,
+        rincian: "ADA ART YANG MENGOBATI SENDIRI? (R1104=1)",
+        type: "binary",
+        children: [
             {
                 id: 29,
                 nomor: "6c2",
@@ -216,12 +224,6 @@ const daftarRincian = [
                 type: "rupiah",
             },
         ],
-    },
-    {
-        id: 7,
-        nomor: 7,
-        rincian: "ADA ART YANG MENGOBATI SENDIRI? (R1104=1)",
-        type: "binary",
     },
     {
         id: 8,

@@ -40,7 +40,7 @@ const Blok4_3: React.FC<{
     daftarArt,
     daftarRincian432,
 }) => {
-    console.log({ daftarArt });
+    // console.log({ daftarArt });
 
     const formItemLayout = {
         // wrapperCol: { span: 24 },
@@ -188,7 +188,7 @@ const Blok4_3: React.FC<{
     //     { beli: 0, produksi: 0, total: 0 },
     // ]);
     const calculateSummary = (data: any) => {
-        console.log("call calculate");
+        // console.log("call calculate");
         let calculate = data.reduce((summary: any[], item: any) => {
             Object.values(item.rekap).forEach((entry: any, index: number) => {
                 summary[index] = summary[index] || {
@@ -242,22 +242,21 @@ const Blok4_3: React.FC<{
                 );
             return [...newRekap];
         });
-        console.log({ rekapMak });
+        // console.log({ rekapMak });
     }, [daftarArt]);
     useEffect(() => {
-        const fetchArt = async () => {
-            const { data } = await axios.get(
-                route("entri.mak.art.fetch", { id_ruta: daftarArt[0]?.id_ruta })
-            );
-            console.log({ daftarArt });
-
-            data.forEach((art: any, index: number) => {
-                `blok4_31_${index}_id_art`;
-
-                form.setFieldValue(`blok4_31_${index}_id_art`, art.id);
-            });
-        };
-        fetchArt();
+        // const fetchArt = async () => {
+        //     const { data } = await axios.get(
+        //         route("entri.mak.art.fetch", { id_ruta: daftarArt[0]?.id_ruta })
+        //     );
+        //     console.log({ daftarArt });
+        //     data.forEach((art: any, index: number) => {
+        //         `blok4_31_${index}_id_art`;
+        //         form.setFieldValue(`blok4_31_${index}_id_art`, art.id);
+        //     });
+        // };
+        // fetchArt();
+        // console.log({ rekapMak });
     }, []);
 
     return (
@@ -296,9 +295,8 @@ const Blok4_3: React.FC<{
                                     label={null}
                                     initialValue={art.id}
                                     hidden
-                                    // hidden
                                 >
-                                    <Input />
+                                    <Input readOnly />
                                 </Form.Item>
                             </td>
 

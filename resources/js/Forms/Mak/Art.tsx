@@ -27,6 +27,7 @@ const Art: React.FC<{
     id_art: string;
     calculateKalori: (formValues: FormListFieldData) => Promise<number>;
     konten: any[]; // record: any;
+    art: any;
 }> = ({
     onFinish,
     nomor_art,
@@ -36,20 +37,17 @@ const Art: React.FC<{
     id_art,
     calculateKalori,
     konten,
+    art,
 }) => {
-    //    const konten =
-
-    // first initialize the rekap art
-
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(true);
-    const [subTotalHarga, setSubTotalHarga] = useState({
-        12: { beli: 0, produksi: 0, total: 0 },
-        13: { beli: 0, produksi: 0, total: 0 },
-    });
+    // const [subTotalHarga, setSubTotalHarga] = useState({
+    //     12: { beli: 0, produksi: 0, total: 0 },
+    //     13: { beli: 0, produksi: 0, total: 0 },
+    // });
 
     const konsumsiArtFinish = async (values: any) => {
-        console.log({ values });
+        // console.log({ values });
 
         // messageApi.open({
         //     type: "loading",
@@ -61,13 +59,13 @@ const Art: React.FC<{
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            console.log({ data });
+            // console.log({ data });
             // messageApi.open({
             //     type: "success",
             //     key: "4_1",
             //     content: "Berhasil menyimpan data",
             // });
-            console.log("sucess");
+            // console.log("sucess");
         } catch (error) {
             // messageApi.open({
             //     type: "error",
@@ -85,6 +83,7 @@ const Art: React.FC<{
         subKey: number;
         jenis: keyof SubTotal;
     }) => {
+        // return;
         // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
         const pattern = `${jenis}_harga${subKey}`;
@@ -99,16 +98,18 @@ const Art: React.FC<{
                 0
             );
 
-        let newSubTotalHarga: any = { ...subTotalHarga };
-        newSubTotalHarga[subKey][jenis] = sum;
-        setSubTotalHarga(newSubTotalHarga);
-        // setRekapArt(newSubTotalHarga)
         let newDaftarArt = [...daftarArt];
-        const updatedArray = newDaftarArt.map((obj) =>
-            obj.artKey === nomor_art ? { ...obj, rekap: newSubTotalHarga } : obj
-        );
+        // console.log({ disini: newSubTotalHarga });
+
+        const updatedArray = newDaftarArt.map((obj) => {
+            let rekap = { ...obj.rekap };
+            rekap[subKey][jenis] = sum;
+            return obj.id === id_art ? { ...obj, rekap: rekap } : obj;
+        });
+        setDaftarArt(updatedArray);
     };
     const calculateRekap = _debounce(() => {
+        // return;
         // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
         // const pattern = `${jenis}_harga${subKey}`;
@@ -163,30 +164,29 @@ const Art: React.FC<{
                 0
             );
 
-        let newSubTotalHarga: any = { ...subTotalHarga };
-
-        newSubTotalHarga["12"]["beli"] = sum_beli_0;
-        newSubTotalHarga["13"]["beli"] = sum_beli_1;
-        newSubTotalHarga["12"]["produksi"] = sum_produksi_0;
-        newSubTotalHarga["13"]["produksi"] = sum_produksi_1;
-        //calculate total for each
-        newSubTotalHarga["12"]["total"] = sum_beli_0 + sum_produksi_0;
-        newSubTotalHarga["13"]["total"] = sum_beli_1 + sum_produksi_1;
-        if (
-            newSubTotalHarga["12"]["total"] === 0 &&
-            newSubTotalHarga["13"]["total"] === 0
-        ) {
-        } else {
-            setSubTotalHarga(newSubTotalHarga);
-        }
-        // console.log({ allFieldValues, newSubTotalHarga });
-
+        // console.log({ disini: newSubTotalHarga });
         let newDaftarArt = [...daftarArt];
-        const updatedArt = newDaftarArt.map((obj) =>
-            obj.nomor_art === nomor_art
+        const updatedArt = newDaftarArt.map((obj) => {
+            let newSubTotalHarga = { ...obj.rekap }; // Create a new object
+
+            newSubTotalHarga["12"] = {
+                beli: sum_beli_0,
+                produksi: sum_produksi_0,
+                total: sum_beli_0 + sum_produksi_0,
+            };
+
+            newSubTotalHarga["13"] = {
+                beli: sum_beli_1,
+                produksi: sum_produksi_1,
+                total: sum_beli_1 + sum_produksi_1,
+            };
+
+            return obj.id === id_art
                 ? { ...obj, rekap: newSubTotalHarga }
-                : obj
-        );
+                : obj;
+        });
+
+        console.log({ newDaftarArt });
 
         setDaftarArt(updatedArt);
     }, 600);
@@ -206,12 +206,11 @@ const Art: React.FC<{
             const { data } = await axios.get(
                 route("api.mak.konsumsi.art", { id_art: id_art })
             );
-            daftarArt.forEach((element: any) => {
-                if (element.id === id_art) {
-                    console.log({ element });
-                    setSubTotalHarga(element.rekap);
-                }
-            });
+            // daftarArt.forEach((element: any) => {
+            //     if (element.id === id_art) {
+            //         setSubTotalHarga(element.rekap);
+            //     }
+            // });
 
             const daftarSub: number[] = [159, 192];
             let konsumsiArt = data.map(
@@ -274,12 +273,9 @@ const Art: React.FC<{
             // setLoading(false);
         };
         fetchKonsumsiArt(id_art);
-        calculateRekap();
+        // calculateRekap();
         setLoading(true);
     }, [id_art]);
-    useEffect(() => {
-        console.log({ konten });
-    }, [subTotalHarga]);
 
     useEffect(() => {
         form.setFieldsValue({ id_ruta, id_art });
@@ -311,29 +307,27 @@ const Art: React.FC<{
                         yang terisi pada halaman ini
                     </Text>
                     <Form.Item style={{ margin: "auto" }} name="id_ruta" hidden>
-                        <Input />
+                        <Input readOnly />
                     </Form.Item>
                     <Form.Item style={{ margin: "auto" }} name="id_art" hidden>
-                        <Input />
+                        <Input readOnly />
                     </Form.Item>
-                    <Form.Item
+                    {/* <Form.Item
                         style={{ margin: "auto" }}
                         name="hal6_jml_komoditas"
                     >
                         <InputNumber max={30} style={{ width: "40px" }} />
-                    </Form.Item>
+                    </Form.Item> */}
                 </Space>
-                {konten.length > 0 ? (
+                {
                     <TabelBlok
                         form={form}
                         konten={konten}
                         title={title}
                         calculate={calculateSubTotalHarga}
-                        rekapMak={subTotalHarga}
+                        rekapMak={art.rekap}
                     />
-                ) : (
-                    <Skeleton active paragraph={{ rows: 10 }} />
-                )}
+                }
             </Form>
         </Space>
     );

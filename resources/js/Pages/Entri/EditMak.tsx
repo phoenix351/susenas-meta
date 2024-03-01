@@ -29,6 +29,7 @@ import {
     ContainerOutlined,
     DollarOutlined,
     LeftCircleOutlined,
+    ReloadOutlined,
     SaveOutlined,
 } from "@ant-design/icons";
 import MyModal from "@/Components/Modal";
@@ -195,6 +196,8 @@ const Mak = ({
         width: "100%",
     };
     // define forms
+    console.log({ rekap_konsumsi, rekap_konsumsi_art });
+
     const [form] = Form.useForm();
     const [blok4_1Form] = Form.useForm();
     const [blok4_1artForm] = Form.useForm();
@@ -210,11 +213,13 @@ const Mak = ({
         daftarRincian432.map((rincian) => ({ beli: 0, produksi: 0, total: 0 }))
     );
 
-    const [loadingReval, setLoadingReval] = useState<boolean>(true);
+    const [loadingReval, setLoadingReval] = useState<boolean>(false);
     // const [spinning, setSpinning] = React.useState<boolean>(false);
 
     const [openModal, setOpenModal] = useState(false);
     const [warningList, setWarningList] = useState<any[]>([]);
+    const [warningRHList, setWarningRHList] = useState<any[]>([]);
+    const [errorList, setErrorList] = useState<any[]>([]);
     const modalCancel = () => {
         setOpenModal(false);
     };
@@ -418,13 +423,13 @@ const Mak = ({
                     0
                 );
             newrekapMak[sub]["produksi"] = sum_produksi;
-            if (sub <= 13) {
+            if (sub <= 14) {
                 newrekapMak[sub]["total"] =
                     newrekapMak[sub]["beli"] + newrekapMak[sub]["produksi"];
             }
             // newrekapMak[14]["beli"] = Object.entries(newrekapMak)
             newrekapMak[14] = newrekapMak
-                .slice(0, 13)
+                .slice(0, 14)
                 // .filter(([fieldName]: any) => fieldName === "beli");
                 .reduce(
                     (prev, current) => ({
@@ -470,7 +475,7 @@ const Mak = ({
         newrekapMak[12] = summary ? summary[0] : 0;
         newrekapMak[13] = summary ? summary[1] : 0;
         newrekapMak[14] = newrekapMak
-            .slice(0, 13)
+            .slice(0, 14)
             // .filter(([fieldName]: any) => fieldName === "beli");
             .reduce(
                 (prev, current) => ({
@@ -555,7 +560,7 @@ const Mak = ({
                     return element;
                     // assign newdaftarart[index].rekap[element.id_kelompok]['produksi'] = element.produksi;
                 });
-                console.log({ newDaftarArt });
+                // console.log({ newDaftarArt });
 
                 setDaftarArt(newDaftarArt);
             }
@@ -563,7 +568,7 @@ const Mak = ({
         artSetUp();
 
         document.addEventListener("keydown", handleKeyPress);
-        console.log({ data });
+        // console.log({ data });
 
         form.setFieldsValue(data);
 
@@ -734,62 +739,11 @@ const Mak = ({
                             style={{ backgroundColor: "#e64d00" }}
                             onClick={async () => {
                                 setOpenModal(true);
-                                const id_ruta = form.getFieldValue("id");
-                                try {
-                                    // Submit all forms concurrently using Promise.all
-                                    const [form1, form2, form3] =
-                                        await Promise.all([
-                                            artForm.submit(),
-                                            form.submit(),
-                                            blok4_1Form.submit(),
-                                        ]);
-
-                                    // Now, all forms are submitted successfully
-                                    setLastSaved(new Date());
-                                    router.get(
-                                        route("entri.mak.edit", {
-                                            id: id_ruta,
-                                        }),
-                                        {},
-                                        {
-                                            preserveState: true,
-                                            preserveScroll: true,
-                                        }
-                                    );
-                                    const { data } = await axios.get(
-                                        route("api.mak.revalidasi", {
-                                            id_ruta: id_ruta,
-                                        })
-                                    );
-                                    let newWarningList = [...warningList];
-                                    // console.log({ data });
-
-                                    newWarningList = [
-                                        // ...newWarningList,
-                                        ...data.evaluasi_rh,
-                                        ...data.evaluasi_basket,
-                                    ];
-                                    setWarningList([...newWarningList]);
-                                    // console.log({ newWarningList });
-
-                                    messageApi.open({
-                                        content: "revalidsai selesai",
-                                        type: "success",
-                                        key: "revalidasi",
-                                    });
-                                    setLoadingReval(false);
-                                } catch (error) {
-                                    console.error(
-                                        "Error submitting forms:",
-                                        error
-                                    );
-                                    // Handle error if any of the forms fails to submit
-                                }
                             }}
                         >
                             {/* <ContainerOutline /> */}
                             <DollarOutlined />
-                            Evaluasi Range Harga
+                            Evaluasi
                         </Button>
                     </Space>
                 </Space>
@@ -807,6 +761,12 @@ const Mak = ({
                                     onFinish={blok1_2Finish}
                                     setDaftarArt={setDaftarArt}
                                     editable={false}
+                                    identitas_wilayah={{
+                                        desa: data.desa,
+                                        kode_desa: data.kode_desa,
+                                        kec: data.kec,
+                                        kode_kec: data.kode_kec,
+                                    }}
                                 />
                             ),
                         },
@@ -892,15 +852,45 @@ const Mak = ({
 
             <MyModal
                 cancelText="Tutup"
-                okText="Oke"
+                okText=""
                 handleCancel={modalCancel}
                 confirmLoadingModal={false}
                 openModal={openModal}
                 handleOk={modalCancel}
-                title="Daftar Warning"
+                title="Daftar Evaluasi"
                 key={"range-harga-modal"}
                 width="1200px"
             >
+                <Button
+                    onClick={async () => {
+                        setLoadingReval(true);
+                        const id_ruta = form.getFieldValue("id");
+                        try {
+                            const { data } = await axios.get(
+                                route("api.mak.revalidasi", {
+                                    id_ruta: id_ruta,
+                                })
+                            );
+
+                            setWarningRHList([...data.evaluasi_rh]);
+                            setErrorList([...data.daftar_error]);
+                            setWarningList([...data.daftar_warning]);
+
+                            messageApi.open({
+                                content: "revalidsai selesai",
+                                type: "success",
+                                key: "revalidasi",
+                            });
+                        } catch (error) {
+                            console.error("Error submitting forms:", error);
+                            // Handle error if any of the forms fails to submit
+                        } finally {
+                            setLoadingReval(false);
+                        }
+                    }}
+                >
+                    <ReloadOutlined /> Revalidasi
+                </Button>
                 {loadingReval ? (
                     <Space
                         style={{
@@ -929,12 +919,65 @@ const Mak = ({
                     </Space>
                 ) : (
                     <Space style={{ width: "100%" }} direction="vertical">
-                        <Space>Jumlah warning : {warningList.length}</Space>
-                        <Table
-                            bordered
-                            columns={columns}
-                            dataSource={warningList}
-                            style={{ width: "100%" }}
+                        <Tabs
+                            onChange={handleChange}
+                            type="card"
+                            items={[
+                                {
+                                    label: "Error Isian",
+                                    key: "1",
+                                    children: (
+                                        <>
+                                            <Space>
+                                                Jumlah error :{" "}
+                                                {errorList.length}
+                                            </Space>
+                                            <Table
+                                                bordered
+                                                columns={errorColumns}
+                                                dataSource={errorList}
+                                                style={{ width: "100%" }}
+                                            />
+                                        </>
+                                    ),
+                                },
+                                {
+                                    label: "Warning Isian",
+                                    key: "2",
+                                    children: (
+                                        <>
+                                            <Space>
+                                                Jumlah error :{" "}
+                                                {warningList.length}
+                                            </Space>
+                                            <Table
+                                                bordered
+                                                columns={errorColumns}
+                                                dataSource={warningList}
+                                                style={{ width: "100%" }}
+                                            />
+                                        </>
+                                    ),
+                                },
+                                {
+                                    label: "Range Harga",
+                                    key: "3",
+                                    children: (
+                                        <>
+                                            <Space>
+                                                Jumlah warning :{" "}
+                                                {warningRHList.length}
+                                            </Space>
+                                            <Table
+                                                bordered
+                                                columns={columns}
+                                                dataSource={warningRHList}
+                                                style={{ width: "100%" }}
+                                            />
+                                        </>
+                                    ),
+                                },
+                            ]}
                         />
                     </Space>
                 )}
@@ -948,6 +991,7 @@ const columns = [
         title: "Nomor",
         dataIndex: "nomor",
         key: "nomor",
+        width: 10,
         render: (text: any, record: any, index: number) => index + 1,
     },
     {
@@ -961,6 +1005,7 @@ const columns = [
         title: "Harga per Satuan",
         dataIndex: "harga",
         key: "harga",
+        width: "20%",
         render: (text: string) => (
             <TextRupiah color="#000" value={Number(text)} />
         ),
@@ -976,6 +1021,29 @@ const columns = [
                 <TextRupiah value={record.max} color={"red"} />)
             </Text>
         ),
+    },
+];
+const errorColumns = [
+    {
+        title: "Nomor",
+        dataIndex: "nomor",
+        key: "nomor",
+        width: 15,
+        render: (text: any, record: any, index: number) => index + 1,
+    },
+    {
+        title: "Variabel",
+        dataIndex: "variable",
+        key: "variable",
+        // render: (_: any, record: any) => record.variable,
+    },
+    {
+        title: "Deskripsi",
+        dataIndex: "rincian",
+        key: "rincian",
+        // render: (text: string) => (
+        //     <TextRupiah color="#000" value={Number(text)} />
+        // ),
     },
 ];
 

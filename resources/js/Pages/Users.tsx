@@ -1,6 +1,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import Highlighter from "react-highlight-words";
 import { Head, router } from "@inertiajs/react";
 import { PageProps, User } from "@/types";
 import {
@@ -21,6 +22,9 @@ import {
     Form,
     Popconfirm,
     message,
+    Input,
+    TableColumnType,
+    InputRef,
 } from "antd";
 // import { Table } from "ant-table-extensions";
 import {
@@ -31,15 +35,34 @@ import {
     UserAddOutlined,
     DeleteFilled,
     EditFilled,
+    SearchOutlined,
 } from "@ant-design/icons";
-import { CompareFn, SortOrder } from "antd/es/table/interface";
-import MyModal from "@/Components/Modal";
+import {
+    ColumnType,
+    CompareFn,
+    FilterDropdownProps,
+    FilterValue,
+    SortOrder,
+} from "antd/es/table/interface";
 import axios from "axios";
 import { throttle } from "lodash";
+const { Title, Text } = Typography;
+
 import CreateUserForm from "@/Forms/User/CreateUserForm";
-const { Title } = Typography;
+import MyModal from "@/Components/Modal";
+import EditUserForm from "@/Forms/User/EditUserForm";
 
 type Sorter<T> = (a: T, b: T, sortOrder?: SortOrder) => number;
+interface ColumnSearchProps {
+    setSelectedKeys: (selectedKeys: string[]) => void;
+    selectedKeys: string[];
+    confirm: () => void;
+    clearFilters: () => void;
+}
+interface CustomColumnType<T> extends ColumnType<T> {
+    onFilter?: (value: any, record: T) => boolean;
+    render?: (text: any, record: T, index: number) => ReactNode;
+}
 
 function createSorter<T>(property: keyof T): Sorter<T> {
     return (a: T, b: T, sortOrder?: SortOrder): number => {
@@ -69,7 +92,15 @@ const Users = ({
     const [openAddModal, setOpenAddModal] = useState(false);
     const [createLoading, setCreateLoading] = useState(false);
 
+    const [openEditModal, setOpenEditModal] = useState(false);
+    const [editLoading, setEditLoading] = useState(false);
+
+    const [searchText, setSearchText] = useState("");
+    const [searchedColumn, setSearchedColumn] = useState("");
+    const searchInput = useRef<InputRef>(null);
+
     const [form] = Form.useForm();
+    const [editForm] = Form.useForm();
     const [messageApi, contextHolder] = message.useMessage();
 
     useEffect(() => {
@@ -77,6 +108,124 @@ const Users = ({
 
         setTableData(users);
     }, []);
+
+    const handleSearch = (
+        selectedKeys: string[],
+        confirm: FilterDropdownProps["confirm"],
+        dataIndex: any
+    ) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+    };
+
+    const handleReset = (clearFilters: () => void) => {
+        clearFilters();
+        setSearchText("");
+    };
+
+    const getColumnSearchProps = (dataIndex: string) => ({
+        filterDropdown: ({
+            setSelectedKeys,
+            selectedKeys,
+            confirm,
+            clearFilters,
+        }: FilterDropdownProps) => (
+            <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+                <Input
+                    ref={searchInput}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={(e) =>
+                        setSelectedKeys(e.target.value ? [e.target.value] : [])
+                    }
+                    onPressEnter={() =>
+                        handleSearch(
+                            selectedKeys as string[],
+                            confirm,
+                            dataIndex
+                        )
+                    }
+                    style={{ marginBottom: 8, display: "block" }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() =>
+                            handleSearch(
+                                selectedKeys as string[],
+                                confirm,
+                                dataIndex
+                            )
+                        }
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Search
+                    </Button>
+                    <Button
+                        onClick={() =>
+                            clearFilters && handleReset(clearFilters)
+                        }
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        Reset
+                    </Button>
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            confirm();
+                            setSearchText((selectedKeys as string[])[0]);
+                            setSearchedColumn(dataIndex);
+                        }}
+                    >
+                        Filter
+                    </Button>
+                    <Button
+                        type="link"
+                        size="small"
+                        onClick={() => {
+                            close();
+                        }}
+                    >
+                        close
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered: boolean) => (
+            <SearchOutlined
+                style={{ color: filtered ? "#1677ff" : undefined }}
+            />
+        ),
+        onFilter: (
+            value: string | number | boolean,
+            record: { [x: string]: { toString: () => string } }
+        ) =>
+            record[dataIndex]
+                .toString()
+                .toLowerCase()
+                .includes((value as string).toLowerCase()),
+        onFilterDropdownOpenChange: (visible: any) => {
+            if (visible) {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
+        },
+        render: (text: string) =>
+            searchedColumn === dataIndex ? (
+                <Highlighter
+                    highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+                    searchWords={[searchText]}
+                    autoEscape
+                    textToHighlight={text ? text.toString() : ""}
+                />
+            ) : (
+                <Text>{text}</Text>
+            ),
+    });
 
     const createUser = async (values: any) => {
         try {
@@ -119,6 +268,50 @@ const Users = ({
             setCreateLoading(false);
         }
     };
+    const UpdateUser = async (values: any) => {
+        try {
+            console.log({ values });
+            // return;
+            setEditLoading(true);
+            const { data } = await axios.patch(route("users.update"), values, {
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (data.status === "error") {
+                messageApi.open({
+                    content: data.message,
+                    type: "error",
+                    key: "add-user-dialog",
+                });
+            } else {
+                messageApi.open({
+                    content: data.message,
+                    type: "success",
+                    key: "add-user-dialog",
+                });
+                router.get(
+                    route("users.index"),
+                    {},
+                    {
+                        preserveScroll: true,
+                        preserveState: true,
+                    }
+                );
+            }
+            setOpenEditModal(false);
+            // setOpenAddModal(false);
+        } catch (error: any) {
+            console.log({ error });
+
+            messageApi.open({
+                content: `Terjadi galat, ${error.response.data.message}`,
+                type: "error",
+                key: "add-user-dialog",
+            });
+        } finally {
+            setEditLoading(false);
+        }
+    };
     const remove = async (userId: string) => {
         try {
             // console.log({ id_ruta });
@@ -144,9 +337,13 @@ const Users = ({
             });
         }
     };
+    const handleEdit = (text: any, record: any) => {
+        editForm.setFieldsValue(record);
+        setOpenEditModal(true);
+    };
     const debounceCellDelete = throttle(remove, 2000);
 
-    const columns = [
+    const columns: CustomColumnType<any>[] = [
         // {
         //     title: "No",
         //     dataIndex: "id",
@@ -173,6 +370,7 @@ const Users = ({
                     return 0;
                 }
             },
+            ...getColumnSearchProps("nama_lengkap"),
         },
         {
             title: "Username",
@@ -199,23 +397,16 @@ const Users = ({
             dataIndex: "nip",
             key: "nip",
         },
-        // {
-        //     title: "Edit",
-        //     dataIndex: "ubah",
-        //     key: "ubah",
-        //     render: (_: any, record: any) => (
-        //         <Button
-        //             type="primary"
-        //             onClick={() =>
-        //                 router.get(
-        //                     `${route("entri.mak.edit", { id: record.id })}`
-        //                 )
-        //             }
-        //         >
-        //             <EditFilled /> entri
-        //         </Button>
-        //     ),
-        // },
+        {
+            title: "Edit",
+            dataIndex: "ubah",
+            key: "ubah",
+            render: (_: any, record: any) => (
+                <Button type="default" onClick={() => handleEdit(_, record)}>
+                    <EditFilled /> ubah
+                </Button>
+            ),
+        },
         // {
         //     title: "Delete",
         //     dataIndex: "entri",
@@ -288,6 +479,22 @@ const Users = ({
                     onFinish={createUser}
                 />
             </MyModal>
+            <MyModal
+                handleOk={() => editForm.submit()}
+                okText="Buat"
+                confirmLoadingModal={editLoading}
+                handleCancel={() => setOpenEditModal(false)}
+                openModal={openEditModal}
+                title="Ubah Akun Petugas"
+                cancelText="Batalkan"
+                key={"add-modal"}
+            >
+                <EditUserForm
+                    kode_kabkot={kode_kabkot}
+                    form={editForm}
+                    onFinish={UpdateUser}
+                />
+            </MyModal>
         </>
     );
 };
@@ -298,7 +505,7 @@ Users.layout = (
     <AuthenticatedLayout
         user={page.props.auth.user}
         header={<h2 className="">Users</h2>}
-        selectedKey="Users"
+        selectedKey="users"
         children={page}
     ></AuthenticatedLayout>
 );

@@ -18,6 +18,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
 }) => {
     const [value, setValue] = useState(0);
     const handleChange = (nilai: any) => {
+        nilai = parseInt(nilai);
         setValue(nilai);
     };
     // useEffect(() => {
@@ -33,7 +34,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     return (
         <Form.Item
             name={inputName}
-            initialValue={initialValue ?? undefined}
+            initialValue={initialValue ? parseInt(String(initialValue)) : 0}
             style={{ marginBottom: "4px" }}
         >
             <InputNumber

@@ -35,6 +35,7 @@ const Dashboard = ({
             });
 
             setDaftarSampel(data_susenas);
+            // console.log({ data_susenas });
         }
     }, []);
     const [cariForm] = Form.useForm();
@@ -63,7 +64,7 @@ const Dashboard = ({
         try {
             const url = route("api.entri.mak", values);
             const { data } = await axios.get(url);
-            console.log({ data });
+            // console.log({ data });
             setDaftarSampel(data.data);
             messageApi.open({
                 type: "success",
@@ -109,6 +110,18 @@ const Dashboard = ({
         }
     };
     const debounceCellDelete = throttle(remove, 2000);
+    interface StatusColor {
+        clean: string;
+        error: string;
+        warning: string;
+        entri: string;
+    }
+    const statusColor: StatusColor = {
+        clean: "green",
+        error: "red",
+        warning: "rgb(255, 204, 0)",
+        entri: "#fff",
+    };
 
     const columns = [
         {
@@ -151,12 +164,27 @@ const Dashboard = ({
             dataIndex: "r111",
             key: "r111",
         },
-        // {
-        //     title: "Status",
-        //     dataIndex: "status_dok",
-        //     key: "status_dok",
-        //     render: (value: any) => <Button>{value}</Button>,
-        // },
+        {
+            title: "Nama PML",
+            dataIndex: "nama_lengkap",
+            key: "nama_lengkap",
+        },
+        {
+            title: "Status",
+            dataIndex: "status_dok",
+            key: "status_dok",
+            render: (value: keyof StatusColor) => (
+                <Button
+                    style={{
+                        backgroundColor: statusColor[value],
+                        fontWeight: 600,
+                    }}
+                    type="primary"
+                >
+                    {value}
+                </Button>
+            ),
+        },
         {
             title: "Entri",
             dataIndex: "entri",
@@ -187,7 +215,7 @@ const Dashboard = ({
                     cancelText="nyanda"
                     onConfirm={() => debounceCellDelete(record.id)}
                 >
-                    <Button type="primary" style={{ backgroundColor: "red" }}>
+                    <Button type="default">
                         <DeleteFilled /> hapus
                     </Button>
                 </Popconfirm>
@@ -217,7 +245,14 @@ const Dashboard = ({
                     <Button
                         type="primary"
                         disabled={!cariForm.getFieldValue("nks")}
-                        onClick={() => router.visit(route("entri.mak.create"))}
+                        onClick={() =>
+                            router.visit(
+                                route(
+                                    "entri.mak.create",
+                                    cariForm.getFieldsValue()
+                                )
+                            )
+                        }
                     >
                         <PlusCircleOutlined /> Tambah Ruta
                     </Button>

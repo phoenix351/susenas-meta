@@ -17,13 +17,19 @@ const CreateUserForm: React.FC<{
                 // route("api.entri.kabkot")
                 route("api.entri.kabkot", { kode_kabkot: kode_kabkot })
             );
-            console.log({ data });
+            // console.log({ data });
             let listData = data.data.map(
                 (item: { kode_kabkot: any; kabkot: any }) => ({
                     label: `[${item.kode_kabkot}] ${item.kabkot}`,
                     value: item.kode_kabkot,
                 })
             );
+            if (kode_kabkot === "00") {
+                listData.push({
+                    label: `[00] SULAWESI UTARA`,
+                    value: kode_kabkot,
+                });
+            }
             setListKabkot(listData);
         };
         fetchKabkot(kode_kabkot);
@@ -75,6 +81,7 @@ const CreateUserForm: React.FC<{
                         pattern: /^[0-9]*$/,
                         message: "Please enter only numbers.",
                     },
+
                     {
                         required: true,
                         message: "Silahkan masukkan kode identitas",

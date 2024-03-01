@@ -5,6 +5,7 @@ use App\Http\Controllers\KomoditasController;
 use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterJabatanController;
 use App\Http\Controllers\MasterWilayahController;
+use App\Http\Controllers\PeriksaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Models\Konsumsi;
@@ -28,10 +29,13 @@ use Inertia\Inertia;
 |
 */
 
+Route::get('/', [MakController::class, 'maintenance'])->name('maintenance');
+
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::patch('/users', [UserController::class, 'update'])->name('users.update');
 });
 
 Route::middleware('auth')->group(function () {
@@ -108,8 +112,11 @@ Route::middleware('auth')->group(function () {
     route::get('/entri/mak/create', [MakController::class, 'create'])->name("entri.mak.create");
     route::get('/entri/mak/{id}', [MakController::class, 'edit'])->name('entri.mak.edit');
 
+    route::post('api/cek-nomor-sampel', [MakController::class, 'cek_nomor_sampel'])->name('api.cekNomorSampel');
+
 
     route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
+    route::get('/periksa', [PeriksaController::class, 'index'])->name('periksa');
 
 
     route::get('/', function () {
