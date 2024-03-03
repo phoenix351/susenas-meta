@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Form, Input, InputNumber } from "antd";
+import React, { useState } from "react";
+import { Form, InputNumber } from "antd";
 import _debounce from "lodash/debounce";
 
 interface RupiahInputProps {
@@ -34,7 +34,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     return (
         <Form.Item
             name={inputName}
-            initialValue={initialValue ? parseInt(String(initialValue)) : 0}
+            initialValue={initialValue ? Math.round(Number(initialValue)) : 0}
             style={{ marginBottom: "4px" }}
         >
             <InputNumber
@@ -48,11 +48,8 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
                 }
                 parser={(value: any) => {
                     if (!value) return undefined;
-                    const parsedValue = parseInt(
-                        value.replace(/[^\d]/g, ""),
-                        10
-                    );
-                    return isNaN(parsedValue) ? 0 : parsedValue;
+                    const parsedValue = Math.round(value.replace(/[^\d]/g, ""));
+                    return isNaN(parsedValue) ? undefined : parsedValue;
                 }}
                 value={value}
                 onChange={(value: any) => {

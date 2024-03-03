@@ -229,7 +229,7 @@ class MakController extends Controller
             })
             ->get();
         // dd($rekap_kabkot);
-        $usersQuery = User::join('vsusenas_mak', 'vsusenas_mak.users_id', 'users.id');
+        $usersQuery = User::join('vsusenas_mak', 'vsusenas_mak.users_id', 'users.id')->join('master_wilayah', 'master_wilayah.kode_kabkot', 'users.kode_kabkot');
 
         // Add the condition only if $kode_kabkot is not "00"
         if ($kode_kabkot !== "00") {
@@ -242,12 +242,14 @@ class MakController extends Controller
             'users.nama_lengkap',
             'users.username',
             'users.kode_kabkot',
-            DB::raw('count(vsusenas_mak.id) as jumlah_dokumen'),
+            'master_wilayah.kabkot',
+            DB::raw('count(distinct vsusenas_mak.id) as jumlah_dokumen'),
             DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
             DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
             DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
         )
-            ->groupBy('users.id', 'users.nama_lengkap', 'users.username', 'users.kode_kabkot')
+
+            ->groupBy('users.id', 'users.nama_lengkap', 'users.username', 'users.kode_kabkot', 'master_wilayah.kabkot')
             ->get();
 
         $data = [
@@ -512,7 +514,10 @@ class MakController extends Controller
             SusenasMak::where('id', $id_ruta)->update($newMak);
             DB::commit();
             // 
-            return response()->json($newMak, 201);
+            return response()->json([
+                'message' => "Berhasil menyimpan perubahan",
+                'status' => 'success'
+            ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json(['error' => 'Error processing data'], 500);
@@ -706,6 +711,7 @@ class MakController extends Controller
         $daftar_warning = [];
         $daftar_rule = new DaftarValidasiModel();
         $data_mak = SusenasMak::where('id', $id_ruta)->first()->toArray();
+        $jumlah_art = AnggotaRuta::where('id_ruta', $id_ruta)->count();
 
         if (sizeof($data_mak) > 0) {
             // loop each var
@@ -757,11 +763,25 @@ class MakController extends Controller
                 'produksi' => 0,
                 'total' => 0,
             ];
+            $rekap_art = [
+                'mak_beli' => 0,
+                'mak_produksi' => 0,
+                'rokok_beli' => 0,
+                'rokok_produksi' => 0,
+            ];
+
             $konsumsi_art = $this->get_konsumsi_art($id_ruta);
             $konsumsi_ruta = $this->get_konsumsi_ruta($id_ruta);
             foreach ($konsumsi_art as $key => $value) {
                 $rincian15['beli'] += $value['beli'];
                 $rincian15['produksi'] += $value['produksi'];
+                if ($value['id_kelompok'] == '12') {
+                    $rekap_art['mak_beli'] += $value['beli'];
+                    $rekap_art['mak_produksi'] += $value['produksi'];
+                } else {
+                    $rekap_art['rokok_beli'] += $value['beli'];
+                    $rekap_art['rokok_produksi'] += $value['produksi'];
+                }
             }
             foreach ($konsumsi_ruta as $key => $value) {
                 $rincian15['beli'] += $value['beli'];
@@ -774,7 +794,22 @@ class MakController extends Controller
                 'produksi' => $data_mak['blok4_32_14_produksi'],
                 'total' => $data_mak['blok4_32_14_total'],
             ];
+
+            // nilai inputan user
+
+            // rekap 4.3.1
+            $blok4_31_jumlah_mak_beli = $data_mak['blok4_31_jumlah_mak_beli'];
+            $blok4_31_jumlah_mak_produksi = $data_mak['blok4_31_jumlah_mak_produksi'];
+            $blok4_31_jumlah_rokok_beli = $data_mak['blok4_31_jumlah_rokok_beli'];
+            $blok4_31_jumlah_rokok_produksi = $data_mak['blok4_31_jumlah_rokok_produksi'];
+
+            // rekap 4.3.2
             $blok4_32_16 = $data_mak['blok4_32_15_total'];
+            $blok4_32_17 = $data_mak['blok4_32_16_total'];
+            $blok4_32_18 = $data_mak['blok4_32_17_total'];
+
+            // dd([$rekap_art, $blok4_31_jumlah_mak_beli, $blok4_31_jumlah_mak_produksi, $blok4_31_jumlah_rokok_beli, $blok4_31_jumlah_rokok_produksi]);
+            // dd([$blok4_32_15, $blok4_32_17, (int)$rincian16, $rincian15]);
 
             foreach ($rincian15 as $key => $value) {
                 if ($value != $blok4_32_15[$key]) {
@@ -788,7 +823,8 @@ class MakController extends Controller
                     $daftar_warning[] = $pesan;
                 }
             }
-            if ($blok4_32_16 != $rincian16) {
+
+            if (round($blok4_32_16) != round($rincian16)) {
                 $pesan = [
                     'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 16",
                     'type' => 'warning',
@@ -797,7 +833,111 @@ class MakController extends Controller
                 $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
                 $daftar_warning[] = $pesan;
             }
-            // dd([$rincian15, (int)$rincian16, $blok4_32_15, $blok4_32_16]);
+
+            if (round($blok4_31_jumlah_mak_produksi) != round($rekap_art['mak_produksi'])) {
+                $pesan = [
+                    'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Produksi sendiri, Pemberian, dsb)",
+                    'type' => 'warning',
+
+                ];
+                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                $daftar_warning[] = $pesan;
+            }
+
+            if (round($blok4_31_jumlah_mak_beli) != round($rekap_art['mak_beli'])) {
+                $pesan = [
+                    'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Pembelian)",
+                    'type' => 'warning',
+
+                ];
+                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                $daftar_warning[] = $pesan;
+            }
+
+            if (round($blok4_31_jumlah_rokok_produksi) != round($rekap_art['rokok_produksi'])) {
+                $pesan = [
+                    'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Produksi sendiri, Pemberian, dsb)",
+                    'type' => 'warning',
+
+                ];
+                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                $daftar_warning[] = $pesan;
+            }
+
+            if (round($blok4_31_jumlah_rokok_beli) != round($rekap_art['rokok_beli'])) {
+                $pesan = [
+                    'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Pembelian)",
+                    'type' => 'warning',
+
+                ];
+                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                $daftar_warning[] = $pesan;
+            }
+
+            if (round($blok4_32_18) != round($rincian16 + $blok4_32_17)) {
+                $pesan = [
+                    'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 18",
+                    'type' => 'warning',
+
+                ];
+                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                $daftar_warning[] = $pesan;
+            }
+
+
+            // cek isisan wtf
+            $columnsToCheck = $this->wtfDependecies;
+            $fields_check = [];
+            $currentWtf = [];
+            foreach ($columnsToCheck as $column) {
+                if (isset($column['fields'])) {
+                    $fields_check = array_merge($fields_check, $column['fields']);
+                }
+            }
+            foreach ($fields_check as $key => $value) {
+                if (isset($data_mak[$value])) {
+                    $currentWtf[$value] =  $data_mak[$value];
+                }
+            }
+
+            // dd($currentWtf);
+
+            if ($jumlah_art != $data_mak['wtf_2']) {
+                $warning = [
+                    'rincian' => "Jumlah Art pada Blok IV.1 tidak sama dengan Rincian Worksheet",
+                    'variable' => "Pertanyaan worksheet Nomor 2",
+                    'type' => 'warning'
+                ];
+                $daftar_warning[] = $warning;
+            }
+
+            foreach ($columnsToCheck as $dependency) {
+
+                foreach ($dependency['fields'] as $dependentField) {
+                    // Check if the field exists in $currentWtf and condition is met
+                    if (isset($data_mak[$dependency['target']]) && in_array($data_mak[$dependency['target']], $dependency['dependentValues'])) {
+                        // if (isset($currentWtf[$dependentField]) && isset($mak[$dependency['target']])) {
+                        // dd([$dependentField, $currentWtf]);
+                        if (!isset($currentWtf[$dependentField])) {
+                            // return value tidak sesuai
+                            $error = [
+                                'rincian' => "Isian ini harus diisi",
+                                'variable' => "Pertanyaan tambahan worksheet " . $dependentField,
+                            ];
+                            $daftar_error[] = $error;
+                        } elseif ($currentWtf[$dependentField] < 1) {
+                            $warning = [
+                                'rincian' => "Isian ini harus bernilai > 0",
+                                'variable' => "Pertanyaan tambahan worksheet " . $dependentField,
+                                'type' => 'warning'
+                            ];
+                            $daftar_warning[] = $warning;
+                        }
+                    } else {
+                        // return value null tetapi dependency terisi
+                    }
+                }
+            }
         }
         return [
             'daftar_warning' => $daftar_warning,

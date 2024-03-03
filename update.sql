@@ -25,3 +25,7 @@ group by nks, r109;
 ALTER TABLE `vsusenas_mak` CHANGE `r108` `r108` VARCHAR(5) NULL DEFAULT NULL;
 
 update vsusenas_mak set status_dok='error' where status_dok='entri';
+
+-- update
+ALTER TABLE `vsusenas_mak` CHANGE `wtf_24` `wtf_24` VARCHAR(1) NULL DEFAULT NULL;
+

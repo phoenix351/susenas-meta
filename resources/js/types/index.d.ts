@@ -43,3 +43,13 @@ interface AnggotaRumahTangga {
     rekap: any;
     nomor_art: number;
 }
+interface RincianQc {
+    id: number;
+    nomor?: number;
+    kode_coicop?: string;
+    rincian: string;
+    satuan?: string;
+    type?: string;
+    value: number;
+    dataType: string;
+}

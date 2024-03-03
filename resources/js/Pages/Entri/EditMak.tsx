@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
 import {
+    Badge,
     Button,
     Form,
     FormInstance,
@@ -16,24 +17,23 @@ import {
     message,
 } from "antd";
 import axios from "axios";
+
 import Blok1_2 from "@/Forms/Mak/Blok1_2";
 import Blok4_1 from "@/Forms/Mak/Blok4_1";
 import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
 import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
-import { AnggotaRumahTangga, PageProps, SubTotal } from "@/types";
+import { AnggotaRumahTangga, PageProps, RincianQc, SubTotal } from "@/types";
 import Blok_QC from "@/Forms/Mak/Blok_QC";
 import {
     ArrowLeftOutlined,
-    AuditOutlined,
-    ContainerOutlined,
     DollarOutlined,
-    LeftCircleOutlined,
     ReloadOutlined,
     SaveOutlined,
 } from "@ant-design/icons";
 import MyModal from "@/Components/Modal";
 import TextRupiah from "@/Components/TextRupiah";
+
 const daftarRincian432 = [
     {
         id: 1,
@@ -156,20 +156,28 @@ const cellStyle = {
     padding: "5px",
 };
 
-const scrollToFormItem = (fieldName: string, form: FormInstance) => {
-    // console.log({ formValues: form.getFieldsValue(), fieldName });
+const calculateQc = async (
+    id_ruta: string,
+    jumlah_art: number,
+    daftarQc: any[],
+    blokqc_3: number
+) => {
+    const { data } = await axios.get(
+        route("api.mak.calculate_qc", { id_ruta: id_ruta })
+    );
 
-    const fieldInstance = form.getFieldInstance(fieldName);
+    let newQc = [...daftarQc];
+    newQc[0].value = data.kalori_total / jumlah_art / 7;
+    newQc[1].value = data.jumlah_komoditas_bahan_makanan;
+    newQc[2].value = data.jumlah_komoditas_makanan_jadi_rokok;
+    newQc[3].value = blokqc_3;
+    newQc[4].value = newQc[1].value + newQc[2].value + newQc[3].value;
+    newQc[5].value = Math.round(data.pengeluaran / jumlah_art);
+    newQc[6].value = data.kalori_basket / 7 / jumlah_art;
 
-    if (fieldInstance) {
-        // Scroll to the corresponding Form.Item
-        fieldInstance.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
-    } else {
-        // console.log("field instance didnt exist");
-    }
+    return newQc;
+
+    // newQc[2] = data.jumlah_komoditas_makanan_jadi_rokok;
 };
 
 const Mak = ({
@@ -195,25 +203,69 @@ const Mak = ({
         paddingBottom: "15px",
         width: "100%",
     };
-    // define forms
-    console.log({ rekap_konsumsi, rekap_konsumsi_art });
 
+    // define forms
     const [form] = Form.useForm();
     const [blok4_1Form] = Form.useForm();
     const [blok4_1artForm] = Form.useForm();
-    const [blok4_3Form] = Form.useForm();
-    let [artForm] = Form.useForm();
+    const [artForm] = Form.useForm();
 
-    const [wtfForm] = Form.useForm();
-    const [daftarSampel, setDaftarSampel] = useState([]);
+    //define usestates
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
-
     const [daftarArt, setDaftarArt] = useState<AnggotaRumahTangga[]>([]);
     const [rekapMak, setRekapMak] = useState(
         daftarRincian432.map((rincian) => ({ beli: 0, produksi: 0, total: 0 }))
     );
-
     const [loadingReval, setLoadingReval] = useState<boolean>(false);
+
+    const [daftarQc, setDaftarQc] = useState<RincianQc[]>([
+        {
+            rincian: "Kalori per Kapita per Hari",
+            id: 0,
+            value: 0,
+            dataType: "decimal",
+        },
+        {
+            rincian: "Kalori 52 basket komoditas per Kapita per Hari",
+            id: 6,
+            value: 0,
+            dataType: "decimal",
+        },
+        {
+            rincian: "Jumlah Komoditas Bahan Makanan/Minuman",
+            id: 1,
+            value: 0,
+            dataType: "integer",
+        },
+        {
+            rincian: "Jumlah Komoditas Makanan/Minuman Jadi dan Rokok",
+            id: 2,
+            value: 0,
+            dataType: "integer",
+        },
+        {
+            rincian:
+                // "Jumlah Komoditas Non Makanan <b>[Disalin dari dokumen KP Blok III Rincian 305 ]</b>",
+                `Jumlah Komoditas Non Makanan [Disalin dari dokumen KP Blok III Rincian 305 ]`,
+            id: 3,
+            value: 0,
+            dataType: "integer",
+        },
+        {
+            rincian: "Jumlah Semua Komoditas",
+            id: 4,
+            value: 0,
+            dataType: "integer",
+        },
+        {
+            rincian: "Pengeluaran per kapita",
+            id: 5,
+            value: 0,
+            dataType: "rupiah",
+        },
+    ]);
+    const [isOpen, setIsOpen] = useState(false);
+
     // const [spinning, setSpinning] = React.useState<boolean>(false);
 
     const [openModal, setOpenModal] = useState(false);
@@ -227,79 +279,33 @@ const Mak = ({
     const [messageApi, contextHolder] = message.useMessage();
 
     const blok1_2Finish = async (values: any) => {
-        // return;
-        // messageApi.open({
-        //     type: "loading",
-        //     key: "cari",
-        //     content: "Menyimpan data...",
-        // });
         try {
             const url = route("entri.mak.update");
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            // messageApi.open({
-            //     type: "success",
-            //     key: "cari",
-            //     content: "Berhasil menyimpan",
-            // });
         } catch (error) {
-            messageApi.open({
-                type: "error",
-                key: "cari",
-                content:
-                    "Oops terjadi kesalahan dalam menyimpan kuesioner VSUSENAS-MAK, silahkan hubungi admin",
-            });
+            console.error("error saving blok 1 and 2");
         }
     };
     const artFormFinish = async (values: any) => {
-        // return;
-
-        // messageApi.open({
-        //     type: "loading",
-        //     key: "4_1",
-        //     content: "Menyimpan data art...",
-        // });
         try {
             const url = route("entri.mak.art.update");
             const response = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            // console.log({ response });
-            // // setDaftarSampel(data.data);
-            // messageApi.open({
-            //     type: "success",
-            //     key: "4_1",
-            //     content: "Berhasil menyimpan data",
-            // });
         } catch (error) {
-            messageApi.open({
-                type: "error",
-                key: "4_1",
-                content:
-                    "Oops terjadi kesalahan dalam menyimpan Kuesioner ART, silahkan hubungi admin",
-            });
+            console.error(
+                "Oops terjadi kesalahan dalam menyimpan Kuesioner ART, silahkan hubungi admin"
+            );
         }
     };
     const blok4_1Finish = async (values: any) => {
-        // return;
-        // messageApi.open({
-        //     type: "loading",
-        //     key: "4_1",
-        //     content: "Memuat Data",
-        // });
         try {
             const url = route("entri.mak.konsumsi.store");
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            // console.log({ data });
-            setDaftarSampel(data.data);
-            // messageApi.open({
-            //     type: "success",
-            //     key: "4_1",
-            //     content: "Berhasil menyimpan data",
-            // });
         } catch (error) {
             messageApi.open({
                 type: "error",
@@ -310,22 +316,9 @@ const Mak = ({
         }
     };
     const blok4_1artFinish = async (values: any) => {
-        // console.log({ values });
-        // messageApi.open({
-        //     type: "loading",
-        //     key: "4_1",
-        //     content: "menyimpan Data",
-        // });
         try {
             const url = route("api.entri.inti", values);
             const { data } = await axios.get(url);
-            // console.log({ data });
-            setDaftarSampel(data.data);
-            // messageApi.open({
-            //     type: "success",
-            //     key: "cari",
-            //     content: "Berhasil mengambil data",
-            // });
         } catch (error) {
             messageApi.open({
                 type: "error",
@@ -382,18 +375,107 @@ const Mak = ({
         const kaloriArray = await Promise.all(promises);
         return kaloriArray.reduce((sum, kalori) => sum + kalori, 0);
     };
+    const simpanData = async () => {
+        messageApi.loading({
+            content: "Menyimpan data",
+            type: "loading",
+            key: "simpan",
+        });
+        try {
+            // Submit all forms concurrently using Promise.all
+
+            const [form1, form2, form3] = await Promise.all([
+                artForm.submit(),
+                form.submit(),
+                blok4_1Form.submit(),
+            ]);
+
+            // Now, all forms are submitted successfully
+            const response = await axios.get(
+                route("api.mak.calculate_qc", {
+                    id_ruta: daftarArt[0].id_ruta,
+                })
+            );
+            const dataQc = response.data;
+            // console.log({ dataQc });
+
+            const newQc = await calculateQc(
+                data.id,
+                daftarArt.length,
+                daftarQc,
+                form.getFieldValue("blokqc_3")
+            );
+            setDaftarQc([...newQc]);
+
+            form.setFieldsValue({
+                blokqc_0: newQc[0].value,
+                blokqc_1: newQc[1].value,
+                blokqc_2: newQc[2].value,
+                blokqc_4: newQc[4].value,
+                blokqc_5: newQc[5].value,
+                blokqc_6: newQc[6].value,
+            });
+            setLastSaved(new Date());
+            router.get(
+                route("entri.mak.edit", {
+                    id: data.id,
+                }),
+                {},
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                }
+            );
+            messageApi.open({
+                content: "Data berhasil tersimpan",
+                type: "success",
+                key: "simpan",
+                duration: 2,
+            });
+        } catch (error) {
+            messageApi.open({
+                content: "Data gagal tersimpan",
+                type: "error",
+                key: "simpan",
+                duration: 2,
+            });
+            // Handle error if any of the forms fails to submit
+        }
+    };
+    const Revalidasi = async () => {
+        await simpanData();
+        const id_ruta = form.getFieldValue("id");
+        try {
+            setLoadingReval(true);
+            const { data } = await axios.get(
+                route("api.mak.revalidasi", {
+                    id_ruta: id_ruta,
+                })
+            );
+
+            setWarningRHList([...data.evaluasi_rh]);
+            setErrorList([...data.daftar_error]);
+            setWarningList([...data.daftar_warning]);
+
+            messageApi.open({
+                content: "Revalidasi selesai",
+                type: "success",
+                key: "revalidasi",
+            });
+        } catch (error) {
+            console.error("Error submitting forms:", error);
+            // Handle error if any of the forms fails to submit
+        } finally {
+            setLoadingReval(false);
+        }
+    };
     const calculateSubTotalHarga = async () => {
         // return;
         // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
         const allFieldValues = blok4_1Form.getFieldsValue();
 
-        calculateKalori(allFieldValues).then((totalKalori) => {
-            // console.log("Total Kalori:", totalKalori);
-        });
-
         const subArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17];
-        const jenisArr = ["beli", "produksi"];
         subArr.forEach((sub: any) => {
             let newrekapMak: SubTotal[] = [...rekapMak];
 
@@ -687,51 +769,7 @@ const Mak = ({
                             second: "numeric",
                             hour12: false,
                         }) || "Never"}
-                        <Button
-                            type="primary"
-                            onClick={async () => {
-                                messageApi.loading({
-                                    content: "Menyimpan data",
-                                    type: "loading",
-                                    key: "simpan",
-                                    duration: 10000,
-                                });
-                                try {
-                                    // Submit all forms concurrently using Promise.all
-                                    const [form1, form2, form3] =
-                                        await Promise.all([
-                                            artForm.submit(),
-                                            form.submit(),
-                                            blok4_1Form.submit(),
-                                        ]);
-
-                                    // Now, all forms are submitted successfully
-                                    setLastSaved(new Date());
-                                    router.get(
-                                        route("entri.mak.edit", {
-                                            id: data.id,
-                                        }),
-                                        {},
-                                        {
-                                            preserveState: true,
-                                            preserveScroll: true,
-                                        }
-                                    );
-                                    messageApi.open({
-                                        content: "Data berhasil tersimpan",
-                                        type: "success",
-                                        key: "simpan",
-                                        duration: 2,
-                                    });
-                                } catch (error) {
-                                    console.error(
-                                        "Error submitting forms:",
-                                        error
-                                    );
-                                    // Handle error if any of the forms fails to submit
-                                }
-                            }}
-                        >
+                        <Button type="primary" onClick={simpanData}>
                             <SaveOutlined /> Simpan
                         </Button>
                         <Button
@@ -739,6 +777,10 @@ const Mak = ({
                             style={{ backgroundColor: "#e64d00" }}
                             onClick={async () => {
                                 setOpenModal(true);
+                                if (!isOpen) {
+                                    Revalidasi();
+                                    setIsOpen(true);
+                                }
                             }}
                         >
                             {/* <ContainerOutline /> */}
@@ -838,10 +880,7 @@ const Mak = ({
                                     tabContentStyle={tabContentStyle}
                                     form={form}
                                     onFinish={blok1_2Finish}
-                                    daftarArt={daftarArt}
-                                    rekapMak={rekapMak}
-                                    daftarRincian432={daftarRincian432}
-                                    setRekapMak={setRekapMak}
+                                    daftarQc={daftarQc}
                                 />
                             ),
                         },
@@ -861,36 +900,18 @@ const Mak = ({
                 key={"range-harga-modal"}
                 width="1200px"
             >
-                <Button
-                    onClick={async () => {
-                        setLoadingReval(true);
-                        const id_ruta = form.getFieldValue("id");
-                        try {
-                            const { data } = await axios.get(
-                                route("api.mak.revalidasi", {
-                                    id_ruta: id_ruta,
-                                })
-                            );
-
-                            setWarningRHList([...data.evaluasi_rh]);
-                            setErrorList([...data.daftar_error]);
-                            setWarningList([...data.daftar_warning]);
-
-                            messageApi.open({
-                                content: "revalidsai selesai",
-                                type: "success",
-                                key: "revalidasi",
-                            });
-                        } catch (error) {
-                            console.error("Error submitting forms:", error);
-                            // Handle error if any of the forms fails to submit
-                        } finally {
-                            setLoadingReval(false);
-                        }
+                <Space
+                    style={{
+                        marginBottom: "20px",
+                        width: "100%",
+                        justifyContent: "end",
                     }}
                 >
-                    <ReloadOutlined /> Revalidasi
-                </Button>
+                    <Button type="primary" onClick={Revalidasi}>
+                        <ReloadOutlined /> Revalidasi
+                    </Button>
+                    <Text>Klik ini untuk melakukan revalidasi ulang</Text>
+                </Space>
                 {loadingReval ? (
                     <Space
                         style={{
@@ -924,7 +945,11 @@ const Mak = ({
                             type="card"
                             items={[
                                 {
-                                    label: "Error Isian",
+                                    label: (
+                                        <Badge count={errorList.length}>
+                                            Error Isian
+                                        </Badge>
+                                    ),
                                     key: "1",
                                     children: (
                                         <>
@@ -942,12 +967,19 @@ const Mak = ({
                                     ),
                                 },
                                 {
-                                    label: "Warning Isian",
+                                    label: (
+                                        <Badge
+                                            count={warningList.length}
+                                            color="rgb(255, 204, 0)"
+                                        >
+                                            Warning Isian
+                                        </Badge>
+                                    ),
                                     key: "2",
                                     children: (
                                         <>
                                             <Space>
-                                                Jumlah error :{" "}
+                                                Jumlah warning :{" "}
                                                 {warningList.length}
                                             </Space>
                                             <Table
@@ -960,12 +992,19 @@ const Mak = ({
                                     ),
                                 },
                                 {
-                                    label: "Range Harga",
+                                    label: (
+                                        <Badge
+                                            count={warningRHList.length}
+                                            color="rgb(255, 204, 0)"
+                                        >
+                                            Warning Isian Range Harga
+                                        </Badge>
+                                    ),
                                     key: "3",
                                     children: (
                                         <>
                                             <Space>
-                                                Jumlah warning :{" "}
+                                                Jumlah warning range harga :{" "}
                                                 {warningRHList.length}
                                             </Space>
                                             <Table

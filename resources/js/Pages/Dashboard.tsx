@@ -48,20 +48,11 @@ function createSorter<T>(property: keyof T): Sorter<T> {
         return 0;
     };
 }
-function createNumberSorter<T>(
-    property: keyof T
-): (a: T, b: T, sortOrder?: SortOrder) => number {
-    return (a: T, b: T, sortOrder?: SortOrder): number => {
+function createNumberSorter<T>(property: keyof T): (a: T, b: T) => number {
+    return (a: T, b: T): number => {
         const valueA = a[property] !== undefined ? Number(a[property]) : 0;
         const valueB = b[property] !== undefined ? Number(b[property]) : 0;
-
-        if (sortOrder === "ascend") {
-            return valueA - valueB;
-        }
-
-        if (sortOrder === "descend") {
-            return valueB - valueA;
-        }
+        return valueA - valueB;
 
         return 0;
     };
@@ -121,12 +112,13 @@ const Dashboard = ({
     const [tableDataKabkot, setTableDataKabkot] = useState<any[]>([]);
     const [tableDataUser, setTableDataUser] = useState<any[]>([]);
     useEffect(() => {
-        console.log({ rekap_kabkot });
+        // console.log({ rekap_kabkot });
         setTableData(data);
         setTableDataKabkot(rekap_kabkot);
         setTableDataUser(users);
     }, []);
     const jumlahSorter = createNumberSorter("jumlah_dok");
+    const jumlahDokumenSorter = createNumberSorter("jumlah_dokumen");
     const cleanSorter = createNumberSorter("dok_clean");
     const warningSorter = createNumberSorter("dok_warning");
     const errorSorter = createNumberSorter("dok_error");
@@ -291,8 +283,13 @@ const Dashboard = ({
             dataIndex: "kode_kabkot",
             key: "kabupaten",
 
-            // render: (_: any, record: any) =>
-            //     `[${record.kode_prov}${record.kode_kabkot}] ${record.kabkot}`,
+            render: (_: any, record: any) =>
+                `[${"71"}${record.kode_kabkot}] ${record.kabkot}`,
+            filters: tableDataKabkot.map((record) => ({
+                text: `[${record.kode_prov}${record.kode_kabkot}] ${record.kabkot}`,
+                value: record.kode_kabkot,
+            })),
+            onFilter: (value: any, record: any) => record.kode_kabkot === value,
         },
         {
             title: "Nama Lengkap",
@@ -317,7 +314,7 @@ const Dashboard = ({
             title: "Jumlah Dokumen Dientri",
             dataIndex: "jumlah_dokumen",
             key: "jumlah_dokumen",
-            sorter: jumlahSorter as CompareFn<object>,
+            sorter: jumlahDokumenSorter as CompareFn<object>,
         },
         {
             title: "Dokumen Clean",
@@ -444,7 +441,9 @@ const Dashboard = ({
                     >
                         <Button
                             type="primary"
-                            onClick={() => handleExport(columns, tableData)}
+                            onClick={() =>
+                                handleExport(columnUsers, tableDataUser)
+                            }
                         >
                             <ExportOutlined />
                             Export as CSV

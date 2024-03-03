@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('daftar_validasi', function (Blueprint $table) {
             $table->id();
+            $table->string('type')->default('error');
             $table->string('blok');
             $table->string('nama_variabel');
             $table->string('deskripsi_variabel');
