@@ -118,6 +118,7 @@ class MakController extends Controller
             ->where('kode_kabkot', $kode_kabkot)
             ->where('nks', $nks)
             ->exists();
+        // dd($exists);
 
         return response()->json(['exists' => $exists]);
     }
@@ -156,7 +157,7 @@ class MakController extends Controller
                         ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
                         ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
                 })
-                ->join('users', 'vsusenas_mak.users_id', 'users.id')
+                ->leftJoin('users', 'vsusenas_mak.users_id', 'users.id')
                 ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct()->get();
 
             //  return response()->json($data, 200);
@@ -312,7 +313,7 @@ class MakController extends Controller
                     ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
                     ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
             })
-            ->join('users', 'vsusenas_mak.users_id', 'users.id')
+            ->leftJoin('users', 'vsusenas_mak.users_id', 'users.id')
             ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct();
 
         $data = $query->get();
@@ -339,7 +340,7 @@ class MakController extends Controller
                 ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
                 ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
         })
-            ->join('users', 'vsusenas_mak.users_id', 'users.id')
+            ->leftJoin('users', 'vsusenas_mak.users_id', 'users.id')
             ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct()->first();
 
         $konsumsi_ruta = Konsumsi::where('id_ruta', $id)->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
