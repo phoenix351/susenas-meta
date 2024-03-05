@@ -9,54 +9,14 @@ import {
     ReactFragment,
     ReactPortal,
 } from "react";
-import {
-    Button,
-    Table,
-    Card,
-    Col,
-    Row,
-    Space,
-    Statistic,
-    Typography,
-    Tabs,
-} from "antd";
+import { Button, Table, Space, Typography, Tabs } from "antd";
 // import { Table } from "ant-table-extensions";
-import {
-    WarningOutlined,
-    StopOutlined,
-    CheckCircleOutlined,
-    ExportOutlined,
-} from "@ant-design/icons";
-import { CompareFn, SortOrder } from "antd/es/table/interface";
+import { ExportOutlined } from "@ant-design/icons";
+import { CompareFn } from "antd/es/table/interface";
+import { createNumberSorter, createSorter } from "@/Functions/ColumnSorter";
+
 const { Title } = Typography;
 
-type Sorter<T> = (a: T, b: T, sortOrder?: SortOrder) => number;
-
-function createSorter<T>(property: keyof T): Sorter<T> {
-    return (a: T, b: T, sortOrder?: SortOrder): number => {
-        const valueA = String(a[property]);
-        const valueB = String(b[property]);
-
-        if (sortOrder === "ascend") {
-            return valueA.localeCompare(valueB);
-        }
-
-        if (sortOrder === "descend") {
-            return -valueB.localeCompare(valueA);
-        }
-
-        return 0;
-    };
-}
-function createNumberSorter<T>(property: keyof T): (a: T, b: T) => number {
-    return (a: T, b: T): number => {
-        const valueA = a[property] !== undefined ? Number(a[property]) : 0;
-        const valueB = b[property] !== undefined ? Number(b[property]) : 0;
-        return valueA - valueB;
-
-        return 0;
-    };
-}
 const handleExport = (columns: any[], tableData: any[]) => {
     // Convert Ant Design table data to CSV format
     // console.log({ tableData });
@@ -374,8 +334,12 @@ const Dashboard = ({
                     >
                         <Table
                             columns={columnsKabkot}
+                            pagination={{
+                                pageSize: 20,
+                                hideOnSinglePage: true,
+                            }}
                             // size="large"
-                            // style={{ width: "100%", backgroundColor: "red" }}
+                            style={{ width: "100%", backgroundColor: "red" }}
                             dataSource={tableDataKabkot}
                             scroll={{ x: "100%" }}
                         />

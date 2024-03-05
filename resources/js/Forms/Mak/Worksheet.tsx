@@ -277,7 +277,7 @@ const daftarRincian = [
     {
         id: 13,
         nomor: 12,
-        rincian: "ADA ART DENGAN STATUS BERUSAHA? (R708=1 2 atau 3)",
+        rincian: "ADA ART DENGAN STATUS BERUSAHA? (R707 = 1, 2, atau 3)",
         type: "binary",
     },
     {

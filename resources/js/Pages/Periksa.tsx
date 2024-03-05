@@ -2,52 +2,16 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 import { useEffect, useState } from "react";
 import { Head } from "@inertiajs/react";
-import { PageProps, User } from "@/types";
-import {
-    ReactElement,
-    JSXElementConstructor,
-    ReactFragment,
-    ReactPortal,
-} from "react";
-import {
-    Button,
-    Table,
-    Card,
-    Col,
-    Row,
-    Space,
-    Statistic,
-    Typography,
-} from "antd";
+import { PageProps } from "@/types";
+import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
+import { Button, Table, Space, Typography } from "antd";
 // import { Table } from "ant-table-extensions";
-import {
-    WarningOutlined,
-    StopOutlined,
-    CheckCircleOutlined,
-    ExportOutlined,
-} from "@ant-design/icons";
-import { CompareFn, SortOrder } from "antd/es/table/interface";
+import { ExportOutlined } from "@ant-design/icons";
+import { CompareFn } from "antd/es/table/interface";
 import TextRupiah from "@/Components/TextRupiah";
+import { createNumberSorter } from "@/Functions/ColumnSorter";
 const { Title } = Typography;
 
-type Sorter<T> = (a: T, b: T, sortOrder?: SortOrder) => number;
-
-function createSorter<T>(property: keyof T): Sorter<T> {
-    return (a: T, b: T, sortOrder?: SortOrder): number => {
-        const valueA = String(a[property]);
-        const valueB = String(b[property]);
-
-        if (sortOrder === "ascend") {
-            return valueA.localeCompare(valueB);
-        }
-
-        if (sortOrder === "descend") {
-            return -valueB.localeCompare(valueA);
-        }
-
-        return 0;
-    };
-}
 const handleExport = (columns: any[], tableData: any[]) => {
     // Convert Ant Design table data to CSV format
     // console.log({ tableData });
@@ -101,13 +65,13 @@ const Periksa = ({
         setTableData(data);
         // setTableDataKabkot(rekap_kabkot);
     }, []);
-    const jumlahSorter = createSorter("jumlah_art");
-    const nksSorter = createSorter("nks");
-    const r109Sorter = createSorter("r109");
-    const rincian15Sorter = createSorter("blok4_32_15_total");
-    const rincian16Sorter = createSorter("blok4_32_16_total");
-    const blokQcMakSorter = createSorter("blokqc_sum");
-    const blokQcNonMakSorter = createSorter("blokqc_3");
+    const jumlahSorter = createNumberSorter("jumlah_art");
+    const nksSorter = createNumberSorter("nks");
+    const r109Sorter = createNumberSorter("r109");
+    const rincian15Sorter = createNumberSorter("blok4_32_15_total");
+    const rincian16Sorter = createNumberSorter("blok4_32_16_total");
+    const blokQcMakSorter = createNumberSorter("blokqc_sum");
+    const blokQcNonMakSorter = createNumberSorter("blokqc_3");
     const uniqueKabkot = new Set();
     const columns = [
         {
