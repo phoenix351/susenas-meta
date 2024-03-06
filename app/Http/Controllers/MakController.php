@@ -103,7 +103,7 @@ class MakController extends Controller
             return false;
         }
 
-        return ($a !== 0 && $b == 0) || ($b !== 0 && $a == 0);
+        return ($a != 0 && $b == 0) || ($b != 0 && $a == 0);
     }
     public function cek_nomor_sampel(Request $request)
     {
@@ -127,7 +127,7 @@ class MakController extends Controller
         return Konsumsi::where('id_ruta', $id_ruta)
             ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
             // ->selectRaw('komoditas.id_kelompok', 'count(*) as jumlah')
-            ->selectRaw('komoditas.id_kelompok,sum(konsumsi.harga_beli) as beli,sum(konsumsi.harga_produksi) as produksi')
+            ->selectRaw('komoditas.id_kelompok, sum(konsumsi.harga_beli) as beli,sum(konsumsi.harga_produksi) as produksi')
             ->where('type', '<>', 'sub')
             ->groupBy('komoditas.id_kelompok')
             ->get();
@@ -706,6 +706,22 @@ class MakController extends Controller
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
+    // Helper function to create error array
+    private function createKomoditasError($rincian, $konsumsi)
+    {
+        return [
+            'rincian' => $rincian,
+            'variable' => "[{$konsumsi['id_komoditas']}] {$konsumsi['nama_komoditas']}",
+        ];
+    }
+
+    // Helper function to check consistency between price and volume
+    private function checkConsistency(&$daftar_error, $konsumsi, $hargaKey, $volumeKey)
+    {
+        if ($this->is_any_zero($konsumsi[$hargaKey], $konsumsi[$volumeKey])) {
+            $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, pemberian dsb bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
+        }
+    }
     private function cek_isian_new($id_ruta)
     {
         $daftar_error = [];
@@ -713,6 +729,7 @@ class MakController extends Controller
         $daftar_rule = new DaftarValidasiModel();
         $data_mak = SusenasMak::where('id', $id_ruta)->first()->toArray();
         $jumlah_art = AnggotaRuta::where('id_ruta', $id_ruta)->count();
+        $daftar_art = AnggotaRuta::where('id_ruta', $id_ruta)->get();
 
         if (sizeof($data_mak) > 0) {
             // loop each var
@@ -758,6 +775,89 @@ class MakController extends Controller
                     }
                 }
             }
+            // cek konsumsi rt dan art 
+            $konsumsi_ruta = Konsumsi::where('konsumsi.id_ruta', $id_ruta)
+                ->join('komoditas', 'konsumsi.id_komoditas', 'komoditas.id')
+                ->select('konsumsi.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
+                ->where('komoditas.type', '<>', 'sub')
+                ->get();
+            foreach ($konsumsi_ruta as $key => $konsumsi) {
+                if ($konsumsi["type"] == "sub") {
+                    $daftar_error[] = $this->createError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                    continue;
+                }
+
+                // Check for consistency between price and volume
+                $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi');
+                $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli');
+                $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total');
+
+                // kesesuaian total 
+            }
+            $nomor = 1;
+            foreach ($daftar_art as $key => $art) {
+                # code...
+                $konsumsi_art = KonsumsiArt::where('konsumsi_art.id_art', $art['id'])
+                    ->join('komoditas', 'konsumsi_art.id_komoditas', 'komoditas.id')
+                    ->select('konsumsi_art.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
+                    ->get();
+                // dd($konsumsi_ruta);
+                foreach ($konsumsi_art as $key => $konsumsi) {
+                    // if ($konsumsi["type"] == "sub") {
+                    //     if ($konsumsi['id_kelompok'] == 12 & $konsumsi['harga_beli'] == 0 & $konsumsi['harga_produksi'] == 0) {
+                    //         $error = [
+                    //             'rincian' => "Isian harga pembelian / produksi, pemberian dsb harus ada (tidak boleh 0 semua)",
+                    //             'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                    //             'nomor_art' => $nomor
+                    //         ];
+                    //         $daftar_error[] = $error;
+                    //     }
+                    //     continue;
+                    // }
+                    // // kesesuaian harga dan volume
+                    // // dd($this->is_any_zero(0, 0));
+                    // if ($this->is_any_zero($konsumsi['harga_produksi'], $konsumsi['volume_produksi'])) {
+                    //     $error = [
+                    //         'rincian' => "Isian harga produksi,pemberian dsb bernilai 0 tetapi volume > 0 atau sebaliknya",
+                    //         'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                    //         'nomor_art' => $nomor
+                    //     ];
+                    //     $daftar_error[] = $error;
+                    // }
+
+                    // if ($this->is_any_zero($konsumsi['harga_beli'], $konsumsi['volume_beli'])) {
+                    //     $error = [
+                    //         'rincian' => "Isian harga pembelian bernilai 0 tetapi volume > 0 atau sebaliknya",
+                    //         'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                    //         'nomor_art' => $nomor
+                    //     ];
+                    //     $daftar_error[] = $error;
+                    // }
+
+                    // if ($this->is_any_zero($konsumsi['harga_total'], $konsumsi['volume_total'])) {
+                    //     $error = [
+                    //         'rincian' => "Isian harga total bernilai 0 tetapi volume > 0 atau sebaliknya",
+                    //         'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
+                    //         'nomor_art' => $nomor
+                    //     ];
+                    //     $daftar_error[] = $error;
+                    // }
+                    if ($konsumsi["type"] == "sub" && $konsumsi['id_kelompok'] == 12 && $konsumsi['harga_beli'] == 0 && $konsumsi['harga_produksi'] == 0) {
+                        $daftar_error[] = $this->createError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                        continue;
+                    }
+                    if ($konsumsi['type'] == 'sub') {
+                        continue;
+                    }
+
+                    // Check for consistency between price and volume
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi');
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli');
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total');
+
+                    // kesesuaian total 
+                }
+            }
             // cek kesesuaian rekap dengan isian
             $rincian15 = [
                 'beli' => 0,
@@ -771,9 +871,12 @@ class MakController extends Controller
                 'rokok_produksi' => 0,
             ];
 
-            $konsumsi_art = $this->get_konsumsi_art($id_ruta);
-            $konsumsi_ruta = $this->get_konsumsi_ruta($id_ruta);
-            foreach ($konsumsi_art as $key => $value) {
+            $rekap_konsumsi_art = $this->get_konsumsi_art($id_ruta);
+            $rekap_konsumsi_ruta = $this->get_konsumsi_ruta($id_ruta);
+
+
+
+            foreach ($rekap_konsumsi_art as $key => $value) {
                 $rincian15['beli'] += $value['beli'];
                 $rincian15['produksi'] += $value['produksi'];
                 if ($value['id_kelompok'] == '12') {
@@ -784,7 +887,7 @@ class MakController extends Controller
                     $rekap_art['rokok_produksi'] += $value['produksi'];
                 }
             }
-            foreach ($konsumsi_ruta as $key => $value) {
+            foreach ($rekap_konsumsi_ruta as $key => $value) {
                 $rincian15['beli'] += $value['beli'];
                 $rincian15['produksi'] += $value['produksi'];
             }
