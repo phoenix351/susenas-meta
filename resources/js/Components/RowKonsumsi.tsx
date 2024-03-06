@@ -36,6 +36,13 @@ const rightCell: React.CSSProperties = {
     textAlign: "right",
     padding: "5px",
 };
+const rupiahCell: React.CSSProperties = {
+    borderStyle: "solid",
+    border: "solid 1px black",
+    width: "200px",
+    textAlign: "right",
+    padding: "5px",
+};
 const darkCell: React.CSSProperties = {
     borderStyle: "solid",
     border: "solid 1px black",
@@ -108,7 +115,7 @@ const RowKonsumsi: React.FC<{
                     <NumberInput inputName={`${data.nomor}_beli_volume`} />
                 )}
             </td>
-            <td style={{ ...rightCell, width: "150px" }}>
+            <td style={rupiahCell}>
                 <RupiahInput
                     inputName={`${data.type === "sub" ? "jumlah" : ""}${
                         data.nomor

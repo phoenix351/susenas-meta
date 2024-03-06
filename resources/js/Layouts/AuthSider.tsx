@@ -14,6 +14,7 @@ import {
     EditOutlined,
     EyeOutlined,
     AuditOutlined,
+    SettingOutlined,
 } from "@ant-design/icons";
 import { User } from "@/types";
 type AuthSiderProps = {
@@ -58,6 +59,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 icon: <EditOutlined />,
                 onClick: () => handleMenuClick("entri"),
                 label: "Entri",
+            },
+            {
+                key: "kelola-entri",
+                icon: <SettingOutlined />,
+                onClick: () => handleMenuClick("kelola-entri"),
+                label: "Kelola Entri",
             },
             {
                 key: "periksa",

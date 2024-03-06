@@ -716,10 +716,15 @@ class MakController extends Controller
     }
 
     // Helper function to check consistency between price and volume
-    private function checkConsistency(&$daftar_error, $konsumsi, $hargaKey, $volumeKey)
+    private function checkConsistency(&$daftar_error, $konsumsi, $hargaKey, $volumeKey, $nomor = -1)
     {
         if ($this->is_any_zero($konsumsi[$hargaKey], $konsumsi[$volumeKey])) {
-            $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, pemberian dsb bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
+            if ($nomor > 0) {
+                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian $hargaKey, pemberian dsb bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
+            } else {
+
+                $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, pemberian dsb bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
+            }
         }
     }
     private function cek_isian_new($id_ruta)
@@ -783,7 +788,7 @@ class MakController extends Controller
                 ->get();
             foreach ($konsumsi_ruta as $key => $konsumsi) {
                 if ($konsumsi["type"] == "sub") {
-                    $daftar_error[] = $this->createError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                    $daftar_error[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
                     continue;
                 }
 
@@ -843,7 +848,7 @@ class MakController extends Controller
                     //     $daftar_error[] = $error;
                     // }
                     if ($konsumsi["type"] == "sub" && $konsumsi['id_kelompok'] == 12 && $konsumsi['harga_beli'] == 0 && $konsumsi['harga_produksi'] == 0) {
-                        $daftar_error[] = $this->createError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                        $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
                         continue;
                     }
                     if ($konsumsi['type'] == 'sub') {
@@ -851,9 +856,9 @@ class MakController extends Controller
                     }
 
                     // Check for consistency between price and volume
-                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi');
-                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli');
-                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total');
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi', $nomor);
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli', $nomor);
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total', $nomor);
 
                     // kesesuaian total 
                 }
