@@ -60,12 +60,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("entri"),
                 label: "Entri",
             },
-            {
-                key: "kelola-entri",
-                icon: <SettingOutlined />,
-                onClick: () => handleMenuClick("kelola-entri"),
-                label: "Kelola Entri",
-            },
+            // {
+            //     key: "kelola-entri",
+            //     icon: <SettingOutlined />,
+            //     onClick: () => handleMenuClick("kelola-entri"),
+            //     label: "Kelola Entri",
+            // },
             {
                 key: "periksa",
                 icon: <AuditOutlined />,

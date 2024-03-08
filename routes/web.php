@@ -36,6 +36,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::patch('/users', [UserController::class, 'update'])->name('users.update');
+    route::get('/entri/mak/view/{id}', [MakController::class, 'view'])->name('entri.mak.view');
 });
 
 Route::middleware('auth')->group(function () {
@@ -112,10 +113,12 @@ Route::middleware('auth')->group(function () {
     route::get('/entri/mak/create', [MakController::class, 'create'])->name("entri.mak.create");
     route::get('/entri/mak/{id}', [MakController::class, 'edit'])->name('entri.mak.edit');
 
+
     route::post('api/cek-nomor-sampel', [MakController::class, 'cek_nomor_sampel'])->name('api.cekNomorSampel');
 
 
     route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
+    route::get('/kelola-entri', [MakController::class, 'kelola_entri'])->name('kelola-entri');
     route::get('/periksa', [PeriksaController::class, 'index'])->name('periksa');
 
 

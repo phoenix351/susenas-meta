@@ -8,16 +8,22 @@ import EntriIntiForm from "@/Forms/EntriIntiSearch";
 import axios from "axios";
 import { PageProps } from "@/types";
 import {
+    AreaChartOutlined,
     DeleteFilled,
     DeleteOutlined,
     DeleteRowOutlined,
     EditFilled,
     EditOutlined,
+    EyeFilled,
+    EyeInvisibleFilled,
+    EyeOutlined,
+    EyeTwoTone,
+    HeatMapOutlined,
     PlusCircleOutlined,
 } from "@ant-design/icons";
 import { throttle } from "lodash";
 
-const Dashboard = ({
+const Main = ({
     data_susenas,
     nks,
     kode_kabkot,
@@ -27,16 +33,15 @@ const Dashboard = ({
     kode_kabkot: string;
 }) => {
     useEffect(() => {
-        console.log({ data_susenas });
-        if (nks && kode_kabkot) {
+        if (data_susenas.length > 0) {
             cariForm.setFieldsValue({
                 nks: nks,
                 kode_kabkot: kode_kabkot,
                 semester: "1",
             });
-        }
-        if (data_susenas.length > 0) {
+
             setDaftarSampel(data_susenas);
+            // console.log({ data_susenas });
         }
     }, []);
     const [cariForm] = Form.useForm();
@@ -197,31 +202,22 @@ const Dashboard = ({
                     type="primary"
                     onClick={() =>
                         router.get(
-                            `${route("entri.mak.edit", { id: record.id })}`
+                            `${route("entri.mak.view", { id: record.id })}`
                         )
                     }
                 >
-                    <EditFilled /> entri
+                    <EyeOutlined /> lihat
                 </Button>
             ),
         },
         {
-            title: "Delete",
-            dataIndex: "entri",
-            key: "entri",
+            title: "Ubah NKS",
+            dataIndex: "ubahNks",
+            key: "ubahNks",
             render: (_: any, record: any) => (
-                <Popconfirm
-                    placement="topLeft"
-                    title="apakah anda yakin akan menghapus ruta ini?"
-                    description="hapus anggota rumah tangga"
-                    okText="yakin dong"
-                    cancelText="nyanda"
-                    onConfirm={() => debounceCellDelete(record.id)}
-                >
-                    <Button type="default">
-                        <DeleteFilled /> hapus
-                    </Button>
-                </Popconfirm>
+                <Button type="default">
+                    <EditOutlined /> Pindah NKS
+                </Button>
             ),
         },
     ];
@@ -244,36 +240,20 @@ const Dashboard = ({
                     form={cariForm}
                     onFinish={cariFinish}
                 />
-                <Space style={{ width: "100%", justifyContent: "end" }}>
-                    <Button
-                        type="primary"
-                        disabled={!cariForm.getFieldValue("nks")}
-                        onClick={() =>
-                            router.visit(
-                                route(
-                                    "entri.mak.create",
-                                    cariForm.getFieldsValue()
-                                )
-                            )
-                        }
-                    >
-                        <PlusCircleOutlined /> Tambah Ruta
-                    </Button>
-                </Space>
                 <Table dataSource={daftarSampel} columns={columns} />;
             </Space>
         </>
     );
 };
 
-Dashboard.layout = (
+Main.layout = (
     page: ReactElement<any, JSXElementConstructor<any>> | ReactPortal
 ) => (
     <AuthenticatedLayout
         user={page.props.auth.user}
-        header={<h2 className="">Dashboard</h2>}
-        selectedKey="entri"
+        header={<h2 className="">Kelola Entri</h2>}
+        selectedKey="kelola-entri"
         children={page}
     ></AuthenticatedLayout>
 );
-export default Dashboard;
+export default Main;

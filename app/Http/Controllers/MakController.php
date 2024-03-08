@@ -143,14 +143,11 @@ class MakController extends Controller
             ->groupBy('id_art', 'komoditas.id_kelompok')
             ->get();
     }
-    public function entri(Request $request)
+    //* @param Type var Description
+    private function get_ruta($kode_kabkot, $nks, $semester = '1', $id_ruta = '-1')
     {
-
-        try {
-            //code...
-            $kabkot = $request->kode_kabkot;
-            $nks = $request->nks;
-            $data = SusenasMak::where('vsusenas_mak.kode_kabkot', $kabkot)->where('vsusenas_mak.nks', $nks)
+        if ($id_ruta == '-1') {
+            return SusenasMak::where('vsusenas_mak.kode_kabkot', $kode_kabkot)->where('vsusenas_mak.nks', $nks)->where('vsusenas_mak.semester', $semester)
                 ->join('master_wilayah', function ($join) {
                     $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
                         ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
@@ -159,14 +156,59 @@ class MakController extends Controller
                 })
                 ->leftJoin('users', 'vsusenas_mak.users_id', 'users.id')
                 ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct()->get();
+        }
 
+        return SusenasMak::where('vsusenas_mak.id', $id_ruta)
+            ->join('master_wilayah', function ($join) {
+                $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
+                    ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
+                    ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
+                    ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
+            })
+            ->leftJoin('users', 'vsusenas_mak.users_id', 'users.id')
+            ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct()->first();
+    }
+    public function entri(Request $request)
+    {
+
+        try {
+            //code...
+            $kode_kabkot = $request->kode_kabkot;
+            $nks = $request->nks;
+            $semester = $request->semester;
+            if (isset($semester)) {
+                $semester = '1';
+            }
+            $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+            // dd([$data, $kode_kabkot, $nks, $semester]);
             //  return response()->json($data, 200);
-            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kabkot, 'nks' => $nks]);
+            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks]);
         } catch (\Throwable $th) {
             //throw $th;
         }
 
         return Inertia::render('Entri/Inti');
+    }
+    public function kelola_entri(Request $request)
+    {
+
+        try {
+            //code...
+            $kode_kabkot = $request->kode_kabkot;
+            $nks = $request->nks;
+            $semester = $request->semester;
+            if (isset($semester)) {
+                $semester = '1';
+            }
+            $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+
+            //  return response()->json($data, 200);
+            return Inertia::render('Kelola Entri/Main', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks]);
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+
+        return Inertia::render('Kelola Entri/Main');
     }
     public function dashboard()
     {
@@ -301,25 +343,17 @@ class MakController extends Controller
 
     public function fetch(Request $request)
     {
-        $kabkot = $request->query('kode_kabkot');
+        $kode_kabkot = $request->query('kode_kabkot');
         $semester = $request->query('semester');
         $provinsi = $request->query('kode_prov');
         $nks = $request->query('nks');
 
-        $query = SusenasMak::where('vsusenas_mak.kode_kabkot', $kabkot)->where('semester', $semester)->where('vsusenas_mak.nks', $nks)
-            ->join('master_wilayah', function ($join) {
-                $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
-                    ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
-                    ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
-                    ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
-            })
-            ->leftJoin('users', 'vsusenas_mak.users_id', 'users.id')
-            ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct();
+        $data = $this->get_ruta($kode_kabkot, $nks, $semester);
 
-        $data = $query->get();
+        // $data = $query->get();
         return response()->json([
             'data' => $data, 'semester' => $semester,
-            'kabkot' => $kabkot, 'provinsi' => $provinsi, 'nks' => $nks
+            'kabkot' => $kode_kabkot, 'provinsi' => $provinsi, 'nks' => $nks
         ]);
     }
     public function konsumsi_art_fetch($id_art)
@@ -334,14 +368,8 @@ class MakController extends Controller
 
 
         // $data = Inti::where('kode_id', $id)->where('semester', $semester)->get();
-        $data = SusenasMak::where('vsusenas_mak.id', $id)->join('master_wilayah', function ($join) {
-            $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
-                ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
-                ->on('master_wilayah.kode_kec', '=', 'vsusenas_mak.kode_kec')
-                ->on('master_wilayah.kode_desa', '=', 'vsusenas_mak.kode_desa');
-        })
-            ->leftJoin('users', 'vsusenas_mak.users_id', 'users.id')
-            ->select('vsusenas_mak.*', 'master_wilayah.kec', 'master_wilayah.desa', 'master_wilayah.klas', 'users.nama_lengkap')->distinct()->first();
+        $data = $this->get_ruta('00', '00', '1', $id);
+        // dd($data);
 
         $konsumsi_ruta = Konsumsi::where('id_ruta', $id)->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
 
@@ -356,6 +384,36 @@ class MakController extends Controller
 
         // dd($konsumsi_ruta);
         return Inertia::render("Entri/EditMak", [
+            'data' => $data,
+            'konsumsi_ruta' => $konsumsi_ruta,
+            'art' => $art,
+            'garis_kemiskinan' => $garis_kemiskinan,
+            'rekap_konsumsi' => $rekap_konsumsi,
+            'rekap_konsumsi_art' => $rekap_konsumsi_art,
+        ]);
+    }
+    public function view($id)
+    {
+        // $id = $request->query('id');
+
+
+        // $data = Inti::where('kode_id', $id)->where('semester', $semester)->get();
+        $data = $this->get_ruta('00', '00', '1', $id);
+        // dd($data);
+
+        $konsumsi_ruta = Konsumsi::where('id_ruta', $id)->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
+
+        $garis_kemiskinan = Kabkot::where('kode', $data->kode_kabkot)->pluck('garis_kemiskinan');
+
+        $art = AnggotaRuta::where('id_ruta', $id)->get();
+
+        $rekap_konsumsi = $this->get_konsumsi_ruta($id);
+
+        $rekap_konsumsi_art = $this->get_konsumsi_art($id);
+        // $konsumsi_ruta = DB::table('konsumsi')->where('id_ruta', $id)->get();
+
+        // dd($konsumsi_ruta);
+        return Inertia::render("Entri/View", [
             'data' => $data,
             'konsumsi_ruta' => $konsumsi_ruta,
             'art' => $art,
@@ -719,11 +777,12 @@ class MakController extends Controller
     private function checkConsistency(&$daftar_error, $konsumsi, $hargaKey, $volumeKey, $nomor = -1)
     {
         if ($this->is_any_zero($konsumsi[$hargaKey], $konsumsi[$volumeKey])) {
+            // dd($konsumsi);
             if ($nomor > 0) {
-                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian $hargaKey, pemberian dsb bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
+                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
             } else {
 
-                $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, pemberian dsb bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
+                $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
             }
         }
     }
@@ -740,7 +799,11 @@ class MakController extends Controller
             // loop each var
             foreach ($data_mak as $nama_var => $value) {
                 // each var find rules 
-                // $current_rules = array_filter($daftar_rule, fn ($element) => $value['nama_variabel'] == $nama_var);
+                // except for status 3,4,5
+                if ($nama_var == 'r203' && $value > 2) {
+                    break;
+                }
+
                 $current_rules = $daftar_rule->where('nama_variabel', '=', $nama_var)->get();
 
                 foreach ($current_rules as $rule) {
@@ -781,269 +844,234 @@ class MakController extends Controller
                 }
             }
             // cek konsumsi rt dan art 
-            $konsumsi_ruta = Konsumsi::where('konsumsi.id_ruta', $id_ruta)
-                ->join('komoditas', 'konsumsi.id_komoditas', 'komoditas.id')
-                ->select('konsumsi.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
-                ->where('komoditas.type', '<>', 'sub')
-                ->get();
-            foreach ($konsumsi_ruta as $key => $konsumsi) {
-                if ($konsumsi["type"] == "sub") {
-                    $daftar_error[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
-                    continue;
-                }
-
-                // Check for consistency between price and volume
-                $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi');
-                $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli');
-                $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total');
-
-                // kesesuaian total 
-            }
-            $nomor = 1;
-            foreach ($daftar_art as $key => $art) {
-                # code...
-                $konsumsi_art = KonsumsiArt::where('konsumsi_art.id_art', $art['id'])
-                    ->join('komoditas', 'konsumsi_art.id_komoditas', 'komoditas.id')
-                    ->select('konsumsi_art.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
+            if ($data_mak['r203'] < 3) {
+                $konsumsi_ruta = Konsumsi::where('konsumsi.id_ruta', $id_ruta)
+                    ->join('komoditas', 'konsumsi.id_komoditas', 'komoditas.id')
+                    ->select('konsumsi.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
+                    ->where('komoditas.type', '<>', 'sub')
                     ->get();
-                // dd($konsumsi_ruta);
-                foreach ($konsumsi_art as $key => $konsumsi) {
-                    // if ($konsumsi["type"] == "sub") {
-                    //     if ($konsumsi['id_kelompok'] == 12 & $konsumsi['harga_beli'] == 0 & $konsumsi['harga_produksi'] == 0) {
-                    //         $error = [
-                    //             'rincian' => "Isian harga pembelian / produksi, pemberian dsb harus ada (tidak boleh 0 semua)",
-                    //             'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                    //             'nomor_art' => $nomor
-                    //         ];
-                    //         $daftar_error[] = $error;
-                    //     }
-                    //     continue;
-                    // }
-                    // // kesesuaian harga dan volume
-                    // // dd($this->is_any_zero(0, 0));
-                    // if ($this->is_any_zero($konsumsi['harga_produksi'], $konsumsi['volume_produksi'])) {
-                    //     $error = [
-                    //         'rincian' => "Isian harga produksi,pemberian dsb bernilai 0 tetapi volume > 0 atau sebaliknya",
-                    //         'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                    //         'nomor_art' => $nomor
-                    //     ];
-                    //     $daftar_error[] = $error;
-                    // }
-
-                    // if ($this->is_any_zero($konsumsi['harga_beli'], $konsumsi['volume_beli'])) {
-                    //     $error = [
-                    //         'rincian' => "Isian harga pembelian bernilai 0 tetapi volume > 0 atau sebaliknya",
-                    //         'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                    //         'nomor_art' => $nomor
-                    //     ];
-                    //     $daftar_error[] = $error;
-                    // }
-
-                    // if ($this->is_any_zero($konsumsi['harga_total'], $konsumsi['volume_total'])) {
-                    //     $error = [
-                    //         'rincian' => "Isian harga total bernilai 0 tetapi volume > 0 atau sebaliknya",
-                    //         'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                    //         'nomor_art' => $nomor
-                    //     ];
-                    //     $daftar_error[] = $error;
-                    // }
-                    if ($konsumsi["type"] == "sub" && $konsumsi['id_kelompok'] == 12 && $konsumsi['harga_beli'] == 0 && $konsumsi['harga_produksi'] == 0) {
-                        $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
-                        continue;
-                    }
-                    if ($konsumsi['type'] == 'sub') {
+                foreach ($konsumsi_ruta as $key => $konsumsi) {
+                    if ($konsumsi["type"] == "sub") {
+                        $daftar_error[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
                         continue;
                     }
 
                     // Check for consistency between price and volume
-                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi', $nomor);
-                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli', $nomor);
-                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total', $nomor);
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi');
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli');
+                    $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total');
 
                     // kesesuaian total 
                 }
-            }
-            // cek kesesuaian rekap dengan isian
-            $rincian15 = [
-                'beli' => 0,
-                'produksi' => 0,
-                'total' => 0,
-            ];
-            $rekap_art = [
-                'mak_beli' => 0,
-                'mak_produksi' => 0,
-                'rokok_beli' => 0,
-                'rokok_produksi' => 0,
-            ];
+                $nomor = 1;
+                foreach ($daftar_art as $key => $art) {
+                    # code...
+                    $konsumsi_art = KonsumsiArt::where('konsumsi_art.id_art', $art['id'])
+                        ->join('komoditas', 'konsumsi_art.id_komoditas', 'komoditas.id')
+                        ->select('konsumsi_art.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
+                        ->get();
+                    // dd($konsumsi_ruta);
+                    foreach ($konsumsi_art as $key => $konsumsi) {
 
-            $rekap_konsumsi_art = $this->get_konsumsi_art($id_ruta);
-            $rekap_konsumsi_ruta = $this->get_konsumsi_ruta($id_ruta);
+                        if ($konsumsi["type"] == "sub" && $konsumsi['id_kelompok'] == 12 && $konsumsi['harga_beli'] == 0 && $konsumsi['harga_produksi'] == 0) {
+                            $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                            continue;
+                        }
+                        if ($konsumsi['type'] == 'sub') {
+                            continue;
+                        }
 
+                        // Check for consistency between price and volume
+                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi', $nomor);
+                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli', $nomor);
+                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total', $nomor);
 
-
-            foreach ($rekap_konsumsi_art as $key => $value) {
-                $rincian15['beli'] += $value['beli'];
-                $rincian15['produksi'] += $value['produksi'];
-                if ($value['id_kelompok'] == '12') {
-                    $rekap_art['mak_beli'] += $value['beli'];
-                    $rekap_art['mak_produksi'] += $value['produksi'];
-                } else {
-                    $rekap_art['rokok_beli'] += $value['beli'];
-                    $rekap_art['rokok_produksi'] += $value['produksi'];
+                        // kesesuaian total 
+                    }
+                    $nomor++;
                 }
-            }
-            foreach ($rekap_konsumsi_ruta as $key => $value) {
-                $rincian15['beli'] += $value['beli'];
-                $rincian15['produksi'] += $value['produksi'];
-            }
-            $rincian15['total'] = $rincian15['beli'] + $rincian15['produksi'];
-            $rincian16 = $rincian15['total'] * 30 / 7;
-            $blok4_32_15 = [
-                'beli' => $data_mak['blok4_32_14_beli'],
-                'produksi' => $data_mak['blok4_32_14_produksi'],
-                'total' => $data_mak['blok4_32_14_total'],
-            ];
+                // cek kesesuaian rekap dengan isian
+                $rincian15 = [
+                    'beli' => 0,
+                    'produksi' => 0,
+                    'total' => 0,
+                ];
+                $rekap_art = [
+                    'mak_beli' => 0,
+                    'mak_produksi' => 0,
+                    'rokok_beli' => 0,
+                    'rokok_produksi' => 0,
+                ];
 
-            // nilai inputan user
+                $rekap_konsumsi_art = $this->get_konsumsi_art($id_ruta);
+                $rekap_konsumsi_ruta = $this->get_konsumsi_ruta($id_ruta);
 
-            // rekap 4.3.1
-            $blok4_31_jumlah_mak_beli = $data_mak['blok4_31_jumlah_mak_beli'];
-            $blok4_31_jumlah_mak_produksi = $data_mak['blok4_31_jumlah_mak_produksi'];
-            $blok4_31_jumlah_rokok_beli = $data_mak['blok4_31_jumlah_rokok_beli'];
-            $blok4_31_jumlah_rokok_produksi = $data_mak['blok4_31_jumlah_rokok_produksi'];
 
-            // rekap 4.3.2
-            $blok4_32_16 = $data_mak['blok4_32_15_total'];
-            $blok4_32_17 = $data_mak['blok4_32_16_total'];
-            $blok4_32_18 = $data_mak['blok4_32_17_total'];
 
-            // dd([$rekap_art, $blok4_31_jumlah_mak_beli, $blok4_31_jumlah_mak_produksi, $blok4_31_jumlah_rokok_beli, $blok4_31_jumlah_rokok_produksi]);
-            // dd([$blok4_32_15, $blok4_32_17, (int)$rincian16, $rincian15]);
+                foreach ($rekap_konsumsi_art as $key => $value) {
+                    $rincian15['beli'] += $value['beli'];
+                    $rincian15['produksi'] += $value['produksi'];
+                    if ($value['id_kelompok'] == '12') {
+                        $rekap_art['mak_beli'] += $value['beli'];
+                        $rekap_art['mak_produksi'] += $value['produksi'];
+                    } else {
+                        $rekap_art['rokok_beli'] += $value['beli'];
+                        $rekap_art['rokok_produksi'] += $value['produksi'];
+                    }
+                }
+                foreach ($rekap_konsumsi_ruta as $key => $value) {
+                    $rincian15['beli'] += $value['beli'];
+                    $rincian15['produksi'] += $value['produksi'];
+                }
+                $rincian15['total'] = $rincian15['beli'] + $rincian15['produksi'];
+                $rincian16 = $rincian15['total'] * 30 / 7;
+                $blok4_32_15 = [
+                    'beli' => $data_mak['blok4_32_14_beli'],
+                    'produksi' => $data_mak['blok4_32_14_produksi'],
+                    'total' => $data_mak['blok4_32_14_total'],
+                ];
 
-            foreach ($rincian15 as $key => $value) {
-                if ($value != $blok4_32_15[$key]) {
-                    // add warning
+                // nilai inputan user
+
+                // rekap 4.3.1
+                $blok4_31_jumlah_mak_beli = $data_mak['blok4_31_jumlah_mak_beli'];
+                $blok4_31_jumlah_mak_produksi = $data_mak['blok4_31_jumlah_mak_produksi'];
+                $blok4_31_jumlah_rokok_beli = $data_mak['blok4_31_jumlah_rokok_beli'];
+                $blok4_31_jumlah_rokok_produksi = $data_mak['blok4_31_jumlah_rokok_produksi'];
+
+                // rekap 4.3.2
+                $blok4_32_16 = $data_mak['blok4_32_15_total'];
+                $blok4_32_17 = $data_mak['blok4_32_16_total'];
+                $blok4_32_18 = $data_mak['blok4_32_17_total'];
+
+                // dd([$rekap_art, $blok4_31_jumlah_mak_beli, $blok4_31_jumlah_mak_produksi, $blok4_31_jumlah_rokok_beli, $blok4_31_jumlah_rokok_produksi]);
+                // dd([$blok4_32_15, $blok4_32_17, (int)$rincian16, $rincian15]);
+
+                foreach ($rincian15 as $key => $value) {
+                    if ($value != $blok4_32_15[$key]) {
+                        // add warning
+                        $pesan = [
+                            'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 15 " . $key,
+                            'type' => 'warning',
+
+                        ];
+                        $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                        $daftar_warning[] = $pesan;
+                    }
+                }
+
+                if (round($blok4_32_16) != round($rincian16)) {
                     $pesan = [
-                        'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 15 " . $key,
+                        'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 16",
                         'type' => 'warning',
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
                     $daftar_warning[] = $pesan;
                 }
-            }
 
-            if (round($blok4_32_16) != round($rincian16)) {
-                $pesan = [
-                    'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 16",
-                    'type' => 'warning',
+                if (round($blok4_31_jumlah_mak_produksi) != round($rekap_art['mak_produksi'])) {
+                    $pesan = [
+                        'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Produksi sendiri, Pemberian, dsb)",
+                        'type' => 'warning',
 
-                ];
-                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
-                $daftar_warning[] = $pesan;
-            }
-
-            if (round($blok4_31_jumlah_mak_produksi) != round($rekap_art['mak_produksi'])) {
-                $pesan = [
-                    'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Produksi sendiri, Pemberian, dsb)",
-                    'type' => 'warning',
-
-                ];
-                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
-                $daftar_warning[] = $pesan;
-            }
-
-            if (round($blok4_31_jumlah_mak_beli) != round($rekap_art['mak_beli'])) {
-                $pesan = [
-                    'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Pembelian)",
-                    'type' => 'warning',
-
-                ];
-                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
-                $daftar_warning[] = $pesan;
-            }
-
-            if (round($blok4_31_jumlah_rokok_produksi) != round($rekap_art['rokok_produksi'])) {
-                $pesan = [
-                    'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Produksi sendiri, Pemberian, dsb)",
-                    'type' => 'warning',
-
-                ];
-                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
-                $daftar_warning[] = $pesan;
-            }
-
-            if (round($blok4_31_jumlah_rokok_beli) != round($rekap_art['rokok_beli'])) {
-                $pesan = [
-                    'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Pembelian)",
-                    'type' => 'warning',
-
-                ];
-                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
-                $daftar_warning[] = $pesan;
-            }
-
-            if (round($blok4_32_18) != round($rincian16 + $blok4_32_17)) {
-                $pesan = [
-                    'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 18",
-                    'type' => 'warning',
-
-                ];
-                $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
-                $daftar_warning[] = $pesan;
-            }
-
-
-            // cek isisan wtf
-            $columnsToCheck = $this->wtfDependecies;
-            $fields_check = [];
-            $currentWtf = [];
-            foreach ($columnsToCheck as $column) {
-                if (isset($column['fields'])) {
-                    $fields_check = array_merge($fields_check, $column['fields']);
+                    ];
+                    $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                    $daftar_warning[] = $pesan;
                 }
-            }
-            foreach ($fields_check as $key => $value) {
-                if (isset($data_mak[$value])) {
-                    $currentWtf[$value] =  $data_mak[$value];
+
+                if (round($blok4_31_jumlah_mak_beli) != round($rekap_art['mak_beli'])) {
+                    $pesan = [
+                        'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Pembelian)",
+                        'type' => 'warning',
+
+                    ];
+                    $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                    $daftar_warning[] = $pesan;
                 }
-            }
 
-            // dd($currentWtf);
+                if (round($blok4_31_jumlah_rokok_produksi) != round($rekap_art['rokok_produksi'])) {
+                    $pesan = [
+                        'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Produksi sendiri, Pemberian, dsb)",
+                        'type' => 'warning',
 
-            if ($jumlah_art != $data_mak['wtf_2']) {
-                $warning = [
-                    'rincian' => "Jumlah Art pada Blok IV.1 tidak sama dengan Rincian Worksheet",
-                    'variable' => "Pertanyaan worksheet Nomor 2",
-                    'type' => 'warning'
-                ];
-                $daftar_warning[] = $warning;
-            }
+                    ];
+                    $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                    $daftar_warning[] = $pesan;
+                }
 
-            foreach ($columnsToCheck as $dependency) {
+                if (round($blok4_31_jumlah_rokok_beli) != round($rekap_art['rokok_beli'])) {
+                    $pesan = [
+                        'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Pembelian)",
+                        'type' => 'warning',
 
-                foreach ($dependency['fields'] as $dependentField) {
-                    // Check if the field exists in $currentWtf and condition is met
-                    if (isset($data_mak[$dependency['target']]) && in_array($data_mak[$dependency['target']], $dependency['dependentValues'])) {
-                        // if (isset($currentWtf[$dependentField]) && isset($mak[$dependency['target']])) {
-                        // dd([$dependentField, $currentWtf]);
-                        if (!isset($currentWtf[$dependentField])) {
-                            // return value tidak sesuai
-                            $error = [
-                                'rincian' => "Isian ini harus diisi",
-                                'variable' => "Pertanyaan tambahan worksheet " . $dependentField,
-                            ];
-                            $daftar_error[] = $error;
-                        } elseif ($currentWtf[$dependentField] < 1) {
-                            $warning = [
-                                'rincian' => "Isian ini harus bernilai > 0",
-                                'variable' => "Pertanyaan tambahan worksheet " . $dependentField,
-                                'type' => 'warning'
-                            ];
-                            $daftar_warning[] = $warning;
+                    ];
+                    $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                    $daftar_warning[] = $pesan;
+                }
+
+                if (round($blok4_32_18) != round($rincian16 + $blok4_32_17)) {
+                    $pesan = [
+                        'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 18",
+                        'type' => 'warning',
+
+                    ];
+                    $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
+                    $daftar_warning[] = $pesan;
+                }
+
+
+                // cek isisan wtf
+                $columnsToCheck = $this->wtfDependecies;
+                $fields_check = [];
+                $currentWtf = [];
+                foreach ($columnsToCheck as $column) {
+                    if (isset($column['fields'])) {
+                        $fields_check = array_merge($fields_check, $column['fields']);
+                    }
+                }
+                foreach ($fields_check as $key => $value) {
+                    if (isset($data_mak[$value])) {
+                        $currentWtf[$value] =  $data_mak[$value];
+                    }
+                }
+
+                // dd($currentWtf);
+
+                if ($jumlah_art != $data_mak['wtf_2']) {
+                    $warning = [
+                        'rincian' => "Jumlah Art pada Blok IV.1 tidak sama dengan Rincian Worksheet",
+                        'variable' => "Pertanyaan worksheet Nomor 2",
+                        'type' => 'warning'
+                    ];
+                    $daftar_warning[] = $warning;
+                }
+
+                foreach ($columnsToCheck as $dependency) {
+
+                    foreach ($dependency['fields'] as $dependentField) {
+                        // Check if the field exists in $currentWtf and condition is met
+                        if (isset($data_mak[$dependency['target']]) && in_array($data_mak[$dependency['target']], $dependency['dependentValues'])) {
+                            // if (isset($currentWtf[$dependentField]) && isset($mak[$dependency['target']])) {
+                            // dd([$dependentField, $currentWtf]);
+                            if (!isset($currentWtf[$dependentField])) {
+                                // return value tidak sesuai
+                                $error = [
+                                    'rincian' => "Isian ini harus diisi",
+                                    'variable' => "Pertanyaan tambahan worksheet " . $dependentField,
+                                ];
+                                $daftar_error[] = $error;
+                            } elseif ($currentWtf[$dependentField] < 1) {
+                                $warning = [
+                                    'rincian' => "Isian ini harus bernilai > 0",
+                                    'variable' => "Pertanyaan tambahan worksheet " . $dependentField,
+                                    'type' => 'warning'
+                                ];
+                                $daftar_warning[] = $warning;
+                            }
+                        } else {
+                            // return value null tetapi dependency terisi
                         }
-                    } else {
-                        // return value null tetapi dependency terisi
                     }
                 }
             }
@@ -1054,345 +1082,64 @@ class MakController extends Controller
         ];
         // return false
     }
-    private function cek_isian($id_ruta)
+
+    private function validateRangeKonsumsi($value, $range_harga, $feedback, $nomor_art = 0)
     {
-
-        $variable = [
-            'blok_1' => [
-                'kode_prov',
-                'kode_kabkot',
-                'kode_kec',
-                'kode_desa',
-                'kode_bs4',
-                'nks',
-                'semester',
-                'r108',
-                'r109',
-                'r110',
-                'r111',
-            ],
-            'blok_2' => [
-                'r201_nama',
-                'r202_nama',
-                'r201_jabatan',
-                'r202_jabatan',
-                'r203'
-            ],
-            'wtf' => [
-                'wtf_2',
-                'wtf_3', 'wtf_4', 'wtf_5', 'wtf_6', 'wtf_7', 'wtf_8', 'wtf_9', 'wtf_10',
-                'wtf_11', 'wtf_12', 'wtf_13', 'wtf_14', 'wtf_15', 'wtf_16', 'wtf_17', 'wtf_18',
-                'wtf_19', 'wtf_20', 'wtf_21', 'wtf_22', 'wtf_23', 'wtf_24',
-            ],
-            'blok_qc' => [
-                "blokqc_0",
-                "blokqc_1",
-                "blokqc_2",
-                "blokqc_3",
-                "blokqc_4",
-                "blokqc_5",
-                "blokqc_6",
-            ],
-            'blok4_31' => [
-                "blok4_31_jumlah_mak_beli",
-                "blok4_31_jumlah_mak_produksi",
-                "blok4_31_jumlah_rokok_beli",
-                "blok4_31_jumlah_rokok_produksi",
-            ],
-            'art' => [
-                "nama",
-                "mak_beli",
-                "mak_produksi",
-                "rokok_beli",
-                "rokok_produksi",
-            ],
-            'blok4_32' => [
-                "blok4_32_0_beli",
-                "blok4_32_0_produksi",
-                "blok4_32_0_total",
-                "blok4_32_1_beli",
-                "blok4_32_1_produksi",
-                "blok4_32_1_total",
-                "blok4_32_2_beli",
-                "blok4_32_2_produksi",
-                "blok4_32_2_total",
-                "blok4_32_3_beli",
-                "blok4_32_3_produksi",
-                "blok4_32_3_total",
-                "blok4_32_4_beli",
-                "blok4_32_4_produksi",
-                "blok4_32_4_total",
-                "blok4_32_5_beli",
-                "blok4_32_5_produksi",
-                "blok4_32_5_total",
-                "blok4_32_6_beli",
-                "blok4_32_6_produksi",
-                "blok4_32_6_total",
-                "blok4_32_7_beli",
-                "blok4_32_7_produksi",
-                "blok4_32_7_total",
-                "blok4_32_8_beli",
-                "blok4_32_8_produksi",
-                "blok4_32_8_total",
-                "blok4_32_9_beli",
-                "blok4_32_9_produksi",
-                "blok4_32_9_total",
-                "blok4_32_10_beli",
-                "blok4_32_10_produksi",
-                "blok4_32_10_total",
-                "blok4_32_11_beli",
-                "blok4_32_11_produksi",
-                "blok4_32_11_total",
-                "blok4_32_12_beli",
-                "blok4_32_12_produksi",
-                "blok4_32_12_total",
-                "blok4_32_13_beli",
-                "blok4_32_13_produksi",
-                "blok4_32_13_total",
-                "blok4_32_14_beli",
-                "blok4_32_14_produksi",
-                "blok4_32_14_total",
-                "blok4_32_15_total",
-                "blok4_32_16_total",
-                "blok4_32_17_total",
-            ]
-        ];
-        try {
-            //
-            // ambil data susenas_mak
-            $mak = SusenasMak::where('id', $id_ruta)->firstOrFail();
-            $daftar_art = AnggotaRuta::where('id_ruta', $id_ruta)->get();
-            $daftar_error = [];
-            // periksa blok I
-            $blok_1 = $mak->only($variable['blok_1']);
-            foreach ($blok_1 as $key => $value) {
-                if (!isset($value)) {
-                    $error = [
-                        'rincian' => "Isian ini harus diisi",
-                        'variable' => $key,
-                    ];
-                    $daftar_error[] = $error;
+        $evaluasi_rh = [];
+        if ($nomor_art > 0) {
+            if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
+                $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
+                if ($harga_satuan > $range_harga->max) {
+                    $feedback['rincian'] = "ART nomor " . $nomor_art . " - harga satuan komoditas dari pembelian diatas range";
+                    $feedback['harga'] = $harga_satuan;
+                    $evaluasi_rh[] = $feedback;
+                } else if ($harga_satuan < $range_harga->min) {
+                    $feedback['rincian'] = "ART nomor " . $nomor_art . " - harga satuan komoditas dari pembelian dibawah range";
+                    $feedback['harga'] = $harga_satuan;
+                    $evaluasi_rh[] = $feedback;
                 }
             }
-
-            $blok_2 = $mak->only($variable['blok_2']);
-            foreach ($blok_2 as $key => $value) {
-                if (!isset($value)) {
-                    $error = [
-                        'rincian' => "Isian ini harus diisi",
-                        'variable' => $key,
-                    ];
-                    $daftar_error[] = $error;
+            if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
+                $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
+                if ($harga_satuan > $range_harga->max) {
+                    $feedback['rincian'] = "ART nomor " . $nomor_art . " - harga satuan komoditas dari produksi sendiri, pemberian, dsb. diatas range";
+                    $feedback['harga'] = $harga_satuan;
+                    $evaluasi_rh[] = $feedback;
+                } else if ($harga_satuan < $range_harga->min) {
+                    $feedback['rincian'] = "ART nomor " . $nomor_art . " - harga satuan komoditas dari produksi sendiri, pemberian, dsb. dibawah range";
+                    $feedback['harga'] = $harga_satuan;
+                    $evaluasi_rh[] = $feedback;
                 }
             }
-            // cek isian wtf basic;
-            $wtf = $mak->only($variable['wtf']);
-            foreach ($wtf as $key => $value) {
-                if (!isset($value)) {
-                    $error = [
-                        'rincian' => "Isian ini harus diisi",
-                        'variable' => $key,
-                    ];
-                    $daftar_error[] = $error;
+        } else {
+            if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
+                $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
+                if ($harga_satuan > $range_harga->max) {
+                    $feedback['rincian'] = "Harga satuan komoditas dari pembelian diatas range";
+                    $feedback['harga'] = $harga_satuan;
+                    $evaluasi_rh[] = $feedback;
+                } else if ($harga_satuan < $range_harga->min) {
+                    $feedback['rincian'] = "Harga satuan komoditas dari pembelian dibawah range";
+                    $feedback['harga'] = $harga_satuan;
+                    $evaluasi_rh[] = $feedback;
                 }
             }
-            // cek isian wtf lanjutan
-
-            $columnsToCheck = $this->wtfDependecies;
-            $fields_check = [];
-            foreach ($columnsToCheck as $column) {
-                if (isset($column['fields'])) {
-                    $fields_check = array_merge($fields_check, $column['fields']);
+            if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
+                $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
+                if ($harga_satuan > $range_harga->max) {
+                    $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. diatas range";
+                    $feedback['harga'] = $harga_satuan;
+                    $evaluasi_rh[] = $feedback;
+                } else if ($harga_satuan < $range_harga->min) {
+                    $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. dibawah range";
+                    $feedback['harga'] = $harga_satuan;
+                    $evaluasi_rh[] = $feedback;
                 }
             }
-
-            $currentWtf = $mak->only($fields_check);
-            // dd($currentWtf);
-
-            foreach ($columnsToCheck as $dependency) {
-
-                foreach ($dependency['fields'] as $dependentField) {
-                    // Check if the field exists in $currentWtf and condition is met
-                    if (isset($mak[$dependency['target']]) && in_array($mak[$dependency['target']], $dependency['dependentValues'])) {
-                        // if (isset($currentWtf[$dependentField]) && isset($mak[$dependency['target']])) {
-                        if (!isset($currentWtf[$dependentField])) {
-                            // return value tidak sesuai
-                            $error = [
-                                'rincian' => "Isian ini harus diisi",
-                                'variable' => $dependentField,
-                            ];
-                            $daftar_error[] = $error;
-                        }
-                    } else {
-                        // return value null tetapi dependency terisi
-                    }
-                }
-            }
-
-            //cek isian konsumsi ruta
-            // satu persatu 
-            $konsumsi_ruta = Konsumsi::where('konsumsi.id_ruta', $id_ruta)
-                ->join('komoditas', 'konsumsi.id_komoditas', 'komoditas.id')
-                ->select('konsumsi.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
-                ->get();
-            // dd($konsumsi_ruta);
-            foreach ($konsumsi_ruta as $key => $konsumsi) {
-                if ($konsumsi["type"] == "sub") {
-                    continue;
-                }
-                // kesesuaian harga dan volume
-                // dd($this->is_any_zero(0, 0));
-                if ($this->is_any_zero($konsumsi['harga_produksi'], $konsumsi['volume_produksi'])) {
-                    $error = [
-                        'rincian' => "Isian harga produksi,pemberian dsb bernilai 0 tetapi volume > 0 atau sebaliknya",
-                        'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                    ];
-                    $daftar_error[] = $error;
-                }
-
-                if ($this->is_any_zero($konsumsi['harga_beli'], $konsumsi['volume_beli'])) {
-                    $error = [
-                        'rincian' => "Isian harga pembelian bernilai 0 tetapi volume > 0 atau sebaliknya",
-                        'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                    ];
-                    $daftar_error[] = $error;
-                }
-
-                if ($this->is_any_zero($konsumsi['harga_total'], $konsumsi['volume_total'])) {
-                    $error = [
-                        'rincian' => "Isian harga total bernilai 0 tetapi volume > 0 atau sebaliknya",
-                        'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                    ];
-                    $daftar_error[] = $error;
-                }
-
-
-                // kesesuaian total 
-            }
-            // keseluruhan tidak boleh 0 
-
-            // cek isian QC
-            $blok_qc = $mak->only($variable['blok_qc']);
-            foreach ($blok_qc as $key => $value) {
-                if (!isset($value)) {
-                    $error = [
-                        'rincian' => "Isian ini harus diisi",
-                        'variable' => $key,
-                    ];
-                    $daftar_error[] = $error;
-                } else if ($key == 'blokqc_3' && $value <= 0) {
-                    $error = [
-                        'rincian' => "Isian jumlah komoditas non makanan tidak boleh bernilai 0",
-                        'variable' => $key,
-                    ];
-                    $daftar_error[] = $error;
-                }
-            }
-            // cek isian blok 4.3.1
-            // cek art
-
-            $blok4_31 = $mak->only($variable['blok4_31']);
-            foreach ($blok4_31 as $key => $value) {
-                if (!isset($value)) {
-                    $error = [
-                        'rincian' => "Isian ini harus diisi",
-                        'variable' => $key,
-                    ];
-                    $daftar_error[] = $error;
-                }
-            }
-            // cek isian blok 4.3.2
-            $nomor = 1;
-            foreach ($daftar_art as $key => $art) {
-                # code...
-                $art_check = $art->only($variable['art']);
-                $konsumsi_art = KonsumsiArt::where('konsumsi_art.id_art', $art['id'])
-                    ->join('komoditas', 'konsumsi_art.id_komoditas', 'komoditas.id')
-                    ->select('konsumsi_art.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
-                    ->get();
-                // dd($konsumsi_ruta);
-                foreach ($konsumsi_art as $key => $konsumsi) {
-                    if ($konsumsi["type"] == "sub") {
-                        if ($konsumsi['id_kelompok'] == 12 & $konsumsi['harga_beli'] == 0 & $konsumsi['harga_produksi'] == 0) {
-                            $error = [
-                                'rincian' => "Isian harga pembelian / produksi, pemberian dsb harus ada (tidak boleh 0 semua)",
-                                'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                                'nomor_art' => $nomor
-                            ];
-                            $daftar_error[] = $error;
-                        }
-                        continue;
-                    }
-                    // kesesuaian harga dan volume
-                    // dd($this->is_any_zero(0, 0));
-                    if ($this->is_any_zero($konsumsi['harga_produksi'], $konsumsi['volume_produksi'])) {
-                        $error = [
-                            'rincian' => "Isian harga produksi,pemberian dsb bernilai 0 tetapi volume > 0 atau sebaliknya",
-                            'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                            'nomor_art' => $nomor
-                        ];
-                        $daftar_error[] = $error;
-                    }
-
-                    if ($this->is_any_zero($konsumsi['harga_beli'], $konsumsi['volume_beli'])) {
-                        $error = [
-                            'rincian' => "Isian harga pembelian bernilai 0 tetapi volume > 0 atau sebaliknya",
-                            'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                            'nomor_art' => $nomor
-                        ];
-                        $daftar_error[] = $error;
-                    }
-
-                    if ($this->is_any_zero($konsumsi['harga_total'], $konsumsi['volume_total'])) {
-                        $error = [
-                            'rincian' => "Isian harga total bernilai 0 tetapi volume > 0 atau sebaliknya",
-                            'variable' => "[" . $konsumsi['id_komoditas'] . "] " . $konsumsi['nama_komoditas'],
-                            'nomor_art' => $nomor
-                        ];
-                        $daftar_error[] = $error;
-                    }
-
-
-                    // kesesuaian total 
-                }
-                foreach ($art_check as $key => $value) {
-                    if (!isset($value)) {
-                        $error = [
-                            'rincian' => "Isian ini harus diisi",
-                            'variable' => $key,
-                            'nomor_art' => $nomor
-                        ];
-                        $daftar_error[] = $error;
-                    }
-                }
-                $nomor++;
-            }
-            $blok4_32 = $mak->only($variable['blok4_32']);
-            foreach ($blok4_32 as $key => $value) {
-                if (!isset($value)) {
-                    $error = [
-                        'rincian' => "Isian ini harus diisi",
-                        'variable' => $key,
-                    ];
-                    $daftar_error[] = $error;
-                } else if ($key == 'blok4_32_16_total' && $value <= 0) {
-                    $error = [
-                        'rincian' => "Isian pengeluaran bukan makanan tidak boleh bernilai 0",
-                        'variable' => $key,
-                    ];
-                    $daftar_error[] = $error;
-                }
-            }
-
-
-
-
-
-            return $daftar_error;
-        } catch (\Exception $ex) {
-            return response()->json(['error' => 'Error processing data'], 500);
         }
+        return $evaluasi_rh;
     }
+
     private function range_harga($id_ruta)
     {
         try {
@@ -1427,6 +1174,7 @@ class MakController extends Controller
                 })
                 ->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')
                 ->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi', 'nama_komoditas']);
+            $daftar_art = AnggotaRuta::where('id_ruta', $id_ruta)->get();
             foreach ($konsumsi_ruta as $key => $value) {
                 // ketika ada komoditas basket maka unset komdoditas dari array
                 $id_komoditas = $value['id_komoditas'];
@@ -1454,90 +1202,60 @@ class MakController extends Controller
                 if ($range_harga->max == 0 && $range_harga->min == 0) {
                     continue;
                 }
-                if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
-                    $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
-                    if ($harga_satuan > $range_harga->max) {
-                        $feedback['rincian'] = "Harga satuan komoditas dari pembelian diatas range";
-                        $feedback['harga'] = $harga_satuan;
-                        $evaluasi_rh[] = $feedback;
-                    }
-                    if ($harga_satuan < $range_harga->min) {
-                        $feedback['rincian'] = "Harga satuan komoditas dari pembelian dibawah range";
-                        $feedback['harga'] = $harga_satuan;
-                        $evaluasi_rh[] = $feedback;
-                    }
-                }
-                if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
-                    $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
-                    if ($harga_satuan > $range_harga->max) {
-                        $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. diatas range";
-                        $feedback['harga'] = $harga_satuan;
-                        $evaluasi_rh[] = $feedback;
-                    }
-                    if ($harga_satuan < $range_harga->min) {
-                        $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. dibawah range";
-                        $feedback['harga'] = $harga_satuan;
-                        $evaluasi_rh[] = $feedback;
-                    }
+                $validasi = $this->validateRangeKonsumsi($value, $range_harga, $feedback);
+                foreach ($validasi as $key => $value) {
+                    # code...
+                    $evaluasi_rh[] = $value;
                 }
             }
-            foreach ($konsumsi_art as $key => $value) {
+            $nomor_art = 1;
+            foreach ($daftar_art as $key => $value) {
                 # code...
-                // ambil kalori dari tabel 
-                $id_komoditas = $value['id_komoditas'];
-                $nama_komoditas = $value['nama_komoditas'];
+                $konsumsi_art = KonsumsiArt::where('id_art', $value['id'])
+                    ->where(function ($query) {
+                        $query->where('harga_beli', '>', '0')
+                            ->orWhere('harga_produksi', '>', '0');
+                    })
+                    ->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')
+                    ->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi', 'nama_komoditas']);
+                foreach ($konsumsi_art as $key => $value) {
+                    # code...
+                    // ambil kalori dari tabel 
+                    $id_komoditas = $value['id_komoditas'];
+                    $nama_komoditas = $value['nama_komoditas'];
 
 
-                if (in_array($id_komoditas, $komoditas_basket)) {
-                    $key = array_search($id_komoditas, $komoditas_basket);
+                    if (in_array($id_komoditas, $komoditas_basket)) {
+                        $key = array_search($id_komoditas, $komoditas_basket);
 
-                    // Check if the key is valid before unsetting
-                    if ($key !== false) {
-                        // Remove the element from $komoditas_basket
-                        unset($komoditas_basket[$key]);
+                        // Check if the key is valid before unsetting
+                        if ($key !== false) {
+                            // Remove the element from $komoditas_basket
+                            unset($komoditas_basket[$key]);
+                        }
+                    }
+
+                    $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
+                    $feedback = [
+                        'id_komoditas' => $id_komoditas,
+                        'nama_komoditas' => $nama_komoditas,
+                        'rincian' => '',
+                        'min' => $range_harga->min,
+                        'max' => $range_harga->max,
+
+                    ];
+                    if ($range_harga->max == 0 && $range_harga->min == 0) {
+                        continue;
+                    }
+                    $validasi = $this->validateRangeKonsumsi($value, $range_harga, $feedback, $nomor_art);
+                    foreach ($validasi as $key => $value) {
+                        # code...
+                        $evaluasi_rh[] = $value;
                     }
                 }
-
-                $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
-                $feedback = [
-                    'id_komoditas' => $id_komoditas,
-                    'nama_komoditas' => $nama_komoditas,
-                    'rincian' => '',
-                    'min' => $range_harga->min,
-                    'max' => $range_harga->max,
-
-                ];
-                if ($range_harga->max == 0 && $range_harga->min == 0) {
-                    continue;
-                }
-                if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
-                    $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
-                    if ($harga_satuan > $range_harga->max) {
-                        $feedback['rincian'] = "Harga satuan komoditas dari pembelian diatas range";
-                        $feedback['harga'] = $harga_satuan;
-                        $evaluasi_rh[] = $feedback;
-                    }
-                    if ($harga_satuan < $range_harga->min) {
-                        $feedback['rincian'] = "Harga satuan komoditas dari pembelian dibawah range";
-                        $feedback['harga'] = $harga_satuan;
-                        $evaluasi_rh[] = $feedback;
-                    }
-                }
-                if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
-                    $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
-                    if ($harga_satuan > $range_harga->max) {
-                        $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. diatas range";
-                        $feedback['harga'] = $harga_satuan;
-                        $evaluasi_rh[] = $feedback;
-                    }
-                    if ($harga_satuan < $range_harga->min) {
-                        $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. dibawah range";
-                        $feedback['harga'] = $harga_satuan;
-                        $evaluasi_rh[] = $feedback;
-                    }
-                }
+                $nomor_art++;
             }
-            // $komoditas_basket = json_decode(json_encode($komoditas_basket), true);
+
             $feedback_basket = [];
 
             foreach ($komoditas_basket as $key => $value) {
@@ -1550,15 +1268,10 @@ class MakController extends Controller
             }
 
 
-            // $data = [
-            //     // 'konsumsi_ruta' => $konsumsi_ruta,
-            //     // 'konsumsi_art' => $konsumsi_art,
-            //     'evaluasi_rh' => $evaluasi_rh,
-            //     // 'evaluasi_basket' => [],
-            //     // 'id_ruta' => $id_ruta,
-            // ];
+
             return $evaluasi_rh;
         } catch (\Exception $ex) {
+            throw new \Exception($ex);
             return response()->json(['error' => 'Error processing data'], 500);
 
 
@@ -1585,5 +1298,44 @@ class MakController extends Controller
     public function maintenance()
     {
         return Inertia::render('Maintenance');
+    }
+    public function change_nks($id_ruta, $nks_baru)
+    {
+        try {
+            //validate input 
+            if (strlen($id_ruta) != 36 || strlen($nks_baru) != 6) {
+                return false;
+            }
+            $mak = SusenasMak::findOrFail($id_ruta);
+            // dd($mak);
+            // handle mak 
+            if ($mak) {
+                // get kabkot
+                $kode_kabkot = $mak->kode_kabkot;
+                $wilayah_baru = MasterWilayah::where('kode_kabkot', $kode_kabkot)->where('nks', $nks_baru)->first();
+                // handle wilayah baru
+                // dd([$wilayah_baru, $kode_kabkot, $nks_baru]);
+                if ($wilayah_baru) {
+                    $mak->kode_desa = $wilayah_baru->kode_desa;
+                    $mak->kode_bs4 = $wilayah_baru->kode_bs4;
+                    // $mak->klas = $wilayah_baru->klas;
+                    $mak->kode_kec = $wilayah_baru->kode_kec;
+                    $mak->nks = $wilayah_baru->nks;
+                    $mak->save();
+                    // dd($mak->changes);
+                    return true;
+                } else {
+                    // return exception 
+                    // no data wilayah found
+                    return false;
+                }
+            }
+            // return exception 
+            // no data susenas mak found
+            return false;
+        } catch (\Throwable $th) {
+            //throw $th;
+            return false;
+        }
     }
 }
