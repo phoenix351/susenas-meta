@@ -15,4 +15,12 @@ class Komoditas extends Model
         'satuan', 'kode_coicop', 'kalori'
     ];
     public $timestamps = false;
+    public function konsumsi()
+    {
+        return $this->hasMany(Konsumsi::class, 'id_komoditas');
+    }
+    public function konsumsi_art()
+    {
+        return $this->hasMany(KonsumsiArt::class, 'id_komoditas');
+    }
 }

@@ -14,6 +14,7 @@ import { Button, Table, Space, Typography, Tabs } from "antd";
 import { ExportOutlined } from "@ant-design/icons";
 import { CompareFn } from "antd/es/table/interface";
 import { createNumberSorter, createSorter } from "@/Functions/ColumnSorter";
+import axios from "axios";
 
 const { Title } = Typography;
 
@@ -59,23 +60,41 @@ const handleExport = (columns: any[], tableData: any[]) => {
     document.body.removeChild(link);
 };
 
-const Dashboard = ({
-    data,
-    rekap_kabkot,
-    users,
-}: PageProps & {
-    data: any;
-    rekap_kabkot: any;
-    users: any;
-}) => {
-    const [tableData, setTableData] = useState<any[]>([]);
+const Dashboard = () => {
+    const [tableDataNks, setTableDataNks] = useState<any[]>([]);
     const [tableDataKabkot, setTableDataKabkot] = useState<any[]>([]);
     const [tableDataUser, setTableDataUser] = useState<any[]>([]);
+    const [dataLoading, setdataLoading] = useState(false);
+
     useEffect(() => {
         // console.log({ rekap_kabkot });
-        setTableData(data);
-        setTableDataKabkot(rekap_kabkot);
-        setTableDataUser(users);
+        const fetchData = async () => {
+            setdataLoading(true);
+            try {
+                const response_kabkot = await axios.get(
+                    route("api.monitoring.rekap_kabkot")
+                );
+                const response_nks = await axios.get(
+                    route("api.monitoring.rekap_nks")
+                );
+                const response_user = await axios.get(
+                    route("api.monitoring.rekap_user")
+                );
+                setTableDataNks(response_nks.data.rekap_nks ?? []);
+                setTableDataKabkot(response_kabkot.data.rekap_kabkot ?? []);
+                setTableDataUser(response_user.data.rekap_user ?? []);
+
+                console.log({ response_kabkot, response_user, response_nks });
+            } catch (error) {
+                console.log("something went wrong: ", { error });
+            } finally {
+                setdataLoading(false);
+            }
+        };
+        fetchData();
+        // setTableData(data);
+        // setTableDataKabkot(rekap_kabkot);
+        // setTableDataUser(users);
     }, []);
     const jumlahSorter = createNumberSorter("jumlah_dok");
     const jumlahDokumenSorter = createNumberSorter("jumlah_dokumen");
@@ -219,9 +238,18 @@ const Dashboard = ({
             title: "%clean",
             dataIndex: "persentase",
             key: "persentase",
-            sorter: (a: { dok_clean: any }, b: { dok_clean: any }) => {
-                const valueA = ((Number(a.dok_clean) / 10) * 100).toFixed(2);
-                const valueB = ((Number(b.dok_clean) / 10) * 100).toFixed(2);
+            sorter: (
+                a: { dok_clean: any; target_nks: any },
+                b: { dok_clean: any; target_nks: any }
+            ) => {
+                const valueA = (
+                    (Number(a.dok_clean) / a.target_nks) *
+                    100
+                ).toFixed(2);
+                const valueB = (
+                    (Number(b.dok_clean) / b.target_nks) *
+                    100
+                ).toFixed(2);
                 return parseFloat(valueA) - parseFloat(valueB);
             },
             render: (_: any, record: any) =>
@@ -338,8 +366,11 @@ const Dashboard = ({
                                 pageSize: 20,
                                 hideOnSinglePage: true,
                             }}
-                            // size="large"
-                            style={{ width: "100%", backgroundColor: "red" }}
+                            loading={{
+                                spinning: dataLoading,
+                                tip: "memuat data...",
+                            }}
+                            // style={{ width: "100%", backgroundColor: "red" }}
                             dataSource={tableDataKabkot}
                             scroll={{ x: "100%" }}
                         />
@@ -363,7 +394,7 @@ const Dashboard = ({
                     >
                         <Button
                             type="primary"
-                            onClick={() => handleExport(columns, tableData)}
+                            onClick={() => handleExport(columns, tableDataNks)}
                         >
                             <ExportOutlined />
                             Export as CSV
@@ -380,9 +411,11 @@ const Dashboard = ({
                     >
                         <Table
                             columns={columns}
-                            // size="large"
-                            // style={{ width: "100%", backgroundColor: "red" }}
-                            dataSource={tableData}
+                            loading={{
+                                spinning: dataLoading,
+                                tip: "memuat data...",
+                            }}
+                            dataSource={tableDataNks}
                             scroll={{ x: "100%" }}
                         />
                     </Space>
@@ -424,8 +457,10 @@ const Dashboard = ({
                     >
                         <Table
                             columns={columnUsers}
-                            // size="large"
-                            // style={{ width: "100%", backgroundColor: "red" }}
+                            loading={{
+                                spinning: dataLoading,
+                                tip: "memuat data...",
+                            }}
                             dataSource={tableDataUser}
                             scroll={{ x: "100%" }}
                         />

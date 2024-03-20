@@ -5,6 +5,7 @@ use App\Http\Controllers\KomoditasController;
 use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterJabatanController;
 use App\Http\Controllers\MasterWilayahController;
+use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\PeriksaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
@@ -37,6 +38,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::patch('/users', [UserController::class, 'update'])->name('users.update');
     route::get('/entri/mak/view/{id}', [MakController::class, 'view'])->name('entri.mak.view');
+    route::get('/recalculate-qc', [MakController::class, 'recalculate_qc'])->name('recalculate_qc');
 });
 
 Route::middleware('auth')->group(function () {
@@ -117,9 +119,18 @@ Route::middleware('auth')->group(function () {
     route::post('api/cek-nomor-sampel', [MakController::class, 'cek_nomor_sampel'])->name('api.cekNomorSampel');
 
 
-    route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
+    // route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
+    route::get('/dashboard', [MonitoringController::class, 'index'])->name('dashboard');
+    route::post('/monitoring/update', [MonitoringController::class, 'update'])->name('monitoring.update');
+
+    route::get('/api/monitoring/rekap-kabkot', [MonitoringController::class, 'get_rekap_kabkot'])->name('api.monitoring.rekap_kabkot');
+    route::get('/api/monitoring/rekap-nks', [MonitoringController::class, 'get_rekap_nks'])->name('api.monitoring.rekap_nks');
+    route::get('/api/monitoring/rekap-user', [MonitoringController::class, 'get_rekap_user'])->name('api.monitoring.rekap_user');
+
     route::get('/kelola-entri', [MakController::class, 'kelola_entri'])->name('kelola-entri');
     route::get('/periksa', [PeriksaController::class, 'index'])->name('periksa');
+    route::get('/unduh-raw', [MakController::class, 'unduh_raw'])->name('unduh_raw');
+
 
 
     route::get('/', function () {

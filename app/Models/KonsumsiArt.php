@@ -18,4 +18,12 @@ class KonsumsiArt extends Model
         'volume_beli', 'volume_produksi',
         'volume_total', 'harga_total',
     ];
+    public function komoditas()
+    {
+        return $this->belongsTo(Komoditas::class, 'id_komoditas');
+    }
+    public function anggota_ruta()
+    {
+        return $this->belongsTo(AnggotaRuta::class, 'id_art');
+    }
 }

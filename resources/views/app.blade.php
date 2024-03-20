@@ -8,6 +8,8 @@
 
 
     <title inertia>{{ config('app.name', 'Meta-Susenas') }}</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

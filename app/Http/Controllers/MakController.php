@@ -213,98 +213,22 @@ class MakController extends Controller
     public function dashboard()
     {
 
-        $kode_kabkot = auth()->user()->kode_kabkot;
 
-
-        $rekap = DB::table('master_wilayah')
-            ->select(
-                'master_wilayah.kode_prov',
-                'master_wilayah.kode_kabkot',
-                'master_wilayah.nks',
-                'master_wilayah.kabkot',
-                DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok'),
-                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
-                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
-                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
-            )
-            ->leftJoin('vsusenas_mak', function ($join) {
-                $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
-                    ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
-                    ->on('master_wilayah.nks', '=', 'vsusenas_mak.nks');
-            })
-            ->groupBy(
-                'master_wilayah.kode_prov',
-                'master_wilayah.kode_kabkot',
-                'master_wilayah.kabkot',
-                'master_wilayah.desa',
-                'master_wilayah.nks',
-
-            )
-            // ->where('master_wilayah.kode_kabkot', $kode_kabkot)
-            ->when($kode_kabkot !== "00", function ($query) use ($kode_kabkot) {
-                $query->where('master_wilayah.kode_kabkot', $kode_kabkot);
-            })
-            ->distinct()
-            ->get();
-        $rekap_kabkot = DB::table('master_wilayah')
-            ->select(
-                'master_wilayah.kode_prov',
-                'master_wilayah.kode_kabkot',
-                'master_wilayah.kabkot',
-                DB::raw('COALESCE(COUNT(DISTINCT master_wilayah.nks), 0) as target_nks'),
-                DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok'),
-                // DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "entri" THEN vsusenas_mak.id END) as dok_entri'),
-                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
-                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
-                DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
-            )
-            ->leftJoin('vsusenas_mak', function ($join) {
-                $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
-                    ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot');
-            })
-            ->groupBy(
-                'master_wilayah.kode_prov',
-                'master_wilayah.kode_kabkot',
-                'master_wilayah.kabkot'
-            )
-            ->when($kode_kabkot !== "00", function ($query) use ($kode_kabkot) {
-                $query->where('master_wilayah.kode_kabkot', $kode_kabkot);
-            })
-            ->get();
-        // dd($rekap_kabkot);
-        $usersQuery = User::join('vsusenas_mak', 'vsusenas_mak.users_id', 'users.id')->join('master_wilayah', 'master_wilayah.kode_kabkot', 'users.kode_kabkot');
-
-        // Add the condition only if $kode_kabkot is not "00"
-        if ($kode_kabkot !== "00") {
-            $usersQuery->where('users.kode_kabkot', $kode_kabkot);
-        }
-
-        // Select the columns
-        $users = $usersQuery->select(
-            'users.id',
-            'users.nama_lengkap',
-            'users.username',
-            'users.kode_kabkot',
-            'master_wilayah.kabkot',
-            DB::raw('count(distinct vsusenas_mak.id) as jumlah_dokumen'),
-            DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
-            DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
-            DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
-        )
-
-            ->groupBy('users.id', 'users.nama_lengkap', 'users.username', 'users.kode_kabkot', 'master_wilayah.kabkot')
-            ->get();
+        $rekap_nks = DB::table('nks_summary')->get();
+        $rekap_kabkot = DB::table('kabkot_summary')->get();
+        $rekap_user = DB::table('user_summary')->get();
 
         $data = [
-            'data' => $rekap,
+            'data' => $rekap_nks,
             'rekap_kabkot' => $rekap_kabkot,
-            'users' => $users
+            'users' => $rekap_user
 
         ];
 
         // $kondisi_total = 100;
         return Inertia::render('Dashboard', $data);
     }
+
     public function store(Request $request)
     {
         try {
@@ -666,6 +590,47 @@ class MakController extends Controller
 
 
 
+
+            // $konsumsi_ruta = Konsumsi::with('komoditas')
+            //     ->where('id_ruta', $id_ruta)
+            //     ->where(function ($query) {
+            //         $query->where('volume_beli', '>', '0')
+            //             ->orWhere('volume_produksi', '>', '0');
+            //     })
+            //     ->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
+
+
+            // $konsumsi_art = KonsumsiArt::with(['anggota_ruta', 'komoditas'])
+            //     ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
+            //     ->where('anggota_ruta.id_ruta', $id_ruta)
+            //     ->where(function ($query) {
+            //         $query->where('volume_beli', '>', 0)
+            //             ->orWhere('volume_produksi', '>', 0);
+            //     })
+            //     ->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
+
+            // $all_konsumsi = $konsumsi_ruta->merge($konsumsi_art);
+            // dd([sizeof($konsumsi_art), sizeof($konsumsi_ruta)]);
+
+            // $kalori_ruta = $konsumsi_ruta->sum(function ($value) {
+            //     return $value->komoditas->kalori * ($value->volume_beli + $value->volume_produksi);
+            // });
+            // $kalori_art = $konsumsi_art->sum(function ($value) {
+            //     return $value->komoditas->kalori * ($value->volume_beli + $value->volume_produksi);
+            // });
+
+            // $kalori_basket_art = $konsumsi_art->filter(function ($value) use ($komoditas_basket) {
+            //     return $komoditas_basket->contains($value->komoditas->id);
+            // })->sum(function ($value) {
+            //     return $value->komoditas->kalori * ($value->volume_beli + $value->volume_produksi);
+            // });
+            // $kalori_basket_ruta = $konsumsi_ruta->filter(function ($value) use ($komoditas_basket) {
+            //     return $komoditas_basket->contains($value->komoditas->id);
+            // })->sum(function ($value) {
+            //     return $value->komoditas->kalori * ($value->volume_beli + $value->volume_produksi);
+            // });
+            // $kalori_basket = $kalori_basket_art + $kalori_basket_ruta;
+            // $kalori_total = $kalori_ruta + $kalori_art;
             $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
                 $query->where('volume_beli', '>', '0')
                     ->orWhere('volume_produksi', '>', '0');
@@ -678,6 +643,7 @@ class MakController extends Controller
                         ->orWhere('volume_produksi', '>', '0');
                 })
                 ->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
+
             foreach ($konsumsi_ruta as $key => $value) {
                 # code...
                 // ambil kalori dari tabel 
@@ -703,8 +669,21 @@ class MakController extends Controller
                 }
             }
             $pengeluaran_non_makanan = SusenasMak::where('id', $id_ruta)->value('blok4_32_16_total');
+            $komoditas_non_makanan = SusenasMak::where('id', $id_ruta)->value('blokqc_3');
+            $art = AnggotaRuta::where('id_ruta', $id_ruta)->pluck('id');
             $pengeluaran = $pengeluaran * 30 / 7;
             $pengeluaran = $pengeluaran + $pengeluaran_non_makanan;
+            $data_update = [
+                'blokqc_0' => $kalori_total / sizeof($art) / 7,
+                'blokqc_6' => $kalori_basket / sizeof($art) / 7,
+                'blokqc_1' => sizeof($konsumsi_ruta),
+                'blokqc_2' => sizeof($konsumsi_art),
+                'blokqc_4' => $komoditas_non_makanan + sizeof($konsumsi_art) + sizeof($konsumsi_ruta),
+                'blokqc_5' => round($pengeluaran / sizeof($art)),
+            ];
+            DB::beginTransaction();
+            SusenasMak::find($id_ruta)->update($data_update);
+            DB::commit();
             $data = [
                 // 'konsumsi_ruta' => $konsumsi_ruta,
                 // 'konsumsi_art' => $konsumsi_art,
@@ -717,10 +696,17 @@ class MakController extends Controller
             ];
             return response()->json($data, 200);
         } catch (\Throwable $th) {
-
+            DB::rollBack();
+            throw $th;
 
             return response()->json(['error' => 'Error processing data'], 500);
         }
+    }
+    public function recalculate_qc()
+    {
+        $daftar_ruta = SusenasMak::whereIn('status_dok', ['clean', 'warning'])->pluck('id');
+        // return response()->json(['daftar_ruta' => $daftar_ruta], 200);
+        return Inertia::render('Calculate', ['data' => $daftar_ruta]);
     }
     public function revalidasi($id_ruta)
     {
@@ -852,7 +838,7 @@ class MakController extends Controller
                     ->get();
                 foreach ($konsumsi_ruta as $key => $konsumsi) {
                     if ($konsumsi["type"] == "sub") {
-                        $daftar_error[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                        $daftar_warning[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
                         continue;
                     }
 
@@ -866,18 +852,28 @@ class MakController extends Controller
                 $nomor = 1;
                 foreach ($daftar_art as $key => $art) {
                     # code...
-                    $konsumsi_art = KonsumsiArt::where('konsumsi_art.id_art', $art['id'])
-                        ->join('komoditas', 'konsumsi_art.id_komoditas', 'komoditas.id')
+                    $nilai_mak = 0;
+                    $konsumsi_art = KonsumsiArt::join('komoditas', 'konsumsi_art.id_komoditas', 'komoditas.id')
                         ->select('konsumsi_art.*', 'komoditas.id_kelompok', 'komoditas.type', 'komoditas.nama_komoditas')
+                        ->where('konsumsi_art.id_art', $art['id'])
+                        ->where(function ($query) {
+                            $query->where('harga_produksi', '>', 0)
+                                ->orWhere('harga_beli', '>', 0)
+                                ->orWhere('komoditas.type', 'sub');
+                        })
                         ->get();
-                    // dd($konsumsi_ruta);
+                    // dd($konsumsi_art);
+
                     foreach ($konsumsi_art as $key => $konsumsi) {
 
-                        if ($konsumsi["type"] == "sub" && $konsumsi['id_kelompok'] == 12 && $konsumsi['harga_beli'] == 0 && $konsumsi['harga_produksi'] == 0) {
-                            $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
-                            continue;
-                        }
+                        // if ($konsumsi["type"] == "sub" && $konsumsi['id_kelompok'] == 12 && $konsumsi['harga_beli'] == 0 && $konsumsi['harga_produksi'] == 0) {
+                        //     $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                        //     continue;
+                        // }
                         if ($konsumsi['type'] == 'sub') {
+                            if ($konsumsi['id_kelompok'] == 12) {
+                                $nilai_mak = $nilai_mak + $konsumsi['harga_beli'] + $konsumsi['harga_produksi'];
+                            }
                             continue;
                         }
 
@@ -887,6 +883,10 @@ class MakController extends Controller
                         $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total', $nomor);
 
                         // kesesuaian total 
+                    }
+                    if ($nilai_mak == 0) {
+
+                        $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
                     }
                     $nomor++;
                 }
@@ -1338,4 +1338,18 @@ class MakController extends Controller
             return false;
         }
     }
+    // public function unduh_raw()
+    // {
+    //     $ruta = SusenasMak::get();
+    //     $art = AnggotaRuta::get();
+    //     $konsumsi_ruta = Konsumsi::get();
+    //     $konsumsi_art = KonsumsiArt::get();
+    //     $data = [
+    //         'ruta' => $ruta,
+    //         'art' => $art,
+    //         'konsumsi_ruta' => $konsumsi_ruta,
+    //         'konsumsi_art' => $konsumsi_art
+    //     ];
+    //     return response()->json($data, 200);
+    // }
 }

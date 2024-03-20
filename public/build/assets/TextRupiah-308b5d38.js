@@ -1,1 +1,0 @@
-import{a as t}from"./app-07f63a06.js";import{S as p}from"./index-63628ab1.js";import{T as i}from"./index-85ea263e.js";const{Text:a}=i,d=({value:e,color:r})=>t(p,{style:{textAlign:"right",justifyContent:"end"},children:t(a,{style:{color:r,paddingLeft:"11px",paddingRight:"11px"},children:`Rp ${Number(e)??0}`.replace(/\B(?=(\d{3})+(?!\d))/g,",")})});export{d as T};

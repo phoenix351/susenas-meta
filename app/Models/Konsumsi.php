@@ -18,4 +18,8 @@ class Konsumsi extends Model
         'volume_beli', 'volume_produksi',
         'volume_total', 'harga_total',
     ];
+    public function komoditas()
+    {
+        return $this->belongsTo(Komoditas::class, 'id_komoditas');
+    }
 }
