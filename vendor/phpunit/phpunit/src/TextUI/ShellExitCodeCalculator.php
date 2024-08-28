@@ -12,6 +12,8 @@ namespace PHPUnit\TextUI;
 use PHPUnit\TestRunner\TestResult\TestResult;
 
 /**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
 final class ShellExitCodeCalculator
@@ -28,37 +30,37 @@ final class ShellExitCodeCalculator
             $returnCode = self::SUCCESS_EXIT;
         }
 
-        if ($failOnEmptyTestSuite && $result->numberOfTests() === 0) {
+        if ($failOnEmptyTestSuite && !$result->hasTests()) {
             $returnCode = self::FAILURE_EXIT;
         }
 
         if ($result->wasSuccessfulIgnoringPhpunitWarnings()) {
-            if ($failOnDeprecation && ($result->hasTestTriggeredDeprecationEvents() || $result->hasTestTriggeredPhpDeprecationEvents() || $result->hasTestTriggeredPhpunitDeprecationEvents())) {
+            if ($failOnDeprecation && $result->hasDeprecations()) {
                 $returnCode = self::FAILURE_EXIT;
             }
 
-            if ($failOnIncomplete && $result->hasTestMarkedIncompleteEvents()) {
+            if ($failOnIncomplete && $result->hasIncompleteTests()) {
                 $returnCode = self::FAILURE_EXIT;
             }
 
-            if ($failOnNotice && ($result->hasTestTriggeredNoticeEvents() || $result->hasTestTriggeredPhpNoticeEvents())) {
+            if ($failOnNotice && $result->hasNotices()) {
                 $returnCode = self::FAILURE_EXIT;
             }
 
-            if ($failOnRisky && $result->hasTestConsideredRiskyEvents()) {
+            if ($failOnRisky && $result->hasRiskyTests()) {
                 $returnCode = self::FAILURE_EXIT;
             }
 
-            if ($failOnSkipped && $result->hasTestSkippedEvents()) {
+            if ($failOnSkipped && $result->hasSkippedTests()) {
                 $returnCode = self::FAILURE_EXIT;
             }
 
-            if ($failOnWarning && $result->hasWarningEvents()) {
+            if ($failOnWarning && $result->hasWarnings()) {
                 $returnCode = self::FAILURE_EXIT;
             }
         }
 
-        if ($result->hasTestErroredEvents() || $result->hasTestTriggeredPhpunitErrorEvents()) {
+        if ($result->hasErrors()) {
             $returnCode = self::EXCEPTION_EXIT;
         }
 

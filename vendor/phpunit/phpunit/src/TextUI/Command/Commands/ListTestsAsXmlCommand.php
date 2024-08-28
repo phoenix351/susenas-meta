@@ -9,6 +9,7 @@
  */
 namespace PHPUnit\TextUI\Command;
 
+use const PHP_EOL;
 use function file_put_contents;
 use function implode;
 use function sprintf;
@@ -21,6 +22,8 @@ use RecursiveIteratorIterator;
 use XMLWriter;
 
 /**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
 final class ListTestsAsXmlCommand implements Command
@@ -60,9 +63,13 @@ final class ListTestsAsXmlCommand implements Command
                 }
 
                 $writer->startElement('testCaseMethod');
+                $writer->writeAttribute('id', $test->valueObjectForEvents()->id());
                 $writer->writeAttribute('name', $test->name());
                 $writer->writeAttribute('groups', implode(',', $test->groups()));
 
+                /**
+                 * @deprecated https://github.com/sebastianbergmann/phpunit/issues/5481
+                 */
                 if (!empty($test->dataSetAsString())) {
                     $writer->writeAttribute(
                         'dataSet',
@@ -75,7 +82,11 @@ final class ListTestsAsXmlCommand implements Command
                 }
 
                 $writer->endElement();
-            } elseif ($test instanceof PhptTestCase) {
+
+                continue;
+            }
+
+            if ($test instanceof PhptTestCase) {
                 if ($currentTestCase !== null) {
                     $writer->endElement();
 

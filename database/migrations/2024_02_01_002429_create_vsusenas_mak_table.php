@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vsusenas_mak', function (Blueprint $table) {
-            $table->id();
+            $table->string('id', 36);
+            $table->string('users_id', 36);
+            $table->string('status_dok', 10)->default("error");
+
             $table->string('kode_prov', 2);
             $table->string('kode_kabkot', 2);
             $table->string('kode_kec', 3);
@@ -27,12 +30,12 @@ return new class extends Migration
             $table->string('r111', 255)->nullable();
 
             // blok 2
-            $table->string('201_nama', 255)->nullable();
-            $table->string('202_nama', 255)->nullable();
-            $table->string('201_jabatan', 1)->nullable();
-            $table->string('202_jabatan', 1)->nullable();
+            $table->string('r201_nama', 255)->nullable();
+            $table->string('r202_nama', 255)->nullable();
+            $table->string('r201_jabatan', 1)->nullable();
+            $table->string('r202_jabatan', 1)->nullable();
             $table->string('r203', 1)->nullable();
-            $table->string('status', 10)->nullable();
+            // $table->string('status', 10)->nullable();
 
             $table->unsignedInteger('wtf_2')->nullable();
             // $table->string('wtf_2', 1)->nullable();
@@ -57,6 +60,7 @@ return new class extends Migration
             $table->string('wtf_21', 1)->nullable();
             $table->string('wtf_22', 1)->nullable();
             $table->string('wtf_23', 1)->nullable();
+            $table->string('wtf_24', 1)->nullable();
             $table->string('wtf_25', 1)->nullable();
             $table->string('wtf_26', 1)->nullable();
 

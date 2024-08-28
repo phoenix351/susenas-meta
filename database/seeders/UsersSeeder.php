@@ -2512,6 +2512,15 @@ class UsersSeeder extends Seeder
                 'username' => 'ni282',
                 'password' => '199611292019012002',
             ),
+            4 =>
+            array(
+                'nama_lengkap' => 'Ponimin, S.Tr.Stat.',
+                'username' => 'ponim',
+                'role' => 'ADMIN',
+                'nip' => '199810132021041001',
+                'kode_kabkot' => '00',
+                'password' => '123',
+            ),
         );
 
 

@@ -13,11 +13,14 @@ use function array_map;
 use function array_push;
 use function in_array;
 use function spl_object_id;
+use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestSuite;
 use RecursiveFilterIterator;
 use RecursiveIterator;
 
 /**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
 abstract class GroupFilterIterator extends RecursiveFilterIterator
@@ -27,6 +30,10 @@ abstract class GroupFilterIterator extends RecursiveFilterIterator
      */
     protected array $groupTests = [];
 
+    /**
+     * @psalm-param RecursiveIterator<int, Test> $iterator
+     * @psalm-param list<non-empty-string> $groups
+     */
     public function __construct(RecursiveIterator $iterator, array $groups, TestSuite $suite)
     {
         parent::__construct($iterator);

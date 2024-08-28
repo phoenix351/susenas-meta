@@ -29,11 +29,6 @@ return new class extends Migration
             $table->string('klas', 1);
             $table->string('kode_bs4', 4);
             $table->string('nks', 6);
-
-            $table->smallInteger('jumlah_ruta');
-
-            $table->string('kode_sls6', 6);
-            $table->string('nama_sls', 255);
         });
     }
 

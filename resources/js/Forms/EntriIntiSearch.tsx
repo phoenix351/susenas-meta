@@ -20,6 +20,8 @@ const EntriIntiForm: React.FC<{
         const url = route("api.entri.kabkot");
 
         const { data } = await axios.get(url);
+        console.log({ data });
+
         const daftarKabkot = data.data.map((item: any) => ({
             label: `[${item.kode_kabkot}] ${item.kabkot}`,
             value: item.kode_kabkot,
@@ -51,11 +53,16 @@ const EntriIntiForm: React.FC<{
         };
     useEffect(() => {
         try {
+            // console.log("sss");
+
             fetchKabkot();
             form.setFieldValue("kode_prov", "71");
+            form.setFieldValue("semester", "2");
 
             // fetchSemester();
-        } catch (error) {}
+        } catch (error) {
+            console.log({ error });
+        }
     }, []);
 
     return (
@@ -81,13 +88,25 @@ const EntriIntiForm: React.FC<{
                         onChange={() => {
                             form.setFieldsValue({
                                 kode_kabkot: "",
-                                semester: "",
                                 nks: "",
                             });
                             setDataSource([]);
 
                             setDaftarNks([]);
                         }}
+                    />
+                </Form.Item>
+                <Form.Item name="semester" label="semester">
+                    <Select
+                        allowClear
+                        showSearch
+                        optionFilterProp="label"
+                        // disabled={semesterDisable}
+                        options={[
+                            // { label: "Semester I", value: "1",},
+                            { label: "Semester II", value: "2" },
+                        ]}
+                        disabled
                     />
                 </Form.Item>
                 <Form.Item name="kode_kabkot" label="Kab/Kota">
@@ -100,30 +119,16 @@ const EntriIntiForm: React.FC<{
                         // disabled={kabkotDisable}
                         onChange={() => {
                             form.setFieldsValue({
-                                semester: "",
                                 nks: "",
                             });
 
                             setDataSource([]);
                             setDaftarNks([]);
-                        }}
-                    />
-                </Form.Item>
-                <Form.Item name="semester" label="semester">
-                    <Select
-                        allowClear
-                        showSearch
-                        optionFilterProp="label"
-                        // disabled={semesterDisable}
-                        options={[
-                            { label: "Semester I", value: "1", selected: true },
-                            // { label: "Semester II", value: "2" },
-                        ]}
-                        onChange={() => {
                             fetchNks();
                         }}
                     />
                 </Form.Item>
+
                 <Form.Item name="nks" label="NKS">
                     <Select
                         allowClear

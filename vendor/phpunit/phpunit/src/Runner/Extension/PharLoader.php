@@ -26,11 +26,15 @@ use SebastianBergmann\FileIterator\Facade as FileIteratorFacade;
 use Throwable;
 
 /**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
 final class PharLoader
 {
     /**
+     * @psalm-param non-empty-string $directory
+     *
      * @psalm-return list<string>
      */
     public function loadPharExtensionsInDirectory(string $directory): array

@@ -19,5 +19,8 @@ class DatabaseSeeder extends Seeder
         $this->call(ProvinsiSeeder::class);
         $this->call(KabkotSeeder::class);
         $this->call(NksSeeder::class);
+        $this->call(MasterWilayahSeeder::class);
+        $this->call(KomoditasSeeder::class);
+        $this->call(RangeHargaSeeder::class);
     }
 }

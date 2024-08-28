@@ -48,12 +48,12 @@ class MasterWilayahController extends Controller
     {
         $kode_kabkot = auth()->user()->kode_kabkot;
         $data = MasterWilayah::distinct()->get(['kode_kabkot', 'kabkot']);
-        if (isset($kode_kabkot) & $kode_kabkot !== "00") {
+        // dd($data);
+        if (isset($kode_kabkot) & $kode_kabkot != "00") {
             $data = MasterWilayah::where('kode_kabkot', $kode_kabkot)->distinct()->get(['kode_kabkot', 'kabkot']);
         }
         // return response()->json($kode_kabkot, 200);
         $user = auth()->user();
-
         return response()->json(['data' => $data, 'kode_kabkot' => $user->kode_kabkot]);
     }
 }

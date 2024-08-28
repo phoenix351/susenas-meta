@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AnggotaRuta extends Model
 {
@@ -13,4 +14,9 @@ class AnggotaRuta extends Model
     protected $table = "anggota_ruta";
     protected $primaryKey = "id";
     protected $fillable = ['nama', 'id_ruta', 'nomor_art'];
+
+    public function konsumsi(): HasMany
+    {
+        return $this->hasMany(KonsumsiArt::class);
+    }
 }

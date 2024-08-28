@@ -23,6 +23,8 @@ use RecursiveFilterIterator;
 use RecursiveIterator;
 
 /**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
 final class NameFilterIterator extends RecursiveFilterIterator
@@ -32,6 +34,9 @@ final class NameFilterIterator extends RecursiveFilterIterator
     private ?int $filterMax = null;
 
     /**
+     * @psalm-param RecursiveIterator<int, Test> $iterator
+     * @psalm-param non-empty-string $filter
+     *
      * @throws Exception
      */
     public function __construct(RecursiveIterator $iterator, string $filter)

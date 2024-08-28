@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('blokqc_3')->nullable();
             $table->integer('blokqc_4')->nullable();
             $table->integer('blokqc_5')->nullable();
+            $table->integer('blokqc_6')->nullable();
         });
     }
 

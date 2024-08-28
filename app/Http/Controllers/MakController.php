@@ -184,7 +184,7 @@ class MakController extends Controller
             //  return response()->json($data, 200);
             return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks]);
         } catch (\Throwable $th) {
-            //throw $th;
+            throw $th;
         }
 
         return Inertia::render('Entri/Inti');
@@ -235,6 +235,7 @@ class MakController extends Controller
             //code...
             $input = $request->all();
             $input['users_id'] = auth()->user()->id;
+            $input["status_dok"] = "error";
             $is_exist = SusenasMak::where('kode_kabkot', $input['kode_kabkot'])
                 ->where('nks', $input['nks'])
                 ->where('r109', $input['r109'])->first();
@@ -259,8 +260,8 @@ class MakController extends Controller
 
             return response()->json($created_mak, 201);
         } catch (\Throwable $th) {
-            // throw $th;
             DB::rollBack();
+            throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
@@ -276,8 +277,11 @@ class MakController extends Controller
 
         // $data = $query->get();
         return response()->json([
-            'data' => $data, 'semester' => $semester,
-            'kabkot' => $kode_kabkot, 'provinsi' => $provinsi, 'nks' => $nks
+            'data' => $data,
+            'semester' => $semester,
+            'kabkot' => $kode_kabkot,
+            'provinsi' => $provinsi,
+            'nks' => $nks
         ]);
     }
     public function konsumsi_art_fetch($id_art)
@@ -503,6 +507,7 @@ class MakController extends Controller
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
+            throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
