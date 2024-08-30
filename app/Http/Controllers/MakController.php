@@ -176,13 +176,14 @@ class MakController extends Controller
             $kode_kabkot = $request->kode_kabkot;
             $nks = $request->nks;
             $semester = $request->semester;
-            if (isset($semester)) {
+            // dd($semester);
+            if (!isset($semester)) {
                 $semester = '1';
             }
             $data = $this->get_ruta($kode_kabkot, $nks, $semester);
             // dd([$data, $kode_kabkot, $nks, $semester]);
             //  return response()->json($data, 200);
-            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks]);
+            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks, 'semester' => $semester]);
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -236,6 +237,7 @@ class MakController extends Controller
             $input = $request->all();
             $input['users_id'] = auth()->user()->id;
             $input["status_dok"] = "error";
+            dd($input);
             $is_exist = SusenasMak::where('kode_kabkot', $input['kode_kabkot'])
                 ->where('nks', $input['nks'])
                 ->where('r109', $input['r109'])->first();
@@ -581,7 +583,7 @@ class MakController extends Controller
         // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
         $identitas_wilayah = $request->all();
         $master_wilayah = MasterWilayah::where('kode_kabkot', $identitas_wilayah['kode_kabkot'])->where('nks', $identitas_wilayah['nks'])->first();
-        return Inertia::render("Entri/CreateMak", ['identitas_wilayah' => $master_wilayah]);
+        return Inertia::render("Entri/CreateMak", ['identitas_wilayah' => $master_wilayah, 'semester' => $request->semester]);
     }
     public function calculate_qc($id_ruta)
     {

@@ -15,6 +15,7 @@ import {
     EyeOutlined,
     AuditOutlined,
     SettingOutlined,
+    MoneyCollectOutlined,
 } from "@ant-design/icons";
 import { User } from "@/types";
 type AuthSiderProps = {
@@ -78,6 +79,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("users.index"),
                 label: "Kelola Petugas",
             },
+            {
+                key: "range_harga",
+                icon: <MoneyCollectOutlined />,
+                onClick: () => handleMenuClick("range_harga.index"),
+                label: "Range Harga",
+            },
         ];
     }
     return (
@@ -89,6 +96,22 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 collapsed={collapsed}
                 theme="light"
             >
+                <Space
+                    style={{
+                        padding: 20,
+                        height: 64,
+                    }}
+                >
+                    <img src="/images/bps.png" width={36} />
+                    <span
+                        style={{
+                            display: collapsed ? "none" : "",
+                            fontWeight: 600,
+                        }}
+                    >
+                        META SUSENAS
+                    </span>
+                </Space>
                 <Menu
                     style={{
                         backgroundColor: "transparent",

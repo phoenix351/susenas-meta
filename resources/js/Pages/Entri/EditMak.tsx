@@ -743,7 +743,7 @@ const Mak = ({
                                         kode_kabkot:
                                             form.getFieldValue("kode_kabkot"),
                                         nks: form.getFieldValue("nks"),
-                                        semester: 1,
+                                        semester: 2,
                                     })
                                 )
                             }

@@ -8,6 +8,7 @@ interface RupiahInputProps {
     [key: string]: any; // Allow additional props
     editable?: boolean;
     initialValue?: number;
+    label?: string;
 }
 
 const RupiahInput: React.FC<RupiahInputProps> = ({
@@ -15,14 +16,13 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     onChange,
     initialValue,
     editable,
+    label,
 }) => {
     const [value, setValue] = useState(0);
     const handleChange = (nilai: any) => {
         nilai = parseInt(nilai);
         setValue(nilai);
     };
-    // useEffect(() => {
-    // }, []);
 
     const debouncedOnChange = _debounce((value: any) => {
         handleChange(value);
@@ -34,6 +34,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     return (
         <Form.Item
             name={inputName}
+            label={label}
             initialValue={initialValue ? Math.round(Number(initialValue)) : 0}
             style={{ marginBottom: "4px" }}
         >

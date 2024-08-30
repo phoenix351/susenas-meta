@@ -21,18 +21,20 @@ const Dashboard = ({
     data_susenas,
     nks,
     kode_kabkot,
+    semester,
 }: PageProps & {
     data_susenas: any[];
     nks: string;
     kode_kabkot: string;
+    semester: string | number;
 }) => {
     useEffect(() => {
-        console.log({ data_susenas });
+        // console.log({ data_susenas });
         if (nks && kode_kabkot) {
             cariForm.setFieldsValue({
                 nks: nks,
                 kode_kabkot: kode_kabkot,
-                semester: "1",
+                semester: semester,
             });
         }
         if (data_susenas.length > 0) {
@@ -56,7 +58,7 @@ const Dashboard = ({
         ),
     };
     const cariFinish = async (values: any) => {
-        console.log({ values });
+        // console.log({ values });
         messageApi.open({
             type: "loading",
             key: "cari",

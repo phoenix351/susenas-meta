@@ -8,7 +8,8 @@ use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\PeriksaController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\PenggunaController;
+use App\Http\Controllers\RangeHargaController;
 use App\Models\Konsumsi;
 use App\Models\MasterJabatan;
 use App\Models\MasterWilayah;
@@ -34,9 +35,9 @@ Route::get('/', [MakController::class, 'maintenance'])->name('maintenance');
 
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::patch('/users', [UserController::class, 'update'])->name('users.update');
+    Route::get('/users', [PenggunaController::class, 'index'])->name('users.index');
+    Route::post('/users', [PenggunaController::class, 'store'])->name('users.store');
+    Route::patch('/users', [PenggunaController::class, 'update'])->name('users.update');
     route::get('/entri/mak/view/{id}', [MakController::class, 'view'])->name('entri.mak.view');
     route::get('/recalculate-qc', [MakController::class, 'recalculate_qc'])->name('recalculate_qc');
 });
@@ -131,6 +132,9 @@ Route::middleware('auth')->group(function () {
     route::get('/periksa', [PeriksaController::class, 'index'])->name('periksa');
     route::get('/unduh-raw', [MakController::class, 'unduh_raw'])->name('unduh_raw');
 
+    // route range harga
+
+
 
 
     route::get('/', function () {
@@ -141,6 +145,9 @@ Route::middleware('auth')->group(function () {
 
 
     route::get('/entri', [MakController::class, 'entri'])->name('entri');
+    // route range harga
+    route::get('/range-harga', [RangeHargaController::class, 'index'])->name('range_harga.index');
+    route::get('/range-harga/fetch', [RangeHargaController::class, 'fetch'])->name('range_harga.fetch');
 
 
 

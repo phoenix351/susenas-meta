@@ -11,8 +11,10 @@ import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 
 const Mak = ({
     identitas_wilayah,
+    semester,
 }: PageProps & {
     identitas_wilayah: any;
+    semester: string | number;
 }) => {
     // const [cariForm] = Form.useForm();
     const tabContentStyle: React.CSSProperties = {
@@ -52,6 +54,10 @@ const Mak = ({
         });
         try {
             const url = route("entri.mak.store");
+            values.semester = semester;
+            // console.log({ values });
+            // return;
+
             const { data } = await axios.post(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
@@ -85,7 +91,7 @@ const Mak = ({
     // const [totalProduksi, setTotalProduksi] = useState(0);
 
     // initialize the form
-   
+
     return (
         <>
             {contextHolder}

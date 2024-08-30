@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
-class UserController extends Controller
+class PenggunaController extends Controller
 {
     public function index()
     {
@@ -30,7 +30,7 @@ class UserController extends Controller
             ->get();
 
         // Return the view with the users
-        return Inertia::render('Users', ['users' => $users, 'kode_kabkot' => $kode_kabkot]);
+        return Inertia::render('Pengguna', ['users' => $users, 'kode_kabkot' => $kode_kabkot]);
     }
     public function store(Request $request)
     {

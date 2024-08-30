@@ -15,6 +15,7 @@ class SusenasMak extends Model
     protected $table = "vsusenas_mak";
 
     protected $fillable = [
+        'semester',
         'r108',
         'r109',
         'r110',

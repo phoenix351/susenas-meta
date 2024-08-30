@@ -81,7 +81,7 @@ function createSorter<T>(property: keyof T): Sorter<T> {
     };
 }
 
-const Users = ({
+const Pengguna = ({
     users,
     kode_kabkot,
 }: PageProps & {
@@ -107,7 +107,7 @@ const Users = ({
         // console.log({ kode_kabkot });
 
         setTableData(users);
-    }, []);
+    }, [users]);
 
     const handleSearch = (
         selectedKeys: string[],
@@ -229,7 +229,7 @@ const Users = ({
 
     const createUser = async (values: any) => {
         try {
-            console.log({ values });
+            // console.log({ values });
             setCreateLoading(true);
             const { data } = await axios.post(route("users.store"), values, {
                 headers: { "Content-Type": "application/json" },
@@ -499,7 +499,7 @@ const Users = ({
     );
 };
 
-Users.layout = (
+Pengguna.layout = (
     page: ReactElement<any, JSXElementConstructor<any>> | ReactPortal
 ) => (
     <AuthenticatedLayout
@@ -509,4 +509,4 @@ Users.layout = (
         children={page}
     ></AuthenticatedLayout>
 );
-export default Users;
+export default Pengguna;
