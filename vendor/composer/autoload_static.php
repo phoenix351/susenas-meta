@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitda4ee04032f14a53106b52fc26220a0c
+class ComposerStaticInit847fde4d2d67b455669aa3133b6969b4
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -582,9 +582,10 @@ class ComposerStaticInitda4ee04032f14a53106b52fc26220a0c
         'App\\Http\\Controllers\\MasterJabatanController' => __DIR__ . '/../..' . '/app/Http/Controllers/MasterJabatanController.php',
         'App\\Http\\Controllers\\MasterWilayahController' => __DIR__ . '/../..' . '/app/Http/Controllers/MasterWilayahController.php',
         'App\\Http\\Controllers\\MonitoringController' => __DIR__ . '/../..' . '/app/Http/Controllers/MonitoringController.php',
+        'App\\Http\\Controllers\\PenggunaController' => __DIR__ . '/../..' . '/app/Http/Controllers/PenggunaController.php',
         'App\\Http\\Controllers\\PeriksaController' => __DIR__ . '/../..' . '/app/Http/Controllers/PeriksaController.php',
         'App\\Http\\Controllers\\ProfileController' => __DIR__ . '/../..' . '/app/Http/Controllers/ProfileController.php',
-        'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
+        'App\\Http\\Controllers\\RangeHargaController' => __DIR__ . '/../..' . '/app/Http/Controllers/RangeHargaController.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\AdminMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/AdminMiddleware.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
@@ -631,7 +632,7 @@ class ComposerStaticInitda4ee04032f14a53106b52fc26220a0c
         'App\\Models\\MasterWilayah' => __DIR__ . '/../..' . '/app/Models/MasterWilayah.php',
         'App\\Models\\Nks' => __DIR__ . '/../..' . '/app/Models/Nks.php',
         'App\\Models\\Provinsi' => __DIR__ . '/../..' . '/app/Models/Provinsi.php',
-        'App\\Models\\SusenasInti' => __DIR__ . '/../..' . '/app/Models/SusenasInti.php',
+        'App\\Models\\RangeHarga' => __DIR__ . '/../..' . '/app/Models/RangeHarga.php',
         'App\\Models\\SusenasMak' => __DIR__ . '/../..' . '/app/Models/SusenasMak.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Policies\\RiwayatBarangPolicy' => __DIR__ . '/../..' . '/app/Policies/RiwayatBarangPolicy.php',
@@ -757,14 +758,17 @@ class ComposerStaticInitda4ee04032f14a53106b52fc26220a0c
         'Database\\Seeders\\DaftarValidasiSeeder' => __DIR__ . '/../..' . '/database/seeders/DaftarValidasiSeeder.php',
         'Database\\Seeders\\DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeders/DatabaseSeeder.php',
         'Database\\Seeders\\KabkotSeeder' => __DIR__ . '/../..' . '/database/seeders/KabkotSeeder.php',
+        'Database\\Seeders\\KomoditasSeeder' => __DIR__ . '/../..' . '/database/seeders/KomoditasSeeder.php',
         'Database\\Seeders\\MaintenanceSeeder' => __DIR__ . '/../..' . '/database/seeders/MaintenanceSeeder.php',
         'Database\\Seeders\\MaintenanceSequenceSeeder' => __DIR__ . '/../..' . '/database/seeders/MaintenanceSequenceSeeder.php',
         'Database\\Seeders\\MasterBarangSeeder' => __DIR__ . '/../..' . '/database/seeders/MasterBarangSeeder.php',
         'Database\\Seeders\\MasterJabatanSeeder' => __DIR__ . '/../..' . '/database/seeders/MasterJabatanSeeder.php',
         'Database\\Seeders\\MasterRuanganSeeder' => __DIR__ . '/../..' . '/database/seeders/MasterRuanganSeeder.php',
         'Database\\Seeders\\MasterSistemOperasiSeeder' => __DIR__ . '/../..' . '/database/seeders/MasterSistemOperasiSeeder.php',
+        'Database\\Seeders\\MasterWilayahSeeder' => __DIR__ . '/../..' . '/database/seeders/MasterWilayahSeeder.php',
         'Database\\Seeders\\NksSeeder' => __DIR__ . '/../..' . '/database/seeders/NksSeeder.php',
         'Database\\Seeders\\ProvinsiSeeder' => __DIR__ . '/../..' . '/database/seeders/ProvinsiSeeder.php',
+        'Database\\Seeders\\RangeHargaSeeder' => __DIR__ . '/../..' . '/database/seeders/RangeHargaSeeder.php',
         'Database\\Seeders\\RiwayatBarangSeeder' => __DIR__ . '/../..' . '/database/seeders/RiwayatBarangSeeder.php',
         'Database\\Seeders\\StatusPemeliharaanSeeder' => __DIR__ . '/../..' . '/database/seeders/StatusPemeliharaanSeeder.php',
         'Database\\Seeders\\UsersSeeder' => __DIR__ . '/../..' . '/database/seeders/UsersSeeder.php',
@@ -6783,9 +6787,9 @@ class ComposerStaticInitda4ee04032f14a53106b52fc26220a0c
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitda4ee04032f14a53106b52fc26220a0c::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitda4ee04032f14a53106b52fc26220a0c::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitda4ee04032f14a53106b52fc26220a0c::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit847fde4d2d67b455669aa3133b6969b4::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit847fde4d2d67b455669aa3133b6969b4::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit847fde4d2d67b455669aa3133b6969b4::$classMap;
 
         }, null, ClassLoader::class);
     }
