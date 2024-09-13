@@ -122,26 +122,16 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
         if (props.children) {
             let activeChild = props.children
                 .filter((item: RincianWorksheet, index: number) => {
-                    const { dependentValues } = item;
-
-                    // Ensure dependentValues and value are compatible types
-                    if (dependentValues && value !== null) {
-                        // Check if dependentValues is an array of strings
-                        if (
-                            typeof value === "string" &&
-                            dependentValues.every((v) => typeof v === "string")
-                        ) {
-                            return dependentValues.includes(value);
-                        }
-
-                        // Check if dependentValues is an array of numbers
-                        if (
-                            typeof value === "number" &&
-                            dependentValues.every((v) => typeof v === "number")
-                        ) {
-                            return dependentValues.includes(value);
-                        }
+                    let logic = false;
+                    if (item.dependentValues) {
+                        item.dependentValues.forEach((val) => {
+                            if (val == value) {
+                                logic = true;
+                            }
+                        });
                     }
+
+                    return logic;
                 })
                 .map((child: any) => (
                     <tr key={props.id}>
