@@ -1,5 +1,13 @@
-import { Button, Form, FormInstance, Select, message } from "antd";
-import { useEffect, useState } from "react";
+import {
+    Button,
+    Form,
+    FormInstance,
+    InputRef,
+    RefSelectProps,
+    Select,
+    message,
+} from "antd";
+import { Ref, useEffect, useRef, useState } from "react";
 import { ReloadOutlined } from "@ant-design/icons";
 import axios from "axios";
 
@@ -12,7 +20,6 @@ const EntriIntiForm: React.FC<{
     const [messageApi, contextHolder] = message.useMessage();
     const daftarProv: {}[] = [{ label: "[71] SULAWESI UTARA", value: "71" }];
     const [daftarKabKot, setDaftarKabKot] = useState([]);
-    const [daftarSemester, setDaftarSemester] = useState([]);
     const [kabkotDisable, setKabkotDisable] = useState(true);
     const [daftarNks, setDaftarNks] = useState([]);
 

@@ -35,34 +35,19 @@ return new class extends Migration
             $table->string('r201_jabatan', 1)->nullable();
             $table->string('r202_jabatan', 1)->nullable();
             $table->string('r203', 1)->nullable();
-            // $table->string('status', 10)->nullable();
 
+            // worksheet
+            $table->unsignedInteger('wtf_1')->nullable();
             $table->unsignedInteger('wtf_2')->nullable();
-            // $table->string('wtf_2', 1)->nullable();
-            $table->string('wtf_3', 1)->nullable();
-            $table->string('wtf_4', 1)->nullable();
-            $table->string('wtf_5', 1)->nullable();
-            $table->string('wtf_6', 1)->nullable();
-            $table->string('wtf_7', 1)->nullable();
-            $table->string('wtf_8', 1)->nullable();
-            $table->string('wtf_9', 1)->nullable();
-            $table->string('wtf_10', 1)->nullable();
-            $table->string('wtf_11', 1)->nullable();
-            $table->string('wtf_12', 1)->nullable();
-            $table->string('wtf_13', 1)->nullable();
-            $table->string('wtf_14', 1)->nullable();
-            $table->string('wtf_15', 1)->nullable();
-            $table->string('wtf_16', 1)->nullable();
-            $table->string('wtf_17', 1)->nullable();
-            $table->string('wtf_18', 1)->nullable();
-            $table->string('wtf_19', 1)->nullable();
-            $table->string('wtf_20', 1)->nullable();
-            $table->string('wtf_21', 1)->nullable();
-            $table->string('wtf_22', 1)->nullable();
-            $table->string('wtf_23', 1)->nullable();
-            $table->string('wtf_24', 1)->nullable();
-            $table->string('wtf_25', 1)->nullable();
-            $table->string('wtf_26', 1)->nullable();
+            $table->unsignedInteger('wtf_3')->nullable();
+            $table->unsignedInteger('wtf_4')->nullable();
+            $table->unsignedBigInteger('wtf_5')->nullable();
+            $table->unsignedInteger('wtf_6')->nullable();
+            $table->unsignedInteger('wtf_7')->nullable();
+            $table->unsignedInteger('wtf_8')->nullable();
+            $table->unsignedInteger('wtf_9')->nullable();
+            $table->unsignedInteger('wtf_10')->nullable();
+            $table->unsignedInteger('wtf_11')->nullable();
 
             $table->timestamps();
         });

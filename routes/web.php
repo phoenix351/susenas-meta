@@ -38,6 +38,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/users', [PenggunaController::class, 'index'])->name('users.index');
     Route::post('/users', [PenggunaController::class, 'store'])->name('users.store');
     Route::patch('/users', [PenggunaController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [PenggunaController::class, 'destroy'])->name('users.delete');
     route::get('/entri/mak/view/{id}', [MakController::class, 'view'])->name('entri.mak.view');
     route::get('/recalculate-qc', [MakController::class, 'recalculate_qc'])->name('recalculate_qc');
 });

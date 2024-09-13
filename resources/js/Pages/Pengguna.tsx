@@ -270,7 +270,7 @@ const Pengguna = ({
     };
     const UpdateUser = async (values: any) => {
         try {
-            console.log({ values });
+            // console.log({ values });
             // return;
             setEditLoading(true);
             const { data } = await axios.patch(route("users.update"), values, {
@@ -317,7 +317,7 @@ const Pengguna = ({
             // console.log({ id_ruta });
 
             const { data } = await axios.delete(
-                route("users.delete", { user_id: userId })
+                route("users.delete", { user: userId })
             );
 
             messageApi.open({
@@ -325,12 +325,17 @@ const Pengguna = ({
                 type: "success",
                 key: "hapus-ruta",
             });
-            router.get(route("users"));
+            router.get(
+                route("users.index"),
+                {},
+                { preserveScroll: true, preserveState: true }
+            );
             // Do any synchronous operations relying on the updatedDaftarArt here
         } catch (error: any) {
-            // console.error("Error in add function:", error);
+            console.error("Error in add function:", error);
             messageApi.open({
-                content: `Terjadi galat ketika menghapus data, tunjukan code ini pada Developer (${error.response.data.message})`,
+                // content: `Terjadi galat ketika menghapus data, tunjukan code ini pada Developer (${error.response.data.message})`,
+                content: "error",
                 type: "error",
                 key: "hapus-ruta",
                 duration: 3,
@@ -407,25 +412,25 @@ const Pengguna = ({
                 </Button>
             ),
         },
-        // {
-        //     title: "Delete",
-        //     dataIndex: "entri",
-        //     key: "entri",
-        //     render: (_: any, record: any) => (
-        //         <Popconfirm
-        //             placement="topLeft"
-        //             title="apakah anda yakin akan menghapus ruta ini?"
-        //             description="hapus anggota rumah tangga"
-        //             okText="yakin dong"
-        //             cancelText="nyanda"
-        //             onConfirm={() => debounceCellDelete(record.id)}
-        //         >
-        //             <Button type="primary" style={{ backgroundColor: "red" }}>
-        //                 <DeleteFilled /> hapus
-        //             </Button>
-        //         </Popconfirm>
-        //     ),
-        // },
+        {
+            title: "Delete",
+            dataIndex: "entri",
+            key: "entri",
+            render: (_: any, record: any) => (
+                <Popconfirm
+                    placement="topLeft"
+                    title="apakah anda yakin akan menghapus ruta ini?"
+                    description="hapus anggota rumah tangga"
+                    okText="yakin dong"
+                    cancelText="nyanda"
+                    onConfirm={() => debounceCellDelete(record.id)}
+                >
+                    <Button type="primary" style={{ backgroundColor: "red" }}>
+                        <DeleteFilled /> hapus
+                    </Button>
+                </Popconfirm>
+            ),
+        },
     ];
 
     return (

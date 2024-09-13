@@ -8,6 +8,7 @@ import {
     Space,
     Typography,
 } from "antd";
+import { Rule } from "antd/es/form";
 import { useEffect, useState } from "react";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 
@@ -39,7 +40,7 @@ const formItemStyle = {
 };
 interface SelectItem {
     label: string;
-    value: any;
+    value: string | number;
 }
 interface RincianWorksheet {
     id: number;
@@ -47,8 +48,10 @@ interface RincianWorksheet {
     rincian?: string;
     type: string;
     options?: SelectItem[] | undefined;
-    dependentValues?: string[];
+    dependentValues?: string[] | number[];
     children?: RincianWorksheet[];
+    dependencies?: string[];
+    rules?: Rule[];
 }
 const InputComponent: React.FC<{
     type: string;
@@ -57,19 +60,35 @@ const InputComponent: React.FC<{
     options?: SelectItem[];
     children?: RincianWorksheet[];
     setValue?: (value: any) => void;
-}> = ({ type, name, options, customKey, children, setValue }) => {
+    rules?: Rule[];
+    dependencies?: string[];
+}> = ({
+    type,
+    name,
+    options,
+    customKey,
+    children,
+    setValue,
+    dependencies,
+    rules,
+}) => {
     const inputComponents: { [type: string]: JSX.Element } = {
         number: (
-            <Form.Item name={name} label={null}>
-                <InputNumber min={0} />
+            <Form.Item
+                name={name}
+                label={null}
+                dependencies={dependencies}
+                rules={rules}
+            >
+                <InputNumber />
             </Form.Item>
         ),
         binary: (
             <MetaSelect
                 name={name}
                 options={[
-                    { label: "[1] YA", value: "1" },
-                    { label: "[5] TIDAK", value: "5" },
+                    { label: "[1] YA", value: 1 },
+                    { label: "[5] TIDAK", value: 5 },
                 ]}
                 onChange={setValue && ((value) => setValue(value))}
             />
@@ -90,7 +109,7 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
     props,
     defaultValue,
 }) => {
-    const [value, setValue] = useState<null | any>(defaultValue);
+    const [value, setValue] = useState<null | string | number>(defaultValue);
     const [activeChild, setActiveChild] = useState<JSX.Element[]>([]);
     const commonColumns = (
         <>
@@ -102,7 +121,28 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
     useEffect(() => {
         if (props.children) {
             let activeChild = props.children
-                .filter((item, index) => item.dependentValues?.includes(value))
+                .filter((item: RincianWorksheet, index: number) => {
+                    const { dependentValues } = item;
+
+                    // Ensure dependentValues and value are compatible types
+                    if (dependentValues && value !== null) {
+                        // Check if dependentValues is an array of strings
+                        if (
+                            typeof value === "string" &&
+                            dependentValues.every((v) => typeof v === "string")
+                        ) {
+                            return dependentValues.includes(value);
+                        }
+
+                        // Check if dependentValues is an array of numbers
+                        if (
+                            typeof value === "number" &&
+                            dependentValues.every((v) => typeof v === "number")
+                        ) {
+                            return dependentValues.includes(value);
+                        }
+                    }
+                })
                 .map((child: any) => (
                     <tr key={props.id}>
                         <td style={centerCell}>{}</td>
@@ -114,6 +154,8 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
                                 options={child.options}
                                 key={child.nomor}
                                 customKey={child.id}
+                                dependencies={child.dependencies}
+                                rules={child.rules}
                             />
                         </td>
                     </tr>
@@ -140,6 +182,8 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
                         customKey={props.id}
                         children={props.children}
                         setValue={setValue}
+                        dependencies={props.dependencies}
+                        rules={props.rules}
                     />
                 </td>
             </tr>
@@ -148,308 +192,194 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
     );
 };
 
+const getRules = (
+    { getFieldValue }: { getFieldValue: (arg0: string) => any },
+    dependentName: string,
+    ruleName: "less" | "greater",
+    message: string
+) => ({
+    validator(rule: any, value: number, callback: any) {
+        const dependentValue = getFieldValue(dependentName);
+        let test = true;
+
+        if (ruleName === "less") {
+            test = value <= dependentValue;
+        } else {
+            test = value >= dependentValue;
+        }
+
+        if (!test) {
+            return Promise.reject(message);
+        }
+        return Promise.resolve();
+    },
+});
+
 const daftarRincian = [
+    {
+        id: 1,
+        nomor: 1,
+        rincian: "Jumlah ART (Blok III Rincian 301)",
+        type: "number",
+        rules: [
+            () => ({
+                validator(rule: any, value: number, callback: any) {
+                    if (value < 1) {
+                        return Promise.reject("Jumlah ART minimal satu");
+                    }
+                    return Promise.resolve();
+                },
+            }),
+        ],
+    },
     {
         id: 2,
         nomor: 2,
-        rincian: "BANYAKNYA ART (Blok III Rincian 301)",
+        rincian: "Jumlah Balita (R302>0)",
         type: "number",
+
+        dependencies: ["wtf_1"],
+        rules: [
+            // ({ getFieldValue }: { getFieldValue: (arg0: string) => any }) => ({
+            //     validator(rule: any, value: number, callback: any) {
+            //         const wtf_1 = getFieldValue("wtf_1");
+            //         if (value > wtf_1) {
+            //             return Promise.reject(
+            //                 "Jumlah Balita tidak bisa melebihi jumlah ART"
+            //             );
+            //         }
+            //         return Promise.resolve();
+            //     },
+            // }),
+            ({ getFieldValue }: { getFieldValue: (arg0: string) => any }) =>
+                getRules(
+                    { getFieldValue },
+                    "wtf_1",
+                    "less",
+                    "Jumlah Balita tidak bisa melebihi jumlah ART"
+                ),
+        ],
     },
     {
         id: 3,
         nomor: 3,
-        rincian: "ADA BALITA? (R302>0)",
-        type: "binary",
-        children: [
-            {
-                id: 27,
-                nomor: "3c1",
-                dependentValues: ["1"],
-                rincian: "Jumlah konsumsi susu (VSEN24.KP Rincian 70 s.d 74)",
-                type: "rupiah",
-            },
+        rincian: "Jumlah ART yang masih bersekolah (R1402=2)",
+        type: "number",
+        rules: [
+            ({ getFieldValue }: { getFieldValue: (arg0: string) => any }) =>
+                getRules(
+                    { getFieldValue },
+                    "wtf_1",
+                    "less",
+                    "Jumlah ART yang bersekolah tidak bisa melebihi jumlah ART"
+                ),
         ],
     },
+
     {
         id: 4,
         nomor: 4,
-        rincian: "ADA WANITA USIA SUBUR? (R405=2 dan R407 usia 10-54 tahun)",
-        type: "binary",
+        rincian: "Status Kepemilikan Bangunan Tempat Tinggal (R1901)",
+        type: "multi",
+        options: [
+            { label: "Milik Sendiri", value: 1 },
+            { label: "Kontrak/Sewa", value: 2 },
+            { label: "Bebas Sewa", value: 3 },
+            { label: "Dinas", value: 4 },
+            { label: "Lainnya", value: 99 },
+        ],
     },
     {
         id: 5,
         nomor: 5,
-        rincian: "ADA PEMBANTU/SUPIR? (R403=8)",
-        type: "binary",
-        children: [
-            {
-                id: 28,
-                nomor: "5c1",
-                dependentValues: ["1"],
-                rincian:
-                    "Jumlah Gaji/Upah pembantu rumah tangga (VSEN24.KP Rincian 277)",
-                type: "rupiah",
-            },
-        ],
+        rincian: "Luas Lantai per Kapita (m^2) (r1902)",
+        type: "number",
     },
     {
         id: 6,
         nomor: 6,
-        rincian:
-            "ADA ART YANG BEROBAT JALAN/RAWAT INAP? (R1105=1 ATAU R1201=1)",
-        type: "binary",
-        children: [
-            {
-                id: 29,
-                nomor: "6c1",
-                dependentValues: ["1"],
-                rincian:
-                    "VSEN24.KP Rincian 248 s.d 254 Kolom 5 (Setahun terakhir)",
-                type: "rupiah",
-            },
+        rincian: "Sumber air minum (R1903)",
+        type: "multi",
+        options: [
+            { label: "Air kemasan bermerek", value: 1 },
+            { label: "Air isi ulang", value: 2 },
+            { label: "Leding/sumur bor/pompa", value: 3 },
+            { label: "Lainnya", value: 99 },
         ],
     },
     {
         id: 7,
         nomor: 7,
-        rincian: "ADA ART YANG MENGOBATI SENDIRI? (R1104=1)",
-        type: "binary",
-        children: [
-            {
-                id: 29,
-                nomor: "6c2",
-                dependentValues: ["1"],
-                rincian:
-                    "VSEN24.KP Rincian 255 s.d 257 Kolom 5 (Setahun terakhir)",
-                type: "rupiah",
-            },
+        rincian: "Sumber air mandi/cuci/dll (R1904)",
+        type: "multi",
+        options: [
+            { label: "Air kemasan bermerek", value: 1 },
+            { label: "Air isi ulang", value: 2 },
+            { label: "Leding/sumur bor/pompa", value: 3 },
+            { label: "Lainnya", value: 99 },
         ],
     },
+
     {
         id: 8,
         nomor: 8,
-        rincian: "ADA ART YANG PERNAH MENGGUNAKAN INTERNET?(R808 =1)",
+        rincian: "Apakah tercatat sebagai menerima PKH? (r2003a)",
         type: "binary",
         children: [
             {
-                id: 30,
-                nomor: "8c1",
-                dependentValues: ["1"],
-                rincian: "VSEN24.KP Rincian 236+238",
-                type: "rupiah",
+                id: 9,
+                nomor: 9,
+                rincian: "Penggunaan PKH (r2003b)",
+                type: "multi",
+                dependentValues: [1],
+                options: [
+                    { label: "Belanja Pangan", value: 1 },
+                    { label: "Biaya Sekolah", value: 2 },
+                    { label: "Pembayaran Utang/Kredit", value: 3 },
+                    { label: "Lainnya", value: 99 },
+                ],
             },
         ],
     },
-    {
-        id: 9,
-        nomor: 9,
-        rincian: "ADA ART YANG MEMILIKI TABUNGAN (BANK)?(R701=1)",
-        type: "binary",
-    },
+
     {
         id: 10,
         nomor: 10,
-        rincian: "ADA ART YANG SEDANG BERSEKOLAH? (R610=2)",
+        rincian: "Apakah ART menerima PIP?",
         type: "binary",
         children: [
             {
-                id: 31,
-                nomor: "10c1",
-                dependentValues: ["1"],
-                rincian: "VSEN24.KP Rincian 265 s.d. 270",
-                type: "rupiah",
+                id: 11,
+                nomor: 11,
+                dependentValues: [1],
+                rincian: "berapa ART yang menerima PIP? (SD s.d. Kuliah)",
+                type: "number",
+                rules: [
+                    ({
+                        getFieldValue,
+                    }: {
+                        getFieldValue: (arg0: string) => any;
+                    }) =>
+                        getRules(
+                            { getFieldValue },
+                            "wtf_3",
+                            "less",
+                            "Jumlah ART yang menerima PIP tidak bisa melebihi ART yang bersekolah"
+                        ),
+                ],
             },
         ],
     },
-    {
-        id: 11,
-        nomor: 11,
-        rincian: "ADA ART YANG MEMILIKI/MENGUASAI HP? (R802=1)",
-        type: "binary",
-    },
-    {
-        id: 12,
-        nomor: 11,
-        rincian:
-            "ADA ART DENGAN STATUS PEKERJAAN BURUH/KARYAWAN/PEGAWAI/PEKERJA BEBAS? (R707=4 atau 5)",
-        type: "binary",
-    },
-    {
-        id: 13,
-        nomor: 12,
-        rincian: "ADA ART DENGAN STATUS BERUSAHA? (R707 = 1, 2, atau 3)",
-        type: "binary",
-    },
-    {
-        id: 14,
-        nomor: 17,
-        rincian: "ADA ART YANG MEROKOK? (R1207 = 1 atau 2)",
-        type: "binary",
-        children: [
-            {
-                id: 32,
-                nomor: "14c1",
-                dependentValues: ["1"],
-                rincian: "VSEN24.KP Rincian 192 Kolom 10",
-                type: "rupiah",
-            },
-        ],
-    },
-    {
-        id: 15,
-        nomor: 18,
-        rincian: "ADA YANG SEDANG MENGGUNAKAN KB? (Blok XVI Rincian 1601=2)",
-        type: "binary",
-        children: [
-            {
-                id: 33,
-                nomor: "15c1",
-                dependentValues: ["1"],
-                rincian: "VSEN24.KP Rincian 263 Kolom 5",
-                type: "rupiah",
-            },
-        ],
-    },
-    {
-        id: 16,
-        nomor: 14,
-        rincian: "STATUS RUMAH? (Blok XVIII Rincian 1802)",
-        type: "multi",
-        options: [
-            { label: "[1] Milik sendiri", value: "1" },
-            { label: "[2] Kontrak/sewa", value: "2" },
-            { label: "[3] Bebas sewa", value: "3" },
-            { label: "[4] Dinas", value: "4" },
-            { label: "[5] Lainnya", value: "5" },
-        ],
-        children: [
-            {
-                id: 34,
-                nomor: "16c1",
-                dependentValues: ["1", "3"],
-                rincian: "VSEN24.KP Rincian 200",
-                type: "rupiah",
-            },
-            {
-                id: 35,
-                nomor: "16c2",
-                dependentValues: ["2"],
-                rincian: "VSEN24.KP Rincian 201 + 202",
-                type: "rupiah",
-            },
 
-            {
-                id: 37,
-                nomor: "16c3",
-                dependentValues: ["4", "5"],
-                rincian: "VSEN24.KP Rincian 203",
-                type: "rupiah",
-            },
-        ],
-    },
-    {
-        id: 17,
-        nomor: 15,
-        rincian:
-            "RUTA MENGGUNAKAN PAM METERAN(LEDING)? (R1810A=3 atau R1814A=3)",
-        type: "binary",
-    },
-    {
-        id: 18,
-        nomor: 16,
-        rincian: "AIR MINUM? (R1810A)",
-        type: "multi",
-        options: [
-            { label: "[1] Air kemasan bermerk", value: "1" },
-            { label: "[2] Air isi ulang", value: "2" },
-            { label: "[3] Leding/sumur bor/pompa ", value: "3" },
-            { label: "[4] Lainnya", value: "4" },
-        ],
-    },
-    {
-        id: 19,
-        nomor: 17,
-        rincian: "SUMBER AIR CUCI/MANDI, DLL (R1814A)",
-        type: "multi",
-        options: [
-            { label: "[1] Air kemasan bermerk", value: "1" },
-            { label: "[2] Air isi ulang", value: "2" },
-            { label: "[3] Leding/sumur bor/pompa ", value: "3" },
-            { label: "[4] Lainnya", value: "4" },
-        ],
-    },
-    {
-        id: 20,
-        nomor: 17,
-        rincian: "SUMBER UTAMA PENERANGAN? (R1816A)",
-        type: "multi",
-        options: [
-            { label: "[1] Listrik PLN dengan meteran", value: "1" },
-            { label: "[2] Listrik PLN tanpa meteran", value: "2" },
-            { label: "[3] Listrik non PLN", value: "3" },
-            { label: "[4] Bukan listrik", value: "4" },
-        ],
-    },
-    {
-        id: 21,
-        nomor: 23,
-        rincian: "BAHAN BAKAR MEMASAK? (R1817)",
-        type: "multi",
-        options: [
-            { label: "[1] Listrik", value: "1" },
-            { label: "[2] LPG > 3 kg", value: "2" },
-            { label: "[3] LPG 3 kg", value: "3" },
-            { label: "[4] Minyak tanah", value: "4" },
-            { label: "[5] Arang/briket/kayu bakar", value: "5" },
-            { label: "[6] Lainnya", value: "6" },
-            { label: "[7] Tidak memasak di rumah", value: "7" },
-        ],
-    },
-    {
-        id: 22,
-        nomor: 24,
-        rincian: "APAKAH RUTA MENERIMA KREDIT? (R1901 salah satu berkode 1)",
-        type: "binary",
-    },
-    {
-        id: 23,
-        nomor: 26,
-        rincian: "MEMILIKI KENDARAAN BERMOTOR? (R2001H=1 atau R2001.K=1)",
-        type: "binary",
-        children: [
-            {
-                id: 39,
-                nomor: "23c1",
-                dependentValues: ["1"],
-                rincian: "VSEN24.KP Rincian 309",
-                type: "rupiah",
-            },
-        ],
-    },
-    {
-        id: 24,
-        nomor: 19,
-        rincian: "MEMILIKI ASURANSI/JAMINAN KESEHATAN? (Blok XI Rincian 1101)",
-        type: "binary",
-        children: [
-            {
-                id: 40,
-                nomor: "24c1",
-                dependentValues: ["1"],
-                rincian: "VSEN24.KP Rincian 311",
-                type: "rupiah",
-            },
-        ],
-    },
     {
         id: 26,
         nomor: "",
-        rincian: "GARIS KEMISKINAN MARET 2023",
+        rincian: "Garis Kemiskinan September 2023",
         type: "rupiah",
     },
 ];
 const Worksheet: React.FC<{
-    form: any;
+    form: FormInstance;
     onFinish: (values: any) => void;
     tabContentStyle: React.CSSProperties;
     // record: any;
@@ -486,7 +416,7 @@ const Worksheet: React.FC<{
                         }}
                     >
                         <tr>
-                            <td style={cellStyle} colSpan={4}>
+                            <td style={cellStyle} colSpan={3}>
                                 <Space direction="vertical">
                                     <Title
                                         level={4}
@@ -511,6 +441,29 @@ const Worksheet: React.FC<{
                                 ),
                             })
                         )}
+                        {/* <tr style={{ backgroundColor: "#fffae6" }}>
+                            <td style={centerCell}>1</td>
+                            <td style={centerCell}>Banyaknya ART</td>
+
+                            <td style={centerCell}>
+                                <Form.Item name="wtf_1">
+                                    <Input />
+                                </Form.Item>
+                            </td>
+                        </tr>
+                        <tr style={{ backgroundColor: "#fffae6" }}>
+                            <td style={centerCell}>2</td>
+                            <td style={centerCell}>Jumlah Balita</td>
+
+                            <td style={centerCell}>
+                                <Form.Item
+                                    name="wtf_2"
+                                   
+                                >
+                                    <Input />
+                                </Form.Item>
+                            </td>
+                        </tr> */}
                     </tbody>
                 </table>
             </Form>

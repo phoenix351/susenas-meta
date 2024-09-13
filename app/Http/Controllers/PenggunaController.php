@@ -113,4 +113,21 @@ class PenggunaController extends Controller
             return response()->json($exp, 500);
         }
     }
+    public function destroy(User $user)
+    {
+        try {
+            //code...
+            DB::beginTransaction();
+            if ($user) {
+                // dd($user);
+                $user->delete();
+            }
+            DB::commit();
+            return response()->json([], 204);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            // return response
+            throw $th;
+        }
+    }
 }

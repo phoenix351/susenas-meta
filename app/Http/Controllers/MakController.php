@@ -23,71 +23,16 @@ class MakController extends Controller
 {
     private $wtfDependecies = [
         [
-            'target' => 'wtf_3',
-            'fields' => ['wtf_3c1'],
-            "dependentValues" => ['1']
-        ],
-        [
-            'target' => 'wtf_5',
-            'fields' => ['wtf_5c1'],
-            "dependentValues" => ['1']
-        ],
-        [
-            'target' => 'wtf_6',
-            'fields' => ['wtf_6c1'],
-            "dependentValues" => ['1']
-        ],
-        [
-            'target' => 'wtf_7',
-            'fields' => ['wtf_6c2'],
-            "dependentValues" => ['1']
-        ],
-        [
             'target' => 'wtf_8',
-            'fields' => ['wtf_8c1'],
+            'fields' => ['wtf_9'],
             "dependentValues" => ['1']
         ],
         [
             'target' => 'wtf_10',
-            'fields' => ['wtf_10c1'],
+            'fields' => ['wtf_11'],
             "dependentValues" => ['1']
-        ],
-        [
-            'target' => 'wtf_14',
-            'fields' => ['wtf_14c1'],
-            "dependentValues" => ['1']
-        ],
-        [
-            'target' => 'wtf_15',
-            'fields' => ['wtf_15c1'],
-            "dependentValues" => ['1']
-        ],
-        [
-            'target' => 'wtf_16',
-            'fields' => ['wtf_16c1'],
-            "dependentValues" => ['1', '3']
-        ],
-        [
-            'target' => 'wtf_16',
-            'fields' => ['wtf_16c2'],
-            "dependentValues" => ['2']
-        ],
-        [
-            'target' => 'wtf_16',
-            'fields' => ['wtf_16c3'],
-            "dependentValues" => ['4', '5']
         ],
 
-        [
-            'target' => 'wtf_23',
-            'fields' => ['wtf_23c1'],
-            "dependentValues" => ['1']
-        ],
-        [
-            'target' => 'wtf_24',
-            'fields' => ['wtf_24c1'],
-            "dependentValues" => ['1']
-        ],
     ];
     public function is_any_zero($a, $b)
     {
@@ -178,7 +123,7 @@ class MakController extends Controller
             $semester = $request->semester;
             // dd($semester);
             if (!isset($semester)) {
-                $semester = '1';
+                $semester = '2';
             }
             $data = $this->get_ruta($kode_kabkot, $nks, $semester);
             // dd([$data, $kode_kabkot, $nks, $semester]);
@@ -237,7 +182,7 @@ class MakController extends Controller
             $input = $request->all();
             $input['users_id'] = auth()->user()->id;
             $input["status_dok"] = "error";
-            dd($input);
+            // dd($input);
             $is_exist = SusenasMak::where('kode_kabkot', $input['kode_kabkot'])
                 ->where('nks', $input['nks'])
                 ->where('r109', $input['r109'])->first();
@@ -358,7 +303,7 @@ class MakController extends Controller
 
             // }
             $data = $request->all();
-
+            // dd($data);
             // Columns to check and their corresponding form fields
             $columnsToCheck = $this->wtfDependecies;
             $fields_check = [];
@@ -388,6 +333,7 @@ class MakController extends Controller
 
             $data_update = SusenasMak::findOrFail($data['id']);
             $data_update->update($data);
+            // dd($data_update);
             $data_update->save();
             // update konsumsi art rekap
             $rekap_art = [];
