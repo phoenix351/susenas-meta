@@ -11,7 +11,7 @@ import Pengguna from "../Pengguna";
 import axios from "axios";
 import { Button, Form, Input, InputNumber, Select, Space, Table } from "antd";
 import RupiahInput from "@/Components/RupiahInput";
-import { FilterOutlined } from "@ant-design/icons";
+import { EditOutlined, FilterOutlined } from "@ant-design/icons";
 interface Komoditas {
     id: number;
     nama_komoditas: string;
@@ -140,6 +140,16 @@ const index = ({
             dataIndex: "komoditas.kalori",
             key: "komoditas.kalori",
             render: (_: any, record: RangeHarga) => record.komoditas.kalori,
+        },
+        {
+            title: "Aksi",
+            key: "aksi",
+            dataIndex: "aksi",
+            render: (_: any, record: RangeHarga) => (
+                <Button onClick={() => handleEdit(record.komoditas_id)}>
+                    <EditOutlined /> Ubah
+                </Button>
+            ),
         },
     ];
     const handleFilter = async (values: RangeHargaFilterProps) => {
@@ -270,3 +280,6 @@ index.layout = (
 // export default Pengguna;
 
 export default index;
+function handleEdit(id: any): void {
+    throw new Error("Function not implemented.");
+}
