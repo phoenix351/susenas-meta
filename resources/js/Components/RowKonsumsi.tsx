@@ -119,10 +119,7 @@ const RowKonsumsi: React.FC<{
         setTotalHarga(total);
         totalHargaCek();
 
-        const totalVolume =
-            form.getFieldValue(`${data.nomor}_beli_volume`) +
-            form.getFieldValue(`${data.nomor}_produksi_volume`);
-        setVolume(totalVolume);
+        volumeCalculate();
     }, []);
 
     function calculateHargaBeli(arg0: { nomor: any; subKey: any }) {
