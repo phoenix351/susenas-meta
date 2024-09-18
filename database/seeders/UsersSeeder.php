@@ -45,7 +45,8 @@ class UsersSeeder extends Seeder
             $value['email'] = $value['username'] . "@ssnmeta.sulut";
             User::create($value);
         }
-        $file_name = './users.csv';
+        $file_name = 'public/seeder/users.csv';
+        // dd(Storage::allDirectories('.'));
         if (Storage::exists($file_name)) {
             $csv_data = Storage::get($file_name);
         } else {

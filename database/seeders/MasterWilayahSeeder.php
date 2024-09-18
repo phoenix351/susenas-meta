@@ -14,7 +14,7 @@ class MasterWilayahSeeder extends Seeder
      */
     public function run(): void
     {
-        $file_name = './master_wilayah.csv';
+        $file_name = 'public/seeder/master_wilayah.csv';
         if (Storage::exists($file_name)) {
             $csv_data = Storage::get($file_name);
         } else {
