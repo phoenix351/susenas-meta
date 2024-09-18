@@ -73,13 +73,13 @@ class PenggunaController extends Controller
                 //cek iif any users with this username...
                 $users = User::where('username', $user['username'])->where('id', '<>', $user['id'])->get();
 
-                if (sizeof($users) > 0) {
-                    $response = [
-                        'message' => 'Username sudah diambil !',
-                        'status' => 'error'
-                    ];
-                    return response()->json($response, 409);
-                }
+                // if (sizeof($users) > 0) {
+                //     $response = [
+                //         'message' => 'Username sudah diambil !',
+                //         'status' => 'error'
+                //     ];
+                //     return response()->json($response, 409);
+                // }
 
                 if (isset($user['password']) && strlen($user['password']) > 4) {
                     $user['password'] = Hash::make($user['password']);

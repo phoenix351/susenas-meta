@@ -21,9 +21,9 @@ return new class extends Migration
             $table->string('satuan')->nullable();
             $table->integer('harga_beli')->nullable();
             $table->integer('harga_produksi')->nullable();
-            $table->integer('volume_beli')->nullable();
-            $table->integer('volume_produksi')->nullable();
-            $table->integer('volume_total')->nullable();
+            $table->float('volume_beli')->nullable();
+            $table->float('volume_produksi')->nullable();
+            $table->float('volume_total')->nullable();
             $table->integer('harga_total')->nullable();
         });
     }

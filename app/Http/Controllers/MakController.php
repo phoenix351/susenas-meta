@@ -992,7 +992,7 @@ class MakController extends Controller
 
                 // dd($currentWtf);
 
-                if ($jumlah_art != $data_mak['wtf_2']) {
+                if ($jumlah_art != $data_mak['wtf_1']) {
                     $warning = [
                         'rincian' => "Jumlah Art pada Blok IV.1 tidak sama dengan Rincian Worksheet",
                         'variable' => "Pertanyaan worksheet Nomor 2",

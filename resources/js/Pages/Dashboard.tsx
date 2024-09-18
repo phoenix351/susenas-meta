@@ -74,14 +74,14 @@ const Dashboard = () => {
                 const response_kabkot = await axios.get(
                     route("api.monitoring.rekap_kabkot")
                 );
+                setTableDataKabkot(response_kabkot.data.rekap_kabkot ?? []);
                 const response_nks = await axios.get(
                     route("api.monitoring.rekap_nks")
                 );
+                setTableDataNks(response_nks.data.rekap_nks ?? []);
                 const response_user = await axios.get(
                     route("api.monitoring.rekap_user")
                 );
-                setTableDataNks(response_nks.data.rekap_nks ?? []);
-                setTableDataKabkot(response_kabkot.data.rekap_kabkot ?? []);
                 setTableDataUser(response_user.data.rekap_user ?? []);
 
                 console.log({ response_kabkot, response_user, response_nks });

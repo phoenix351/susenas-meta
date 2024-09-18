@@ -9,7 +9,7 @@ use Inertia\Inertia;
 
 class MonitoringController extends Controller
 {
-    
+
 
     public function index()
     {
@@ -136,6 +136,7 @@ class MonitoringController extends Controller
                 DB::table('user_summary')->insert($rekap_user);
                 DB::commit();
             }
+            // dd($rekap_user);
             if (sizeof($rekap_kabkot) > 0) {
                 // insert
                 DB::beginTransaction();

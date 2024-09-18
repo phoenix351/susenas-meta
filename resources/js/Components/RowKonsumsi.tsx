@@ -71,9 +71,11 @@ const RowKonsumsi: React.FC<{
     }) => void;
 }> = ({ data, form, subKey, rekapMak, calculate }) => {
     const [totalHarga, setTotalHarga] = useState(0);
+    const [volume, setVolume] = useState(0);
     const [isTotalEqual, setIsTotalEqual] = useState<boolean>(false);
     const [isBeliEqual, setIsBeliEqual] = useState<boolean>(false);
     const [isProduksiEqual, setIsProduksiEqual] = useState<boolean>(false);
+    const [isVolumeEqual, setIsVolumeEqual] = useState<boolean>(false);
 
     useEffect(() => {
         let beli = Number(
@@ -116,6 +118,11 @@ const RowKonsumsi: React.FC<{
             form.getFieldValue(`${data.nomor}_produksi_harga`);
         setTotalHarga(total);
         totalHargaCek();
+
+        const totalVolume =
+            form.getFieldValue(`${data.nomor}_beli_volume`) +
+            form.getFieldValue(`${data.nomor}_produksi_volume`);
+        setVolume(totalVolume);
     }, []);
 
     function calculateHargaBeli(arg0: { nomor: any; subKey: any }) {
@@ -174,7 +181,14 @@ const RowKonsumsi: React.FC<{
             );
         }
     }
-
+    function volumeCalculate(): void {
+        const totalVolume =
+            form.getFieldValue(`${data.nomor}_beli_volume`) +
+            form.getFieldValue(`${data.nomor}_produksi_volume`);
+        setVolume(totalVolume);
+        const volumeInput = form.getFieldValue(`${data.nomor}_total_volume`);
+        setIsVolumeEqual(volumeInput == totalVolume);
+    }
     return (
         <>
             <tr
@@ -230,7 +244,10 @@ const RowKonsumsi: React.FC<{
                     }}
                 >
                     {data.type === "sub" || (
-                        <NumberInput inputName={`${data.nomor}_beli_volume`} />
+                        <NumberInput
+                            inputName={`${data.nomor}_beli_volume`}
+                            onChange={_debounce(volumeCalculate, 400)}
+                        />
                     )}
                 </td>
                 <td style={{ ...rupiahCell }}>
@@ -249,6 +266,7 @@ const RowKonsumsi: React.FC<{
                     {data.type === "sub" || (
                         <NumberInput
                             inputName={`${data.nomor}_produksi_volume`}
+                            onChange={_debounce(volumeCalculate, 400)}
                         />
                     )}
                 </td>
@@ -262,7 +280,10 @@ const RowKonsumsi: React.FC<{
                 </td>
                 <td style={data.type === "sub" ? darkCell : cellStyle}>
                     {data.type === "sub" || (
-                        <NumberInput inputName={`${data.nomor}_total_volume`} />
+                        <NumberInput
+                            inputName={`${data.nomor}_total_volume`}
+                            onChange={_debounce(volumeCalculate, 400)}
+                        />
                     )}
                 </td>
                 <td style={{ ...rightCell }}>
@@ -270,20 +291,6 @@ const RowKonsumsi: React.FC<{
                         inputName={`${data.nomor}_total_harga`}
                         onChange={_debounce(totalHargaCek, 600)}
                     />
-
-                    {/* <Form.Item name={`${data.nomor}_total_harga_calculated`}>
-                    <Input />
-                </Form.Item> */}
-
-                    {/* <TextRupiah
-                    color="red"
-                    value={
-                        data.type === "sub"
-                            ? rekapMak[data.subKey]["produksi"] +
-                              rekapMak[data.subKey]["beli"]
-                            : totalHarga
-                    }
-                /> */}
                 </td>
             </tr>
             <tr
@@ -322,7 +329,22 @@ const RowKonsumsi: React.FC<{
                         />
                     )}
                 </td>
-                <td style={cellStyle}></td>
+                <td style={rightCell}>
+                    {data.type !== "sub" && (
+                        <Form.Item
+                            style={{
+                                color: isVolumeEqual ? "green" : "red",
+                                backgroundColor: "inherit",
+                                border: "none",
+                                marginRight: "10px",
+                            }}
+                            name={`${data.nomor}_total_volume_calculated`}
+                        >
+                            {volume > 0 ? volume : ""}
+                            {/* <Input disabled={true} /> */}
+                        </Form.Item>
+                    )}
+                </td>
                 <td style={cellStyle}>
                     <RupiahInput
                         style={{

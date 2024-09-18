@@ -62,6 +62,7 @@ const Periksa = ({
 }) => {
     const [current, setCurrent] = useState(0);
     const [updateLoading, setUpdateLoading] = useState(false);
+    console.log({ data });
 
     const calculateQc = async (id_rutas: string[]) => {
         try {
@@ -129,7 +130,7 @@ const Periksa = ({
     useEffect(() => {
         // console.log({ data });
         // Assuming data is an array of id_rutas
-        // calculateQc(data);
+        calculateQc(data);
     }, []);
     const uniqueKabkot = new Set();
 
