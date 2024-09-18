@@ -14,7 +14,7 @@ class KomoditasSeeder extends Seeder
      */
     public function run(): void
     {
-        $file_name = 'database\seeders\komoditas.csv';
+        $file_name = './komoditas.csv';
         if (Storage::exists($file_name)) {
             $csv_data = Storage::get($file_name);
         } else {
