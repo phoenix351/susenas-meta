@@ -87,7 +87,12 @@ const EntriIntiForm: React.FC<{
             >
                 {contextHolder}
                 {/* <Space direction="horizontal"> */}
-                <Form.Item name="kode_prov" label="Provinsi">
+                <Form.Item
+                    name="kode_prov"
+                    label="Provinsi"
+                    labelCol={{ span: 8 }}
+                    wrapperCol={{ span: 16 }}
+                >
                     <Select
                         allowClear
                         showSearch
@@ -106,7 +111,12 @@ const EntriIntiForm: React.FC<{
                         }}
                     />
                 </Form.Item>
-                <Form.Item name="semester" label="semester">
+                <Form.Item
+                    name="semester"
+                    label="semester"
+                    labelCol={{ span: 8 }}
+                    wrapperCol={{ span: 16 }}
+                >
                     <Select
                         allowClear
                         showSearch
@@ -119,7 +129,12 @@ const EntriIntiForm: React.FC<{
                         disabled
                     />
                 </Form.Item>
-                <Form.Item name="kode_kabkot" label="Kab/Kota">
+                <Form.Item
+                    name="kode_kabkot"
+                    label="Kab/Kota"
+                    labelCol={{ span: 8 }}
+                    wrapperCol={{ span: 16 }}
+                >
                     <Select
                         allowClear
                         showSearch
@@ -139,7 +154,12 @@ const EntriIntiForm: React.FC<{
                     />
                 </Form.Item>
 
-                <Form.Item name="nks" label="NKS">
+                <Form.Item
+                    name="nks"
+                    label="NKS"
+                    labelCol={{ span: 8 }}
+                    wrapperCol={{ span: 16 }}
+                >
                     <Select
                         allowClear
                         showSearch
@@ -151,10 +171,11 @@ const EntriIntiForm: React.FC<{
                         }}
                     />
                 </Form.Item>
-
-                <Button type="primary" onClick={() => form.submit()}>
-                    <ReloadOutlined /> Refresh
-                </Button>
+                <Form.Item wrapperCol={{ span: 16, offset: 8 }}>
+                    <Button type="primary" onClick={() => form.submit()}>
+                        <ReloadOutlined /> Refresh
+                    </Button>
+                </Form.Item>
             </Form>
         </>
     );
