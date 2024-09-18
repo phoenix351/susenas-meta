@@ -50,7 +50,7 @@ export default function UpdateProfileInformation({ auth }: PageProps) {
                         },
                     ]}
                 >
-                    <Input defaultValue={auth.user.username} />
+                    <Input defaultValue={auth.user.username} readOnly />
                 </Form.Item>
                 <Form.Item
                     label={<label>email</label>}
@@ -67,7 +67,7 @@ export default function UpdateProfileInformation({ auth }: PageProps) {
                         },
                     ]}
                 >
-                    <Input defaultValue={auth.user.email} />
+                    <Input defaultValue={auth.user.email} readOnly />
                 </Form.Item>
                 <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
                     <Button

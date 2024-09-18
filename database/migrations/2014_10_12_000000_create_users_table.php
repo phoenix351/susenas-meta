@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('nip');
             // $table->string('bidang');
             $table->string('kode_kabkot', 2);
-            $table->unsignedBigInteger('jabatan_id')->default(5);
-            $table->foreign('jabatan_id')->references('id')->on('master_jabatan')->onDelete('cascade');
+            $table->enum('jabatan', ['Staf BPS Provinsi', 'Staf BPS Kabupaten/Kota', 'Mitra'])->default('Staf BPS Kabupaten/Kota');
             $table->string('role')->default('basic');
             $table->string('username');
             // $table->string('foto_url');

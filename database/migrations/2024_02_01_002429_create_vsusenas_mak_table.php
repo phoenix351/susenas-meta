@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('nks', 6);
             $table->string('semester', 1)->default(1);
             // $table->string('id_bs', 10);
-            $table->unsignedInteger('r108')->nullable();
+            $table->string('r108', 8)->nullable();
             $table->unsignedInteger('r109')->nullable();
             $table->string('r110', 255)->nullable();
             $table->string('r111', 255)->nullable();
@@ -32,8 +32,8 @@ return new class extends Migration
             // blok 2
             $table->string('r201_nama', 255)->nullable();
             $table->string('r202_nama', 255)->nullable();
-            $table->string('r201_jabatan', 1)->nullable();
-            $table->string('r202_jabatan', 1)->nullable();
+            $table->enum('r201_jabatan', ['Staf BPS Provinsi', 'Staf BPS Kabupaten/Kota', 'Mitra'])->default('Staf BPS Kabupaten/Kota');
+            $table->enum('r202_jabatan', ['Staf BPS Provinsi', 'Staf BPS Kabupaten/Kota', 'Mitra'])->default('Staf BPS Kabupaten/Kota');
             $table->string('r203', 1)->nullable();
 
             // worksheet

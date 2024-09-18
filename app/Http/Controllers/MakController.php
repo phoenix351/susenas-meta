@@ -527,9 +527,10 @@ class MakController extends Controller
     public function create(Request $request)
     {
         // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
+        $user = auth()->user();
         $identitas_wilayah = $request->all();
         $master_wilayah = MasterWilayah::where('kode_kabkot', $identitas_wilayah['kode_kabkot'])->where('nks', $identitas_wilayah['nks'])->first();
-        return Inertia::render("Entri/CreateMak", ['identitas_wilayah' => $master_wilayah, 'semester' => $request->semester]);
+        return Inertia::render("Entri/CreateMak", ['identitas_wilayah' => $master_wilayah, 'semester' => $request->semester, 'user' => $user]);
     }
     public function calculate_qc($id_ruta)
     {

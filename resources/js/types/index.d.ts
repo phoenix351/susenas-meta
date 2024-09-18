@@ -8,6 +8,7 @@ export interface User {
     posisi: string;
     bidang: string;
     role: string;
+    jabatan: string;
 }
 
 export type PageProps<

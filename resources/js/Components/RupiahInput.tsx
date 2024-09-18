@@ -9,6 +9,8 @@ interface RupiahInputProps {
     editable?: boolean;
     initialValue?: number;
     label?: string;
+    style?: React.CSSProperties;
+    disabled?: boolean;
 }
 
 const RupiahInput: React.FC<RupiahInputProps> = ({
@@ -17,6 +19,8 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     initialValue,
     editable,
     label,
+    style,
+    disabled,
 }) => {
     const [value, setValue] = useState(0);
     const handleChange = (nilai: any) => {
@@ -39,18 +43,22 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
             style={{ marginBottom: "4px" }}
         >
             <InputNumber
+                disabled={disabled}
                 className="custom-input-number"
                 readOnly={editable ? editable : false}
-                style={{ width: "100%", textAlign: "right" }}
+                style={{ width: "100%", textAlign: "right", ...style }}
                 min={0}
                 max={1000000000}
-                formatter={(value: any) =>
-                    `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
-                parser={(value: any) => {
-                    if (!value) return undefined;
-                    const parsedValue = Math.round(value.replace(/[^\d]/g, ""));
-                    return isNaN(parsedValue) ? undefined : parsedValue;
+                formatter={(value: number | undefined) => {
+                    if (value == 0) return "";
+                    return `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }}
+                parser={(displayValue: string | undefined) => {
+                    if (!displayValue) return 0;
+                    const parsedValue = Math.round(
+                        Number(String(displayValue).replace(/[^\d]/g, ""))
+                    );
+                    return isNaN(parsedValue) ? 0 : parsedValue;
                 }}
                 value={value}
                 onChange={(value: any) => {

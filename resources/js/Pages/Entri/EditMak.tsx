@@ -141,7 +141,7 @@ const daftarRincian432 = [
     {
         id: 18,
         nomor: 18,
-        rincian: "RATA-RATA PENGELUARAN MAKANAN SEBULAN [R.16 + R17]",
+        rincian: "RATA-RATA PENGELUARAN SEBULAN [R.16 + R17]",
         type: "average",
     },
 ];
@@ -693,6 +693,8 @@ const Mak = ({
                 item.id_komoditas
             }_produksi_harga${item.id_kelompok}`]: item.harga_produksi,
             [`${item.id_komoditas}_total_harga`]: item.harga_total,
+            [`${item.id_komoditas}_total_harga_calculated`]:
+                item.harga_produksi + item.harga_beli,
             [`${item.id_komoditas}_item`]: item.item,
             [`${item.id_komoditas}_satuan`]: item.satuan,
             [`${item.id_komoditas}_beli_volume`]: item.volume_beli,

@@ -398,6 +398,11 @@ const Pengguna = ({
             key: "role",
         },
         {
+            title: "Jabatan",
+            dataIndex: "jabatan",
+            key: "jabatan",
+        },
+        {
             title: "Kode Identitas (NIP/NIK)",
             dataIndex: "nip",
             key: "nip",

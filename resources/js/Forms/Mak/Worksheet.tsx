@@ -45,7 +45,7 @@ interface SelectItem {
 interface RincianWorksheet {
     id: number;
     nomor?: number | null | string;
-    rincian?: string;
+    rincian?: JSX.Element | string;
     type: string;
     options?: SelectItem[] | undefined;
     dependentValues?: string[] | number[];
@@ -113,7 +113,7 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
     const [activeChild, setActiveChild] = useState<JSX.Element[]>([]);
     const commonColumns = (
         <>
-            <td style={centerCell}>{props.id}</td>
+            <td style={centerCell}>{props.nomor}</td>
             <td style={cellStyle}>{props.rincian}</td>
         </>
     );
@@ -185,16 +185,21 @@ const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
 const getRules = (
     { getFieldValue }: { getFieldValue: (arg0: string) => any },
     dependentName: string,
-    ruleName: "less" | "greater",
+    ruleName: "less" | "greater" | "less equal" | "greater equal" | "equal",
     message: string
 ) => ({
     validator(rule: any, value: number, callback: any) {
         const dependentValue = getFieldValue(dependentName);
         let test = true;
-
-        if (ruleName === "less") {
+        if (ruleName == "less") {
+            test = value < dependentValue;
+        } else if (ruleName == "equal") {
+            test = value == dependentValue;
+        } else if (ruleName == "greater") {
+            test = value > dependentValue;
+        } else if (ruleName == "less equal") {
             test = value <= dependentValue;
-        } else {
+        } else if (ruleName == "greater equal") {
             test = value >= dependentValue;
         }
 
@@ -225,7 +230,7 @@ const daftarRincian = [
     {
         id: 2,
         nomor: 2,
-        rincian: "Jumlah Balita (R302>0)",
+        rincian: "Jumlah Balita (R302)",
         type: "number",
 
         dependencies: ["wtf_1"],
@@ -246,7 +251,7 @@ const daftarRincian = [
                     { getFieldValue },
                     "wtf_1",
                     "less",
-                    "Jumlah Balita tidak bisa melebihi jumlah ART"
+                    "Jumlah Balita tidak bisa melebihi atau sama dengan jumlah ART"
                 ),
         ],
     },
@@ -260,7 +265,7 @@ const daftarRincian = [
                 getRules(
                     { getFieldValue },
                     "wtf_1",
-                    "less",
+                    "less equal",
                     "Jumlah ART yang bersekolah tidak bisa melebihi jumlah ART"
                 ),
         ],
@@ -282,7 +287,11 @@ const daftarRincian = [
     {
         id: 5,
         nomor: 5,
-        rincian: "Luas Lantai per Kapita (m^2) (r1902)",
+        rincian: (
+            <span>
+                Luas Lantai per Kapita (m<sup>2</sup>) (R1902)
+            </span>
+        ),
         type: "number",
     },
     {
@@ -313,13 +322,13 @@ const daftarRincian = [
     {
         id: 8,
         nomor: 8,
-        rincian: "Apakah tercatat sebagai menerima PKH? (r2003a)",
+        rincian: "Apakah tercatat sebagai menerima PKH? (R2003a)",
         type: "binary",
         children: [
             {
                 id: 9,
                 nomor: 9,
-                rincian: "Penggunaan PKH (r2003b)",
+                rincian: "Penggunaan PKH (R2003b)",
                 type: "multi",
                 dependentValues: [1],
                 options: [
@@ -353,7 +362,7 @@ const daftarRincian = [
                         getRules(
                             { getFieldValue },
                             "wtf_3",
-                            "less",
+                            "less equal",
                             "Jumlah ART yang menerima PIP tidak bisa melebihi ART yang bersekolah"
                         ),
                 ],
@@ -364,7 +373,7 @@ const daftarRincian = [
     {
         id: 26,
         nomor: "",
-        rincian: "Garis Kemiskinan September 2023",
+        rincian: "Garis Kemiskinan Maret 2024",
         type: "rupiah",
     },
 ];
@@ -415,7 +424,7 @@ const Worksheet: React.FC<{
                                         Isian Worksheet Template{" "}
                                     </Title>
                                     <Text>
-                                        RINCIAN (Lihat Dokumen VSEN22.K)
+                                        RINCIAN (Lihat Dokumen VSEN24.K)
                                     </Text>
                                 </Space>
                             </td>

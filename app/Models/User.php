@@ -27,6 +27,7 @@ class User extends Authenticatable
         'nip',
         'kode_kabkot',
         'role',
+        'jabatan'
 
     ];
 

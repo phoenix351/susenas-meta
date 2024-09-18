@@ -19,12 +19,15 @@ const TextRupiah: React.FC<{ value: number; color: string }> = ({
                     color: color,
                     paddingLeft: "11px",
                     paddingRight: "11px",
+                    whiteSpace: "nowrap",
                 }}
             >
-                {`Rp ${Number(value) ?? 0}`.replace(
-                    /\B(?=(\d{3})+(?!\d))/g,
-                    ","
-                )}
+                {value > 0
+                    ? `Rp ${Number(value)}`.replace(
+                          /\B(?=(\d{3})+(?!\d))/g,
+                          ","
+                      )
+                    : ""}
                 {/* {value} */}
             </Text>
         </Space>

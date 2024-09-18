@@ -19,6 +19,7 @@ import _debounce from "lodash/debounce";
 
 import MetaSelect from "@/Components/MetaSelect";
 import cekNomorSampel from "@/Functions/cekNomorSampel";
+import { jabatanList } from "@/CONSTANT";
 
 const { Text, Title } = Typography;
 
@@ -243,6 +244,7 @@ const Blok1_2: React.FC<{
             cekNomorSampel(value, currentRecordId, kode_kabkot, nks),
         400
     );
+
     const validateNomorSampel = async (_: any, value: any) => {
         const currentRecordId = form.getFieldValue("id"); // replace 'id' with the actual field name of the record identifier
         const kode_kabkot = form.getFieldValue("kode_kabkot");
@@ -544,7 +546,11 @@ const Blok1_2: React.FC<{
                                         {
                                             pattern: /^\d+[A-Z]*$/,
                                             message:
-                                                "Please enter only numbers with optional follow with uppercase alphabet.",
+                                                "Silahkan isi dengan format Digit dan Huruf (dalam kapital) tanpa spasi",
+                                        },
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
                                         },
                                     ]}
                                 >
@@ -567,6 +573,10 @@ const Blok1_2: React.FC<{
                                         {
                                             validator: validateNomorSampel,
                                         },
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
+                                        },
                                     ]}
                                 >
                                     <InputNumber min={1} />
@@ -582,6 +592,12 @@ const Blok1_2: React.FC<{
                                     name="r110"
                                     label={null}
                                     style={formItemStyle}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
+                                        },
+                                    ]}
                                 >
                                     <Input
                                         minLength={2}
@@ -593,8 +609,7 @@ const Blok1_2: React.FC<{
                         <tr>
                             <td style={cellStyle}>111</td>
                             <td style={cellStyle}>
-                                {" "}
-                                Alamat (Nama Jalan/Gang/RT/RW/Dusun){" "}
+                                Alamat (Nama Jalan/Gang/RT/RW/Dusun)
                             </td>
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
@@ -602,6 +617,12 @@ const Blok1_2: React.FC<{
                                     name="r111"
                                     label={null}
                                     style={formItemStyle}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
+                                        },
+                                    ]}
                                 >
                                     <Input minLength={5} />
                                 </Form.Item>
@@ -654,6 +675,12 @@ const Blok1_2: React.FC<{
                                     name="r201_nama"
                                     label={null}
                                     style={formItemStyle}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
+                                        },
+                                    ]}
                                 >
                                     <Input minLength={2} />
                                 </Form.Item>
@@ -663,36 +690,23 @@ const Blok1_2: React.FC<{
                                     name="r201_jabatan"
                                     style={formItemStyle}
                                     label={null}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
+                                        },
+                                    ]}
                                 >
                                     <Select
                                         // defaultValue={"0000"}
                                         showSearch
                                         optionFilterProp="label"
-                                        options={[
-                                            {
-                                                label: "1. Staf BPS Provinsi",
-                                                value: "1",
-                                            },
-                                            {
-                                                label: "2. Staf BPS Kab/Kota",
-                                                value: "2",
-                                            },
-                                            { label: "3. KSK", value: "3" },
-                                            { label: "4. Mitra", value: "4" },
-                                        ]}
+                                        options={jabatanList}
                                         // onChange={() => setKabkotDisable(false)}
                                     />
                                 </Form.Item>
                             </td>
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="r201_waktu"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    {/* datepicker */}
-                                </Form.Item>
-                            </td>
+                            <td style={cellStyle}></td>
                             <td style={cellStyle}></td>
                         </tr>
                         <tr>
@@ -705,8 +719,14 @@ const Blok1_2: React.FC<{
                                     name="r202_nama"
                                     label={null}
                                     style={formItemStyle}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
+                                        },
+                                    ]}
                                 >
-                                    <Input minLength={2} />
+                                    <Input minLength={2} readOnly />
                                 </Form.Item>
                             </td>
                             <td style={cellStyle}>
@@ -714,34 +734,22 @@ const Blok1_2: React.FC<{
                                     name="r202_jabatan"
                                     label={null}
                                     style={formItemStyle}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
+                                        },
+                                    ]}
                                 >
                                     <Select
                                         showSearch
                                         optionFilterProp="label"
-                                        options={[
-                                            {
-                                                label: "1. Staf BPS Provinsi",
-                                                value: "1",
-                                            },
-                                            {
-                                                label: "2. Staf BPS Kab/Kota",
-                                                value: "2",
-                                            },
-                                            { label: "3. KSK", value: "3" },
-                                            { label: "4. Mitra", value: "4" },
-                                        ]}
+                                        options={jabatanList}
+                                        disabled
                                     />
                                 </Form.Item>
                             </td>
-                            <td style={cellStyle}>
-                                <Form.Item
-                                    name="r202_waktu"
-                                    label={null}
-                                    style={formItemStyle}
-                                >
-                                    {/* datepicker */}
-                                </Form.Item>
-                            </td>
+                            <td style={cellStyle}></td>
                             <td style={cellStyle}></td>
                         </tr>
                         <tr>
@@ -772,6 +780,12 @@ const Blok1_2: React.FC<{
                                         {
                                             label: "[5] Rumah tangga pindah/bangunan sensus sudah tidak ada",
                                             value: "5",
+                                        },
+                                    ]}
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "Isian ini harus diisi!",
                                         },
                                     ]}
                                 />

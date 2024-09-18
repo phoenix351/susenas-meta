@@ -9,6 +9,6 @@ class Kabkot extends Model
 {
     use HasFactory;
     protected $table = "kabkot";
-    protected $fillable = ['kode_nks', 'kode_kabkot'];
+    protected $fillable = ['kode_nks', 'kode_kabkot', 'garis_kemiskinan'];
     public $timestamps = false;
 }

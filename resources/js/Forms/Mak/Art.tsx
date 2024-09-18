@@ -191,14 +191,14 @@ const Art: React.FC<{
         setDaftarArt(updatedArt);
     }, 600);
     const handleSubmit = _debounce(() => form.submit(), 3000);
-    const handleValueChange = (values: FormListFieldData) => {
+    const handleValueChange = _debounce(() => {
         calculateRekap();
         handleSubmit();
         calculateKalori(form.getFieldsValue()).then((totalKalori) => {
             let newDaftarArt = [...daftarArt];
             newDaftarArt[nomor_art]["kalori"] = totalKalori;
         });
-    };
+    }, 3000);
     // kumpulan useeffect
     useEffect(() => {
         const fetchKonsumsiArt = async (id_art: string) => {

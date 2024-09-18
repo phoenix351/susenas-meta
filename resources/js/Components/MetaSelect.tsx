@@ -1,4 +1,4 @@
-import { Form, Select } from "antd";
+import { Form, FormRule, Select } from "antd";
 import React from "react";
 interface Option {
     label: string;
@@ -13,9 +13,10 @@ const MetaSelect: React.FC<{
     options: Option[];
     name: string;
     onChange?: (value: any) => void;
-}> = ({ options, name, onChange }) => {
+    rules?: FormRule[];
+}> = ({ options, name, onChange, rules }) => {
     return (
-        <Form.Item name={name} label={null} style={formItemStyle}>
+        <Form.Item name={name} label={null} style={formItemStyle} rules={rules}>
             <Select
                 allowClear
                 showSearch

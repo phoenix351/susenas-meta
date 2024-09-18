@@ -152,9 +152,9 @@ const TabelBlok: React.FC<{
                     <th style={cellStyle} rowSpan={2}>
                         No Urut
                     </th>
-                    <th style={cellStyle} rowSpan={2}>
+                    {/* <th style={cellStyle} rowSpan={2}>
                         Kode COICOP
-                    </th>
+                    </th> */}
                     <th style={cellStyle} rowSpan={2}>
                         Rincian
                     </th>
@@ -185,9 +185,9 @@ const TabelBlok: React.FC<{
                     <td width="55px" style={centerCell}>
                         (1)
                     </td>
-                    <td width="130px" style={centerCell}>
+                    {/* <td width="130px" style={centerCell}>
                         (2)
-                    </td>
+                    </td> */}
                     <td style={centerCell}>(3)</td>
                     <td width="80px" style={centerCell}>
                         (4)

@@ -38,6 +38,7 @@ const EntriIntiForm: React.FC<{
         } else {
             form.setFieldValue("kode_kabkot", data.kode_kabkot);
         }
+        fetchNks();
         setDaftarKabKot(daftarKabkot);
     };
     const fetchNks = async () =>
@@ -51,6 +52,7 @@ const EntriIntiForm: React.FC<{
             });
 
             const { data } = await axios.get(url);
+            // console.log({});
 
             const daftarNks = data.map((item: any) => ({
                 label: item,
@@ -63,6 +65,7 @@ const EntriIntiForm: React.FC<{
             // console.log("sss");
 
             fetchKabkot();
+            // fetchNks();
             form.setFieldValue("kode_prov", "71");
             form.setFieldValue("semester", "2");
 

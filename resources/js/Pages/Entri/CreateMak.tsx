@@ -6,15 +6,17 @@ import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
 import { Button, Form, Space, message } from "antd";
 import axios from "axios";
 import Blok1_2 from "@/Forms/Mak/Blok1_2";
-import { PageProps } from "@/types";
+import { PageProps, User } from "@/types";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 
 const Mak = ({
     identitas_wilayah,
     semester,
+    user,
 }: PageProps & {
     identitas_wilayah: any;
     semester: string | number;
+    user: User;
 }) => {
     // const [cariForm] = Form.useForm();
     const tabContentStyle: React.CSSProperties = {
@@ -91,6 +93,23 @@ const Mak = ({
     // const [totalProduksi, setTotalProduksi] = useState(0);
 
     // initialize the form
+    useEffect(() => {
+        // form.setFieldsValue({
+        //     r108: "1A",
+        //     r109: 1,
+        //     r110: "Ponimin",
+        //     r111: "Jalan Maengket",
+        //     r201_nama: "Sinra Tenseiii",
+        //     r201_jabatan: "Mitra",
+        //     r202_nama: "Ponimin, S.Tr.Stat.",
+        //     r202_jabatan: "Staf BPS Provinsi",
+        //     r203: "1",
+        // });
+        form.setFieldsValue({
+            r202_nama: user.nama_lengkap,
+            r202_jabatan: user.jabatan,
+        });
+    }, []);
 
     return (
         <>

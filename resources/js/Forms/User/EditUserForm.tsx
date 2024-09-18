@@ -3,6 +3,7 @@ import { Form, Input, Select, Radio } from "antd";
 import form, { FormInstance } from "antd/es/form";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { jabatanList } from "@/CONSTANT";
 
 const CreateUserForm: React.FC<{
     form: FormInstance;
@@ -35,10 +36,11 @@ const CreateUserForm: React.FC<{
         fetchKabkot(kode_kabkot);
     }, [kode_kabkot]);
 
-    const listRole: any[] | undefined = [
+    const listRole: { label: string; value: string }[] = [
         { label: "PML", value: "PML" },
         { label: "ADMIN", value: "ADMIN" },
     ];
+
     return (
         <Form
             form={form}
@@ -137,6 +139,23 @@ const CreateUserForm: React.FC<{
                 <Select
                     showSearch
                     options={listRole}
+                    style={{ color: "#000" }}
+                />
+            </Form.Item>
+            <Form.Item
+                label="Jabatan"
+                name="jabatan"
+                // style={{ display: "none" }}
+                rules={[
+                    {
+                        required: true,
+                        message: "Silahkan jabatan petugas",
+                    },
+                ]}
+            >
+                <Select
+                    showSearch
+                    options={jabatanList}
                     style={{ color: "#000" }}
                 />
             </Form.Item>
