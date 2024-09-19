@@ -122,6 +122,41 @@ const Blok4_3: React.FC<{
         rincian,
         key,
     }) => {
+        const [isBeliEqual, setIsBeliEqual] = useState<boolean>(false);
+        const [isProduksiEqual, setIsProduksiEqual] = useState<boolean>(false);
+        const [isTotalEqual, setIsTotalEqual] = useState<boolean>(false);
+
+        function inputCalculatedCheck() {
+            const beliCalculated = rekapMak[rincian.id - 1].beli;
+            const produksiCalculated = rekapMak[rincian.id - 1].produksi;
+            const totalCalculated = rekapMak[rincian.id - 1].total;
+
+            const beliInputed = form.getFieldValue(
+                `blok4_32_${rincian.id - 1}_beli`
+            );
+            const produksiInputed = form.getFieldValue(
+                `blok4_32_${rincian.id - 1}_produksi`
+            );
+            const totalInputed = form.getFieldValue(
+                `blok4_32_${rincian.id - 1}_total`
+            );
+            console.log({
+                beli: { beliCalculated, beliInputed },
+                produksi: { produksiCalculated, produksiInputed },
+                total: { totalCalculated, totalInputed },
+            });
+            setIsBeliEqual(beliCalculated == beliInputed);
+            setIsProduksiEqual(produksiCalculated == produksiInputed);
+            setIsTotalEqual(totalCalculated == totalInputed);
+        }
+        useEffect(() => {
+            inputCalculatedCheck();
+        }, [
+            rekapMak[rincian.id - 1].beli,
+            rekapMak[rincian.id - 1].produksi,
+            rekapMak[rincian.id - 1].total,
+        ]);
+
         return (
             <tr>
                 <td style={centerCell}>{rincian.nomor}</td>
@@ -133,9 +168,10 @@ const Blok4_3: React.FC<{
                             <RupiahInput
                                 key={key}
                                 inputName={`blok4_32_${rincian.id - 1}_beli`}
+                                onChange={inputCalculatedCheck}
                             />
                             <TextRupiah
-                                color="red"
+                                color={isBeliEqual ? "green" : "red"}
                                 key={rincian.id}
                                 value={rekapMak[rincian.id - 1].beli}
                             />
@@ -150,9 +186,10 @@ const Blok4_3: React.FC<{
                                 inputName={`blok4_32_${
                                     rincian.id - 1
                                 }_produksi`}
+                                onChange={inputCalculatedCheck}
                             />
                             <TextRupiah
-                                color="red"
+                                color={isProduksiEqual ? "green" : "red"}
                                 key={rincian.id}
                                 value={rekapMak[rincian.id - 1].produksi}
                             />
@@ -164,12 +201,10 @@ const Blok4_3: React.FC<{
                         <RupiahInput
                             key={key}
                             inputName={`blok4_32_${rincian.id - 1}_total`}
-                            onChange={
-                                key === 16 ? handleNonMakInput : undefined
-                            }
+                            onChange={inputCalculatedCheck}
                         />
                         <TextRupiah
-                            color="red"
+                            color={isTotalEqual ? "green" : "red"}
                             key={rincian.id}
                             value={rekapMak[rincian.id - 1].total}
                         />
