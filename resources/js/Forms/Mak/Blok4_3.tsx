@@ -148,6 +148,9 @@ const Blok4_3: React.FC<{
             setIsBeliEqual(beliCalculated == beliInputed);
             setIsProduksiEqual(produksiCalculated == produksiInputed);
             setIsTotalEqual(totalCalculated == totalInputed);
+            if (rincian.id == 17) {
+                handleNonMakInput(totalInputed);
+            }
         }
         useEffect(() => {
             inputCalculatedCheck();

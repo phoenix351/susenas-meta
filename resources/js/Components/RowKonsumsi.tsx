@@ -338,7 +338,6 @@ const RowKonsumsi: React.FC<{
                             name={`${data.nomor}_total_volume_calculated`}
                         >
                             {volume > 0 ? volume : ""}
-                            {/* <Input disabled={true} /> */}
                         </Form.Item>
                     )}
                 </td>
@@ -348,8 +347,9 @@ const RowKonsumsi: React.FC<{
                             color: isTotalEqual ? "green" : "red",
                             backgroundColor: "inherit",
                             border: "none",
+                            cursor: "text",
                         }}
-                        disabled={true}
+                        readOnly={true}
                         inputName={`${data.nomor}_total_harga_calculated`}
                     />
                 </td>

@@ -6,7 +6,7 @@ interface RupiahInputProps {
     // value: number;
     onChange?: (value: number | undefined) => void;
     [key: string]: any; // Allow additional props
-    editable?: boolean;
+    readOnly?: boolean;
     initialValue?: number;
     label?: string;
     style?: React.CSSProperties;
@@ -17,7 +17,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     inputName,
     onChange,
     initialValue,
-    editable,
+    readOnly,
     label,
     style,
     disabled,
@@ -45,7 +45,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
             <InputNumber
                 disabled={disabled}
                 className="custom-input-number"
-                readOnly={editable ? editable : false}
+                readOnly={readOnly}
                 style={{ width: "100%", textAlign: "right", ...style }}
                 min={0}
                 max={1000000000}
