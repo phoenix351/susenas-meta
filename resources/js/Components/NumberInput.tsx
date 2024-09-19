@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, InputNumber } from "antd";
 import _debounce from "lodash/debounce";
+import { ValidateStatus } from "antd/es/form/FormItem";
 
 interface NumberInputProps {
     // value: number;
@@ -9,6 +10,7 @@ interface NumberInputProps {
     editable?: boolean;
     initialValue?: number;
     inputName: string;
+    validateStatus?: ValidateStatus;
 }
 
 const NumberInput: React.FC<NumberInputProps> = ({
@@ -16,6 +18,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
     onChange,
     initialValue,
     editable,
+    validateStatus,
 }) => {
     const [value, setValue] = useState(0);
     const handleChange = (nilai: any) => {
@@ -36,6 +39,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
             name={inputName}
             initialValue={initialValue ?? undefined}
             style={{ marginBottom: "4px" }}
+            validateStatus={validateStatus}
         >
             <InputNumber
                 className="custom-input-number"

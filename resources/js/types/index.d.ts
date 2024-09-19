@@ -54,3 +54,8 @@ interface RincianQc {
     value: number;
     dataType: string;
 }
+interface RekapMak {
+    beli: number;
+    produksi: number;
+    total: number;
+}

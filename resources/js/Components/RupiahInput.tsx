@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Form, InputNumber } from "antd";
 import _debounce from "lodash/debounce";
+import { ValidateStatus } from "antd/es/form/FormItem";
 
 interface RupiahInputProps {
     // value: number;
@@ -11,6 +12,7 @@ interface RupiahInputProps {
     label?: string;
     style?: React.CSSProperties;
     disabled?: boolean;
+    validateStatus?: ValidateStatus;
 }
 
 const RupiahInput: React.FC<RupiahInputProps> = ({
@@ -21,6 +23,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     label,
     style,
     disabled,
+    validateStatus,
 }) => {
     const [value, setValue] = useState(0);
     const handleChange = (nilai: any) => {
@@ -41,6 +44,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
             label={label}
             initialValue={initialValue ? Math.round(Number(initialValue)) : 0}
             style={{ marginBottom: "4px" }}
+            validateStatus={validateStatus}
         >
             <InputNumber
                 disabled={disabled}

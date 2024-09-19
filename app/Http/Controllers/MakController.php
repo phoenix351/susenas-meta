@@ -363,10 +363,10 @@ class MakController extends Controller
                     }
                 }
             }
+            // dd($rekap_art);
             DB::beginTransaction();
             foreach ($rekap_art as $key => $value) {
                 # code...
-                $id = $value['id'];
                 $current = $value;
                 unset($current['id']);
                 unset($current['nomor_art']);

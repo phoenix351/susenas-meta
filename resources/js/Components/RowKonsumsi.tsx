@@ -100,7 +100,6 @@ const RowKonsumsi: React.FC<{
         }
 
         const total = beli + produksi;
-        console.log({ beli, produksi, total });
 
         if (!total) return;
         form.setFieldsValue({
@@ -253,6 +252,9 @@ const RowKonsumsi: React.FC<{
                             data.nomor
                         }_beli_harga${data.subKey}`}
                         onChange={_debounce(beliHargaCalculate, 600)}
+                        validateStatus={
+                            !isBeliEqual && data.type == "sub" ? "error" : ""
+                        }
                     />
                 </td>
                 <td
@@ -273,6 +275,11 @@ const RowKonsumsi: React.FC<{
                             data.nomor
                         }_produksi_harga${data.subKey}`}
                         onChange={_debounce(produksiHargaCalculate, 600)}
+                        validateStatus={
+                            !isProduksiEqual && data.type == "sub"
+                                ? "error"
+                                : ""
+                        }
                     />
                 </td>
                 <td style={data.type === "sub" ? darkCell : cellStyle}>
@@ -280,6 +287,7 @@ const RowKonsumsi: React.FC<{
                         <NumberInput
                             inputName={`${data.nomor}_total_volume`}
                             onChange={_debounce(volumeCalculate, 400)}
+                            validateStatus={!isVolumeEqual ? "error" : ""}
                         />
                     )}
                 </td>
@@ -287,6 +295,7 @@ const RowKonsumsi: React.FC<{
                     <RupiahInput
                         inputName={`${data.nomor}_total_harga`}
                         onChange={_debounce(totalHargaCek, 600)}
+                        validateStatus={!isTotalEqual ? "error" : ""}
                     />
                 </td>
             </tr>

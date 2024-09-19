@@ -20,6 +20,8 @@ import RupiahInput from "@/Components/RupiahInput";
 import { RekapMak, Rincian, SubTotal } from "@/types";
 import Blok from "@/Components/Blok";
 import TextRupiah from "@/Components/TextRupiah";
+import RekapArt from "@/Components/RekapArt";
+import RekapRT from "@/Components/RekapRT";
 
 const { Text, Title } = Typography;
 
@@ -100,122 +102,118 @@ const Blok4_3: React.FC<{
         satuan?: string;
         type: string;
     }
-    interface RekapMak {
-        beli: number;
-        produksi: number;
-        total: number;
-    }
+
     const [messageApi, contextHolder] = message.useMessage();
 
-    const handleNonMakInput = (value: any) => {
-        let updatedRekap = [...rekapMak];
-        updatedRekap[16].total = value;
-        updatedRekap[17].total =
-            updatedRekap[15].total + updatedRekap[16].total;
+    // const handleNonMakInput = (value: any) => {
+    //     let updatedRekap = [...rekapMak];
+    //     updatedRekap[16].total = value;
+    //     updatedRekap[17].total =
+    //         updatedRekap[15].total + updatedRekap[16].total;
 
-        updatedRekap;
+    //     updatedRekap;
 
-        setRekapMak(updatedRekap);
-    };
+    //     setRekapMak(updatedRekap);
+    // };
 
-    const renderBlok432: React.FC<{ rincian: Rincian; key: number }> = ({
-        rincian,
-        key,
-    }) => {
-        const [isBeliEqual, setIsBeliEqual] = useState<boolean>(false);
-        const [isProduksiEqual, setIsProduksiEqual] = useState<boolean>(false);
-        const [isTotalEqual, setIsTotalEqual] = useState<boolean>(false);
+    // const renderBlok432: React.FC<{ rincian: Rincian; key: number }> = ({
+    //     rincian,
+    //     key,
+    // }) => {
+    //     const [isBeliEqual, setIsBeliEqual] = useState<boolean>(false);
+    //     const [isProduksiEqual, setIsProduksiEqual] = useState<boolean>(false);
+    //     const [isTotalEqual, setIsTotalEqual] = useState<boolean>(false);
 
-        function inputCalculatedCheck() {
-            const beliCalculated = rekapMak[rincian.id - 1].beli;
-            const produksiCalculated = rekapMak[rincian.id - 1].produksi;
-            const totalCalculated = rekapMak[rincian.id - 1].total;
+    //     function inputCalculatedCheck() {
+    //         const beliCalculated = rekapMak[rincian.id - 1].beli;
+    //         const produksiCalculated = rekapMak[rincian.id - 1].produksi;
+    //         const totalCalculated = rekapMak[rincian.id - 1].total;
 
-            const beliInputed = form.getFieldValue(
-                `blok4_32_${rincian.id - 1}_beli`
-            );
-            const produksiInputed = form.getFieldValue(
-                `blok4_32_${rincian.id - 1}_produksi`
-            );
-            const totalInputed = form.getFieldValue(
-                `blok4_32_${rincian.id - 1}_total`
-            );
-            console.log({
-                beli: { beliCalculated, beliInputed },
-                produksi: { produksiCalculated, produksiInputed },
-                total: { totalCalculated, totalInputed },
-            });
-            setIsBeliEqual(beliCalculated == beliInputed);
-            setIsProduksiEqual(produksiCalculated == produksiInputed);
-            setIsTotalEqual(totalCalculated == totalInputed);
-            if (rincian.id == 17) {
-                handleNonMakInput(totalInputed);
-            }
-        }
-        useEffect(() => {
-            inputCalculatedCheck();
-        }, [
-            rekapMak[rincian.id - 1].beli,
-            rekapMak[rincian.id - 1].produksi,
-            rekapMak[rincian.id - 1].total,
-        ]);
+    //         const beliInputed = form.getFieldValue(
+    //             `blok4_32_${rincian.id - 1}_beli`
+    //         );
+    //         const produksiInputed = form.getFieldValue(
+    //             `blok4_32_${rincian.id - 1}_produksi`
+    //         );
+    //         const totalInputed = form.getFieldValue(
+    //             `blok4_32_${rincian.id - 1}_total`
+    //         );
+    //         console.log({
+    //             beli: { beliCalculated, beliInputed },
+    //             produksi: { produksiCalculated, produksiInputed },
+    //             total: { totalCalculated, totalInputed },
+    //         });
+    //         setIsBeliEqual(beliCalculated == beliInputed);
+    //         setIsProduksiEqual(produksiCalculated == produksiInputed);
+    //         setIsTotalEqual(totalCalculated == totalInputed);
+    //         if (rincian.id == 17) {
+    //             handleNonMakInput(totalInputed);
+    //         }
+    //     }
+    //     useEffect(() => {
+    //         inputCalculatedCheck();
+    //     }, [
+    //         rekapMak[rincian.id - 1].beli,
+    //         rekapMak[rincian.id - 1].produksi,
+    //         rekapMak[rincian.id - 1].total,
+    //     ]);
 
-        return (
-            <tr>
-                <td style={centerCell}>{rincian.nomor}</td>
-                <td style={cellStyle}>{rincian.rincian}</td>
+    //     return (
+    //         <tr>
+    //             <td style={centerCell}>{rincian.nomor}</td>
+    //             <td style={cellStyle}>{rincian.rincian}</td>
 
-                <td style={rightCell}>
-                    {rincian.id < 16 && (
-                        <>
-                            <RupiahInput
-                                key={key}
-                                inputName={`blok4_32_${rincian.id - 1}_beli`}
-                                onChange={inputCalculatedCheck}
-                            />
-                            <TextRupiah
-                                color={isBeliEqual ? "green" : "red"}
-                                key={rincian.id}
-                                value={rekapMak[rincian.id - 1].beli}
-                            />
-                        </>
-                    )}
-                </td>
-                <td style={rightCell}>
-                    {rincian.id < 16 && (
-                        <>
-                            <RupiahInput
-                                key={key}
-                                inputName={`blok4_32_${
-                                    rincian.id - 1
-                                }_produksi`}
-                                onChange={inputCalculatedCheck}
-                            />
-                            <TextRupiah
-                                color={isProduksiEqual ? "green" : "red"}
-                                key={rincian.id}
-                                value={rekapMak[rincian.id - 1].produksi}
-                            />
-                        </>
-                    )}
-                </td>
-                <td style={rightCell}>
-                    <>
-                        <RupiahInput
-                            key={key}
-                            inputName={`blok4_32_${rincian.id - 1}_total`}
-                            onChange={inputCalculatedCheck}
-                        />
-                        <TextRupiah
-                            color={isTotalEqual ? "green" : "red"}
-                            key={rincian.id}
-                            value={rekapMak[rincian.id - 1].total}
-                        />
-                    </>
-                </td>
-            </tr>
-        );
-    };
+    //             <td style={rightCell}>
+    //                 {rincian.id < 16 && (
+    //                     <>
+    //                         <RupiahInput
+    //                             key={key}
+    //                             inputName={`blok4_32_${rincian.id - 1}_beli`}
+    //                             onChange={inputCalculatedCheck}
+    //                         />
+    //                         <TextRupiah
+    //                             color={isBeliEqual ? "green" : "red"}
+    //                             key={rincian.id}
+    //                             value={rekapMak[rincian.id - 1].beli}
+    //                         />
+    //                     </>
+    //                 )}
+    //             </td>
+    //             <td style={rightCell}>
+    //                 {rincian.id < 16 && (
+    //                     <>
+    //                         <RupiahInput
+    //                             key={key}
+    //                             inputName={`blok4_32_${
+    //                                 rincian.id - 1
+    //                             }_produksi`}
+    //                             onChange={inputCalculatedCheck}
+    //                         />
+    //                         <TextRupiah
+    //                             color={isProduksiEqual ? "green" : "red"}
+    //                             key={rincian.id}
+    //                             value={rekapMak[rincian.id - 1].produksi}
+    //                         />
+    //                     </>
+    //                 )}
+    //             </td>
+    //             <td style={rightCell}>
+    //                 <>
+    //                     <RupiahInput
+    //                         key={key}
+    //                         inputName={`blok4_32_${rincian.id - 1}_total`}
+    //                         onChange={inputCalculatedCheck}
+    //                     />
+    //                     <TextRupiah
+    //                         color={isTotalEqual ? "green" : "red"}
+    //                         key={rincian.id}
+    //                         value={rekapMak[rincian.id - 1].total}
+    //                     />
+    //                 </>
+    //             </td>
+    //         </tr>
+    //     );
+    // };
 
     const [rekapArt, setRekapArt] = useState({
         12: { beli: 0, produksi: 0, total: 0 },
@@ -282,20 +280,6 @@ const Blok4_3: React.FC<{
         });
         // console.log({ rekapMak });
     }, [daftarArt]);
-    useEffect(() => {
-        // const fetchArt = async () => {
-        //     const { data } = await axios.get(
-        //         route("entri.mak.art.fetch", { id_ruta: daftarArt[0]?.id_ruta })
-        //     );
-        //     console.log({ daftarArt });
-        //     data.forEach((art: any, index: number) => {
-        //         `blok4_31_${index}_id_art`;
-        //         form.setFieldValue(`blok4_31_${index}_id_art`, art.id);
-        //     });
-        // };
-        // fetchArt();
-        // console.log({ rekapMak });
-    }, []);
 
     return (
         <Space direction="vertical" style={tabContentStyle}>
@@ -323,109 +307,63 @@ const Blok4_3: React.FC<{
                     key={1}
                 >
                     {daftarArt.map((art: any, index: number) => (
-                        <tr>
-                            <td style={centerCell}>{index + 1}</td>
-                            <td style={cellStyle}>
-                                {art.nama}
-                                <Form.Item
-                                    key={`form-item-${index}`} // Add a unique key here
-                                    name={`blok4_31_${index}_id_art`}
-                                    label={null}
-                                    initialValue={art.id}
-                                    hidden
-                                >
-                                    <Input readOnly />
-                                </Form.Item>
-                            </td>
-
-                            <td style={rightCell}>
-                                <RupiahInput
-                                    inputName={`blok4_31_${index}_mak_beli`}
-                                    initialValue={art.mak_beli}
-                                />
-                                <TextRupiah
-                                    color="red"
-                                    // value={0}
-                                    value={art.rekap[12]["beli"]}
-                                />
-                            </td>
-                            <td style={rightCell}>
-                                <RupiahInput
-                                    inputName={`blok4_31_${index}_mak_produksi`}
-                                    initialValue={art.mak_produksi}
-                                />
-                                <TextRupiah
-                                    color="red"
-                                    // value={0}
-                                    value={art.rekap[12]["produksi"]}
-                                />
-                            </td>
-                            <td style={rightCell}>
-                                <RupiahInput
-                                    inputName={`blok4_31_${index}_rokok_beli`}
-                                    initialValue={art.rokok_beli}
-                                />
-                                <TextRupiah
-                                    color="red"
-                                    // value={0}
-                                    value={art.rekap[13]["beli"]}
-                                />
-                            </td>
-                            <td style={rightCell}>
-                                <RupiahInput
-                                    inputName={`blok4_31_${index}_rokok_produksi`}
-                                    initialValue={art.rokok_produksi}
-                                />
-                                <TextRupiah
-                                    color="red"
-                                    // value={0}
-                                    value={art.rekap[13]["produksi"]}
-                                />
-                            </td>
-                        </tr>
+                        <RekapArt
+                            art={art}
+                            index={index}
+                            key={index}
+                            form={form}
+                            tipe="individu"
+                        />
                     ))}
                     {daftarArt.length > 0 && (
-                        <tr>
-                            <td style={cellStyle}></td>
-                            <td style={cellStyle}>JUMLAH</td>
+                        <RekapArt
+                            art={{ rekap: rekapArt }}
+                            index={99}
+                            key={99}
+                            form={form}
+                            tipe="jumlah"
+                        />
+                        // <tr>
+                        //     <td style={cellStyle}></td>
+                        //     <td style={cellStyle}>JUMLAH</td>
 
-                            <td style={rightCell}>
-                                <RupiahInput
-                                    inputName={`blok4_31_jumlah_mak_beli`}
-                                />
-                                <TextRupiah
-                                    color="red"
-                                    value={rekapArt[12]["beli"]}
-                                />
-                            </td>
-                            <td style={rightCell}>
-                                <RupiahInput
-                                    inputName={`blok4_31_jumlah_mak_produksi`}
-                                />
-                                <TextRupiah
-                                    color="red"
-                                    value={rekapArt[12]["produksi"]}
-                                />
-                            </td>
-                            <td style={rightCell}>
-                                <RupiahInput
-                                    inputName={`blok4_31_jumlah_rokok_beli`}
-                                />
-                                <TextRupiah
-                                    color="red"
-                                    value={rekapArt[13]["beli"]}
-                                />
-                            </td>
-                            <td style={rightCell}>
-                                <RupiahInput
-                                    inputName={`blok4_31_jumlah_rokok_produksi`}
-                                />
-                                <TextRupiah
-                                    color="red"
-                                    value={rekapArt[13]["produksi"]}
-                                />
-                            </td>
-                        </tr>
+                        //     <td style={rightCell}>
+                        //         <RupiahInput
+                        //             inputName={`blok4_31_jumlah_mak_beli`}
+                        //         />
+                        //         <TextRupiah
+                        //             color="red"
+                        //             value={rekapArt[12]["beli"]}
+                        //         />
+                        //     </td>
+                        //     <td style={rightCell}>
+                        //         <RupiahInput
+                        //             inputName={`blok4_31_jumlah_mak_produksi`}
+                        //         />
+                        //         <TextRupiah
+                        //             color="red"
+                        //             value={rekapArt[12]["produksi"]}
+                        //         />
+                        //     </td>
+                        //     <td style={rightCell}>
+                        //         <RupiahInput
+                        //             inputName={`blok4_31_jumlah_rokok_beli`}
+                        //         />
+                        //         <TextRupiah
+                        //             color="red"
+                        //             value={rekapArt[13]["beli"]}
+                        //         />
+                        //     </td>
+                        //     <td style={rightCell}>
+                        //         <RupiahInput
+                        //             inputName={`blok4_31_jumlah_rokok_produksi`}
+                        //         />
+                        //         <TextRupiah
+                        //             color="red"
+                        //             value={rekapArt[13]["produksi"]}
+                        //         />
+                        //     </td>
+                        // </tr>
                     )}
                 </Blok>
                 {/* blok 4.3.2  */}
@@ -448,19 +386,22 @@ const Blok4_3: React.FC<{
                     key={2}
                 >
                     {daftarRincian432.map(
-                        (rincian, key) => renderBlok432({ rincian, key })
+                        // (rincian, key) => renderBlok432({ rincian, key })
+                        (rincian, key) => (
+                            <RekapRT
+                                form={form}
+                                rincian={rincian}
+                                key={key}
+                                index={key}
+                                rekapMak={rekapMak}
+                                setRekapMak={setRekapMak}
+                            />
+                        )
                         // <renderBlok432 key={key} rincian={rincian}/>
                     )}
                 </Blok>
 
                 {contextHolder}
-                {/* Blok I  */}
-                {/* <Form.Item name="kode_prov" label="Provinsi">
-                    <Select
-                        options={daftarProv}
-                        onChange={() => setKabkotDisable(false)}
-                    />
-                </Form.Item> */}
             </Form>
         </Space>
     );
