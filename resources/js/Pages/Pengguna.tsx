@@ -257,6 +257,7 @@ const Pengguna = ({
             }
             setCreateLoading(false);
             setOpenAddModal(false);
+            form.resetFields();
         } catch (error: any) {
             console.log({ errror: error.response.data.message });
 
@@ -430,7 +431,7 @@ const Pengguna = ({
                     cancelText="nyanda"
                     onConfirm={() => debounceCellDelete(record.id)}
                 >
-                    <Button type="primary" style={{ backgroundColor: "red" }}>
+                    <Button type="default" style={{ color: "red" }}>
                         <DeleteFilled /> hapus
                     </Button>
                 </Popconfirm>
@@ -474,7 +475,9 @@ const Pengguna = ({
                 />
             </Space>
             <MyModal
-                handleOk={() => form.submit()}
+                handleOk={() => {
+                    form.submit();
+                }}
                 okText="Buat"
                 confirmLoadingModal={createLoading}
                 handleCancel={() => setOpenAddModal(false)}
