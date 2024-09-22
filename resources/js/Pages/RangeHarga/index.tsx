@@ -9,9 +9,27 @@ import React, {
 } from "react";
 import Pengguna from "../Pengguna";
 import axios from "axios";
-import { Button, Form, Input, InputNumber, Select, Space, Table } from "antd";
+import {
+    Button,
+    Form,
+    Input,
+    InputNumber,
+    Modal,
+    Select,
+    Space,
+    Table,
+} from "antd";
 import RupiahInput from "@/Components/RupiahInput";
-import { EditOutlined, FilterOutlined } from "@ant-design/icons";
+import {
+    EditOutlined,
+    FileOutlined,
+    FilterOutlined,
+    UploadOutlined,
+} from "@ant-design/icons";
+import { render } from "react-dom";
+import TextRupiah from "@/Components/TextRupiah";
+import MyModal from "@/Components/Modal";
+import UpdateRangeHarga from "./UpdateRangeHarga";
 interface Komoditas {
     id: number;
     nama_komoditas: string;
@@ -60,6 +78,9 @@ const index = ({
     const [daftarRangeHarga, setDaftarRangeHarga] = useState<RangeHarga[]>([]);
     const [loadingData, setLoadingData] = useState<boolean>(false);
     const [showFilter, setShowFilter] = useState<boolean>(false);
+
+    const [openModalUpdateRangeHarga, setOpenModalUpdateRangeHarga] =
+        useState<boolean>(false);
 
     const [filterForm] = Form.useForm();
     const fetchDaftarRangeHarga = async () => {
@@ -129,11 +150,17 @@ const index = ({
             title: "Harga Minimum",
             dataIndex: "min",
             key: "min",
+            render: (value: number) => (
+                <TextRupiah color="#000" value={value} />
+            ),
         },
         {
             title: "Harga Maksimum",
             dataIndex: "max",
             key: "max",
+            render: (value: number) => (
+                <TextRupiah color="#000" value={value} />
+            ),
         },
         {
             title: "Kalori",
@@ -176,6 +203,9 @@ const index = ({
                 style={{ marginBottom: showFilter ? 0 : 20 }}
             >
                 <FilterOutlined /> Filter Data
+            </Button>
+            <Button onClick={() => setOpenModalUpdateRangeHarga(true)}>
+                <FileOutlined /> Update Range Harga
             </Button>
             <Form
                 form={filterForm}
@@ -263,6 +293,17 @@ const index = ({
                 columns={rangeHargaColumns}
                 loading={loadingData}
             />
+            <Modal
+                open={openModalUpdateRangeHarga}
+                okText=""
+                confirmLoading={false}
+                onOk={() => {}}
+                onCancel={() => setOpenModalUpdateRangeHarga(false)}
+                title="Update Range Harga"
+                width={1000}
+            >
+                <UpdateRangeHarga />
+            </Modal>
         </>
     );
 };
