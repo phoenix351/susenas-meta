@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\RangeHargaImport;
 use App\Models\Komoditas;
 use App\Models\MasterWilayah;
 use App\Models\RangeHarga;
@@ -9,6 +10,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RangeHargaController extends Controller
 {
@@ -106,10 +108,10 @@ class RangeHargaController extends Controller
                 if (isset($userInput['input']['kode_kabkot']) && !is_null($userInput['input']['kode_kabkot'])) {
                     $query->where('kode_kabkot', 'like', "%" . $userInput['input']['kode_kabkot'] . "%");
                 }
-                if (isset($userInput['input']['min']) && ($userInput['input']['min'])>0) {
+                if (isset($userInput['input']['min']) && ($userInput['input']['min']) > 0) {
                     $query->where('min', '>=',  $userInput['input']['min']);
                 }
-                if (isset($userInput['input']['max']) && ($userInput['input']['max'])>0) {
+                if (isset($userInput['input']['max']) && ($userInput['input']['max']) > 0) {
                     $query->where('max', '<=',  $userInput['input']['max']);
                 }
 
@@ -120,5 +122,14 @@ class RangeHargaController extends Controller
         } catch (\Throwable $th) {
             throw $th;
         }
+    }
+    public function upload(Request $request)
+    {
+        $file = $request->input('file');
+        dd($file);
+        // dd($request->all());
+        $range_harga_import = new RangeHargaImport;
+        Excel::import($range_harga_import, $file);
+        dd($range_harga_import->rows);
     }
 }

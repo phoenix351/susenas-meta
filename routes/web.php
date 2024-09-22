@@ -43,6 +43,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     route::get('/recalculate-qc', [MakController::class, 'recalculate_qc'])->name('recalculate_qc');
 });
 
+
 Route::middleware('auth')->group(function () {
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -83,7 +84,7 @@ Route::middleware('auth')->group(function () {
         return response()->json(['data' => $data]);
     })->name('api.entri.semester');
 
-    route::delete('/entri/mak/delete/{id_ruta}', [MakController::class, 'delete'])->name('entri.mak.delete');
+    route::get('/entri/mak/create', [MakController::class, 'create'])->name("entri.mak.create");
     route::post('/entri/mak', [MakController::class, 'store'])->name('entri.mak.store');
     route::post('/entri/mak/art', [AnggotaRutaController::class, 'store'])->name('entri.mak.art.store');
     route::patch('/entri/mak/art', [AnggotaRutaController::class, 'update'])->name('entri.mak.art.update');
@@ -91,6 +92,7 @@ Route::middleware('auth')->group(function () {
     route::patch('/entri/mak/konsumsi', [MakController::class, 'konsumsi_store'])->name('entri.mak.konsumsi.store');
     route::patch('/entri/mak/konsumsi/art', [MakController::class, 'konsumsi_art_store'])->name('entri.mak.konsumsi_art.store');
     route::delete('/entri/mak/art/{id_art}', [AnggotaRutaController::class, 'delete'])->name('entri.mak.art.delete');
+    route::delete('/entri/mak/delete/{id_ruta}', [MakController::class, 'delete'])->name('entri.mak.delete');
 
     route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');
     route::get('/api/entri/mak', [MakController::class, 'fetch'])->name('api.entri.mak');
@@ -114,7 +116,6 @@ Route::middleware('auth')->group(function () {
     route::get('/api/entri/bs4', [MasterWilayahController::class, 'fetch_bs4'])->name('api.entri.bs4');
     route::get('/api/entri/nks', [MasterWilayahController::class, 'fetch_nks'])->name('api.entri.nks');
 
-    route::get('/entri/mak/create', [MakController::class, 'create'])->name("entri.mak.create");
     route::get('/entri/mak/{id}', [MakController::class, 'edit'])->name('entri.mak.edit');
 
 
@@ -149,6 +150,7 @@ Route::middleware('auth')->group(function () {
     // route range harga
     route::get('/range-harga', [RangeHargaController::class, 'index'])->name('range_harga.index');
     route::get('/range-harga/fetch', [RangeHargaController::class, 'fetch'])->name('range_harga.fetch');
+    route::post('/range-harga/upload', [RangeHargaController::class, 'upload'])->name('range_harga.upload');
 
 
 

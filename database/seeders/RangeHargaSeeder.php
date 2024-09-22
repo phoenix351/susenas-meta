@@ -14,7 +14,7 @@ class RangeHargaSeeder extends Seeder
      */
     public function run(): void
     {
-        $file_name = 'database\seeders\range_harga_komoditas.csv';
+        $file_name = 'public/seeder/range_harga.csv';
         if (Storage::exists($file_name)) {
             $csv_data = Storage::get($file_name);
         } else {
@@ -25,12 +25,15 @@ class RangeHargaSeeder extends Seeder
         $headers = array_shift($rows);
         // dd($lines);
         foreach ($rows as $index => $row) {
+            if ($index == 0) {
+                continue;
+            }
             $range_harga = new RangeHarga(
                 [
-                    'kode_kabkot' => $row[0],
-                    'id_komoditas' => $row[1],
-                    'min' => $row[2],
-                    'max' => $row[3],
+                    'kode_kabkot' => $row[1],
+                    'id_komoditas' => $row[2],
+                    'min' => $row[5],
+                    'max' => $row[6],
                 ]
             );
             $range_harga->save();

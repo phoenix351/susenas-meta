@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Carbon;
 
 class MonitoringController extends Controller
 {
@@ -13,7 +15,6 @@ class MonitoringController extends Controller
 
     public function index()
     {
-
         return Inertia::render('Dashboard');
     }
     public function get_rekap_nks()
@@ -28,6 +29,7 @@ class MonitoringController extends Controller
     }
     public function get_rekap_kabkot()
     {
+        $this->update();
         $rekap_kabkot = DB::table('kabkot_summary');
 
         $rekap_kabkot = $rekap_kabkot->get();
@@ -48,6 +50,14 @@ class MonitoringController extends Controller
     }
     public function update()
     {
+        $last_update = DB::table('monitoring_update')->latest('created_at')->first();
+        if (is_null($last_update)) {
+        } else {
+            $minutes = Carbon::parse($last_update->created_at)->diffInMinutes();
+            if ($minutes < 30) {
+                return;
+            }
+        }
         try {
             // penghitungan rekap kabkot
             $rekap_kabkot = DB::table('master_wilayah')
@@ -149,6 +159,10 @@ class MonitoringController extends Controller
                 DB::beginTransaction();
                 DB::table('nks_summary')->delete();
                 DB::table('nks_summary')->insert($rekap_nks);
+                DB::table('monitoring_update')->insert([
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
+                ]);
                 DB::commit();
             }
             return response()->json(['message' => 'Berhasil mengupdate data pada monitoring'], 201);

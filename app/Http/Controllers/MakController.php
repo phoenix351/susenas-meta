@@ -177,6 +177,10 @@ class MakController extends Controller
 
     public function store(Request $request)
     {
+
+        if (auth()->user()->role !== "PML") {
+            return abort('403');
+        }
         try {
             //code...
             $input = $request->all();
@@ -299,6 +303,9 @@ class MakController extends Controller
     }
     public function update(Request $request)
     {
+        if (auth()->user()->role !== "PML") {
+            return abort('403');
+        }
         try {
 
             // }
@@ -387,6 +394,9 @@ class MakController extends Controller
 
     public function konsumsi_store(Request $request)
     {
+        if (auth()->user()->role !== "PML") {
+            return abort('403');
+        }
         try {
             $input = $request->all();
             $converted = [];
@@ -461,6 +471,9 @@ class MakController extends Controller
     }
     public function konsumsi_art_store(Request $request)
     {
+        if (auth()->user()->role !== "PML") {
+            return abort('403');
+        }
         try {
             $input = $request->all();
             $converted = [];
@@ -528,6 +541,10 @@ class MakController extends Controller
     {
         // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
         $user = auth()->user();
+        if (auth()->user()->role !== "PML") {
+            return abort('403');
+        }
+
         $identitas_wilayah = $request->all();
         $master_wilayah = MasterWilayah::where('kode_kabkot', $identitas_wilayah['kode_kabkot'])->where('nks', $identitas_wilayah['nks'])->first();
         return Inertia::render("Entri/CreateMak", ['identitas_wilayah' => $master_wilayah, 'semester' => $request->semester, 'user' => $user]);
