@@ -47,31 +47,12 @@ const Art: React.FC<{
     // });
 
     const konsumsiArtFinish = async (values: any) => {
-        // console.log({ values });
-
-        // messageApi.open({
-        //     type: "loading",
-        //     key: "4_1",
-        //     content: "Memuat Data",
-        // });
         try {
             const url = route("entri.mak.konsumsi_art.store");
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            // console.log({ data });
-            // messageApi.open({
-            //     type: "success",
-            //     key: "4_1",
-            //     content: "Berhasil menyimpan data",
-            // });
-            // console.log("sucess");
         } catch (error) {
-            // messageApi.open({
-            //     type: "error",
-            //     key: "4_1",
-            //     content: "Oops terjadi kesalahan, silahkan hubungi admin",
-            // });
             console.log("error", { error });
         }
     };
@@ -271,6 +252,7 @@ const Art: React.FC<{
             konsumsiArtValues[`blok4_31_${nomor_art}_id_art`] = id_art;
             form.setFieldsValue(konsumsiArtValues);
             // setLoading(false);
+            console.log({ konsumsiArtValues });
         };
         fetchKonsumsiArt(id_art);
         // calculateRekap();

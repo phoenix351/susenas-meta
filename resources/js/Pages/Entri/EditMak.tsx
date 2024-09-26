@@ -195,7 +195,8 @@ const Mak = ({
     rekap_konsumsi: any[];
     rekap_konsumsi_art: any[];
 }) => {
-    // const [cariForm] = Form.useForm();
+    // console.log({ rekap_konsumsi_art });
+
     const tabContentStyle: React.CSSProperties = {
         backgroundColor: "#fff",
         paddingLeft: "10px",

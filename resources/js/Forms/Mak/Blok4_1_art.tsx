@@ -68,8 +68,6 @@ const Blok4_1: React.FC<{
     setDaftarArt,
     calculateKalori,
 }) => {
-    // konstanta
-    // console.log({ daftarArt });
     const blok4_1_hal2Finish = (values: any) => {
         // console.log({ values });
     };

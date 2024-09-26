@@ -255,13 +255,14 @@ class MakController extends Controller
         $garis_kemiskinan = Kabkot::where('kode', $data->kode_kabkot)->pluck('garis_kemiskinan');
 
         $art = AnggotaRuta::where('id_ruta', $id)->get();
+        // dd($art);
 
         $rekap_konsumsi = $this->get_konsumsi_ruta($id);
 
         $rekap_konsumsi_art = $this->get_konsumsi_art($id);
         // $konsumsi_ruta = DB::table('konsumsi')->where('id_ruta', $id)->get();
 
-        // dd($konsumsi_ruta);
+        // dd($konsumsi_ruta[2]);
         return Inertia::render("Entri/EditMak", [
             'data' => $data,
             'konsumsi_ruta' => $konsumsi_ruta,
@@ -339,8 +340,9 @@ class MakController extends Controller
 
 
             $data_update = SusenasMak::findOrFail($data['id']);
+
             $data_update->update($data);
-            // dd($data_update);
+            // dd($data);
             $data_update->save();
             // update konsumsi art rekap
             $rekap_art = [];
@@ -482,7 +484,11 @@ class MakController extends Controller
 
             foreach ($input as $key => $value) {
 
+                if (str_contains($key, "calculate")) {
+                    continue;
+                }
                 $splitted = explode('_', $key);
+
                 if ($key == "id_ruta" || $key == "id_art") continue;
                 if (sizeof($splitted) == 2) {
                     $nama_var = $splitted[1];
@@ -509,6 +515,7 @@ class MakController extends Controller
 
 
             // Reset array keys to start from 0
+            // dd($converted);
             $converted = array_values($converted);
             $baru = [];
             foreach ($converted as $item) {
@@ -527,6 +534,7 @@ class MakController extends Controller
             }
             DB::beginTransaction();
             KonsumsiArt::upsert($baru, 'id');
+
             SusenasMak::where('id', $id_ruta)->update(['updated_at' => Date::now()]);
             // 
             DB::commit();
