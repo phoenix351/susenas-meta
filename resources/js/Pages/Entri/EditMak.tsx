@@ -1,6 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-import { useEffect, useRef, useState } from "react";
+import { ErrorInfo, useEffect, useRef, useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
 import {
@@ -282,11 +282,17 @@ const Mak = ({
     const blok1_2Finish = async (values: any) => {
         try {
             const url = route("entri.mak.update");
-            const { data } = await axios.patch(url, values, {
+            const response = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-        } catch (error) {
-            console.error("error saving blok 1 and 2");
+        } catch (error: any) {
+            if (error.response.status === 403) {
+                message.error({
+                    content: "Akun anda tidak boleh mengubah isian ini",
+                    key: "403-forbidden",
+                    duration: 2000,
+                });
+            }
         }
     };
     const artFormFinish = async (values: any) => {

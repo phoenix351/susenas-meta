@@ -1171,6 +1171,7 @@ class MakController extends Controller
 
 
                 $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
+
                 $feedback = [
                     'id_komoditas' => $id_komoditas,
                     'nama_komoditas' => $nama_komoditas,
