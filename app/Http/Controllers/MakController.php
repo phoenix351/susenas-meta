@@ -773,7 +773,7 @@ class MakController extends Controller
 
                 foreach ($current_rules as $rule) {
                     $pesan = [
-                        'variable' => $rule['deskripsi_variabel'],
+                        'variable' => $rule['nama_variabel'],
                         'type' => $rule['type'],
                     ];
                     if ($rule['nama_rule'] == 'required' && !isset($value)) {
