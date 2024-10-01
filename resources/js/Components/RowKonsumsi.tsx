@@ -76,25 +76,19 @@ const RowKonsumsi: React.FC<{
     const [isBeliEqual, setIsBeliEqual] = useState<boolean>(false);
     const [isProduksiEqual, setIsProduksiEqual] = useState<boolean>(false);
     const [isVolumeEqual, setIsVolumeEqual] = useState<boolean>(false);
-
+    const hargaProduksiName = `${data.type === "sub" ? "jumlah" : ""}${
+        data.nomor
+    }_produksi_harga${data.subKey}`;
+    const hargaBeliName = `${data.type === "sub" ? "jumlah" : ""}${
+        data.nomor
+    }_beli_harga${data.subKey}`;
+    const hargaTotalName = `${data.nomor}_total_harga`;
     useEffect(() => {
-        let beli = Number(
-            form.getFieldValue(
-                `${data.type === "sub" ? "jumlah" : ""}${
-                    data.nomor
-                }_beli_harga${data.subKey}`
-            )
-        );
+        let beli = Number(form.getFieldValue(hargaBeliName));
         if (!beli) {
             beli = 0;
         }
-        let produksi = Number(
-            form.getFieldValue(
-                `${data.type === "sub" ? "jumlah" : ""}${
-                    data.nomor
-                }_produksi_harga${data.subKey}`
-            )
-        );
+        let produksi = Number(form.getFieldValue(hargaProduksiName));
         if (!produksi) {
             produksi = 0;
         }
@@ -108,14 +102,14 @@ const RowKonsumsi: React.FC<{
         totalHargaCek();
     }, [totalHarga]);
     useEffect(() => {
+        // console.log({ val: form.getFieldValue(hargaBeliName), hargaBeliName });
+    }, [form.getFieldValue(hargaBeliName)]);
+
+    useEffect(() => {
         totalHargaCek();
     }, [rekapMak[data.subKey]["produksi"], rekapMak[data.subKey]["beli"]]);
 
     useEffect(() => {
-        const total =
-            form.getFieldValue(`${data.nomor}_beli_harga`) +
-            form.getFieldValue(`${data.nomor}_produksi_harga`);
-        setTotalHarga(total);
         totalHargaCek();
 
         volumeCalculate();
@@ -133,17 +127,12 @@ const RowKonsumsi: React.FC<{
             }_produksi_harga${data.subKey}`
         );
         let total = value + hargaProduksi;
-        // console.log(value, hargaProduksi);
 
         form.setFieldsValue({
             [`${data.nomor}_total_harga_calculated`]: total,
         });
         setTotalHarga(total);
         if (data.type === "sub") return;
-        // calculate({
-        //     subKey: data.subKey,
-        //     jenis: "beli" as keyof SubTotal,
-        // });
     }
 
     function produksiHargaCalculate(value: number | undefined): void {
@@ -155,11 +144,14 @@ const RowKonsumsi: React.FC<{
     }
     function totalHargaCek(): void {
         const value = form.getFieldValue(`${data.nomor}_total_harga`);
-        const totalHarga = form.getFieldValue(
-            `${data.nomor}_total_harga_calculated`
-        );
 
-        setIsTotalEqual(value == totalHarga);
+        const total =
+            Number(form.getFieldValue(hargaBeliName)) ??
+            0 + Number(form.getFieldValue(hargaProduksiName)) ??
+            0;
+        // console.log({ value, total, ...data });
+
+        setIsTotalEqual(value == total);
         if (data.type == "sub") {
             const hargaProduksi = form.getFieldValue(
                 `${data.type === "sub" ? "jumlah" : ""}${
@@ -248,9 +240,7 @@ const RowKonsumsi: React.FC<{
                 </td>
                 <td style={{ ...rupiahCell }}>
                     <RupiahInput
-                        inputName={`${data.type === "sub" ? "jumlah" : ""}${
-                            data.nomor
-                        }_beli_harga${data.subKey}`}
+                        inputName={hargaBeliName}
                         onChange={_debounce(beliHargaCalculate, 600)}
                         validateStatus={
                             !isBeliEqual && data.type == "sub" ? "error" : ""
@@ -271,9 +261,7 @@ const RowKonsumsi: React.FC<{
                 </td>
                 <td style={{ ...rightCell }}>
                     <RupiahInput
-                        inputName={`${data.type === "sub" ? "jumlah" : ""}${
-                            data.nomor
-                        }_produksi_harga${data.subKey}`}
+                        inputName={hargaProduksiName}
                         onChange={_debounce(produksiHargaCalculate, 600)}
                         validateStatus={
                             !isProduksiEqual && data.type == "sub"
@@ -293,7 +281,7 @@ const RowKonsumsi: React.FC<{
                 </td>
                 <td style={{ ...rightCell }}>
                     <RupiahInput
-                        inputName={`${data.nomor}_total_harga`}
+                        inputName={hargaTotalName}
                         onChange={_debounce(totalHargaCek, 600)}
                         validateStatus={!isTotalEqual ? "error" : ""}
                     />

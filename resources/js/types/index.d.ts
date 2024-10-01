@@ -1,3 +1,5 @@
+import { Rule } from "antd/es/form";
+
 export interface User {
     id: number;
     nama_lengkap: string;
@@ -26,10 +28,13 @@ interface SubTotal {
 }
 interface Rincian {
     id: number;
-    nomor: number;
+    nomor?: number;
     subKey?: string;
     rincian: string;
-    type: string;
+    type?: string;
+    dataType?: string;
+    rules?: Rule[];
+    value?: number | string | undefined;
 }
 interface RekapMak {
     beli: number;
@@ -44,16 +49,7 @@ interface AnggotaRumahTangga {
     rekap: any;
     nomor_art: number;
 }
-interface RincianQc {
-    id: number;
-    nomor?: number;
-    kode_coicop?: string;
-    rincian: string;
-    satuan?: string;
-    type?: string;
-    value: number;
-    dataType: string;
-}
+
 interface RekapMak {
     beli: number;
     produksi: number;

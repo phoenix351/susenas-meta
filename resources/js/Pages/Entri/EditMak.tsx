@@ -1,6 +1,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-import { useEffect, useRef, useState } from "react";
+import { ErrorInfo, useEffect, useRef, useState } from "react";
 import { Head, router } from "@inertiajs/react";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
 import {
@@ -23,7 +23,7 @@ import Blok4_1 from "@/Forms/Mak/Blok4_1";
 import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
 import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
-import { AnggotaRumahTangga, PageProps, RincianQc, SubTotal } from "@/types";
+import { AnggotaRumahTangga, PageProps, Rincian, SubTotal } from "@/types";
 import Blok_QC from "@/Forms/Mak/Blok_QC";
 import {
     ArrowLeftOutlined,
@@ -195,7 +195,8 @@ const Mak = ({
     rekap_konsumsi: any[];
     rekap_konsumsi_art: any[];
 }) => {
-    // const [cariForm] = Form.useForm();
+    // console.log({ rekap_konsumsi_art });
+
     const tabContentStyle: React.CSSProperties = {
         backgroundColor: "#fff",
         paddingLeft: "10px",
@@ -218,7 +219,7 @@ const Mak = ({
     );
     const [loadingReval, setLoadingReval] = useState<boolean>(false);
 
-    const [daftarQc, setDaftarQc] = useState<RincianQc[]>([
+    const [daftarQc, setDaftarQc] = useState<Rincian[]>([
         {
             rincian: "Kalori per Kapita per Hari",
             id: 0,
@@ -281,11 +282,17 @@ const Mak = ({
     const blok1_2Finish = async (values: any) => {
         try {
             const url = route("entri.mak.update");
-            const { data } = await axios.patch(url, values, {
+            const response = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-        } catch (error) {
-            console.error("error saving blok 1 and 2");
+        } catch (error: any) {
+            if (error.response.status === 403) {
+                message.error({
+                    content: "Akun anda tidak boleh mengubah isian ini",
+                    key: "403-forbidden",
+                    duration: 2000,
+                });
+            }
         }
     };
     const artFormFinish = async (values: any) => {
@@ -1072,6 +1079,12 @@ const errorColumns = [
         key: "nomor",
         width: 15,
         render: (text: any, record: any, index: number) => index + 1,
+    },
+    {
+        title: "Blok",
+        dataIndex: "blok",
+        key: "blok",
+        // render: (_: any, record: any) => record.variable,
     },
     {
         title: "Variabel",

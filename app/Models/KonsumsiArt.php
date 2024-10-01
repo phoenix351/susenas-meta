@@ -12,12 +12,6 @@ class KonsumsiArt extends Model
     protected $table = 'konsumsi_art';
     // protected $primaryKey = ['id_ruta', 'id_komoditas'];
 
-    protected $fillable = [
-        'id_art', 'id_komoditas', 'item', 'satuan',
-        'harga_beli', 'harga_produksi',
-        'volume_beli', 'volume_produksi',
-        'volume_total', 'harga_total',
-    ];
     public function komoditas()
     {
         return $this->belongsTo(Komoditas::class, 'id_komoditas');

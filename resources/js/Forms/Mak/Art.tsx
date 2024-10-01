@@ -6,6 +6,7 @@ import {
     InputNumber,
     Skeleton,
     Space,
+    Spin,
     Typography,
 } from "antd";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
@@ -40,39 +41,23 @@ const Art: React.FC<{
     art,
 }) => {
     const [form] = Form.useForm();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     // const [subTotalHarga, setSubTotalHarga] = useState({
     //     12: { beli: 0, produksi: 0, total: 0 },
     //     13: { beli: 0, produksi: 0, total: 0 },
     // });
 
     const konsumsiArtFinish = async (values: any) => {
-        // console.log({ values });
-
-        // messageApi.open({
-        //     type: "loading",
-        //     key: "4_1",
-        //     content: "Memuat Data",
-        // });
         try {
+            setLoading(true);
             const url = route("entri.mak.konsumsi_art.store");
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
-            // console.log({ data });
-            // messageApi.open({
-            //     type: "success",
-            //     key: "4_1",
-            //     content: "Berhasil menyimpan data",
-            // });
-            // console.log("sucess");
         } catch (error) {
-            // messageApi.open({
-            //     type: "error",
-            //     key: "4_1",
-            //     content: "Oops terjadi kesalahan, silahkan hubungi admin",
-            // });
             console.log("error", { error });
+        } finally {
+            setLoading(false);
         }
     };
     // const [totalProduksi, setTotalProduksi] = useState(0);
@@ -186,19 +171,19 @@ const Art: React.FC<{
                 : obj;
         });
 
-        console.log({ newDaftarArt });
+        // console.log({ newDaftarArt });
 
         setDaftarArt(updatedArt);
     }, 600);
-    const handleSubmit = _debounce(() => form.submit(), 3000);
+    // const handleSubmit = _debounce(() => form.submit(), 3000);
     const handleValueChange = _debounce(() => {
         calculateRekap();
-        handleSubmit();
+        form.submit();
         calculateKalori(form.getFieldsValue()).then((totalKalori) => {
             let newDaftarArt = [...daftarArt];
             newDaftarArt[nomor_art]["kalori"] = totalKalori;
         });
-    }, 3000);
+    }, 1000);
     // kumpulan useeffect
     useEffect(() => {
         const fetchKonsumsiArt = async (id_art: string) => {
@@ -271,10 +256,10 @@ const Art: React.FC<{
             konsumsiArtValues[`blok4_31_${nomor_art}_id_art`] = id_art;
             form.setFieldsValue(konsumsiArtValues);
             // setLoading(false);
+            setLoading(false);
         };
         fetchKonsumsiArt(id_art);
         // calculateRekap();
-        setLoading(true);
     }, [id_art]);
 
     useEffect(() => {
@@ -299,19 +284,33 @@ const Art: React.FC<{
                 onValuesChange={handleValueChange}
             >
                 <Space
-                    style={{ width: "100%", justifyContent: "end" }}
+                    style={{ width: "100%", justifyContent: "space-between" }}
                     direction="horizontal"
                 >
-                    <Text>
-                        Jumlah komoditas bahan makanan,bahan minuman, dan rokok
-                        yang terisi pada halaman ini
-                    </Text>
-                    <Form.Item style={{ margin: "auto" }} name="id_ruta" hidden>
-                        <Input readOnly />
-                    </Form.Item>
-                    <Form.Item style={{ margin: "auto" }} name="id_art" hidden>
-                        <Input readOnly />
-                    </Form.Item>
+                    <Space style={{ display: loading ? "" : "none" }}>
+                        Menyimpan... <Spin />
+                    </Space>
+
+                    <Space>
+                        <Text>
+                            Jumlah komoditas bahan makanan,bahan minuman, dan
+                            rokok yang terisi pada halaman ini
+                        </Text>
+                        <Form.Item
+                            style={{ margin: "auto" }}
+                            name="id_ruta"
+                            hidden
+                        >
+                            <Input readOnly />
+                        </Form.Item>
+                        <Form.Item
+                            style={{ margin: "auto" }}
+                            name="id_art"
+                            hidden
+                        >
+                            <Input readOnly />
+                        </Form.Item>
+                    </Space>
                     {/* <Form.Item
                         style={{ margin: "auto" }}
                         name="hal6_jml_komoditas"
