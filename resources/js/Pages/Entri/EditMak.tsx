@@ -1081,6 +1081,12 @@ const errorColumns = [
         render: (text: any, record: any, index: number) => index + 1,
     },
     {
+        title: "Blok",
+        dataIndex: "blok",
+        key: "blok",
+        // render: (_: any, record: any) => record.variable,
+    },
+    {
         title: "Variabel",
         dataIndex: "variable",
         key: "variable",
