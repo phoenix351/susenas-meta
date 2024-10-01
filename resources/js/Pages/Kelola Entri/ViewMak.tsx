@@ -23,7 +23,7 @@ import Blok4_1 from "@/Forms/Mak/Blok4_1";
 import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
 import Blok4_3 from "@/Forms/Mak/Blok4_3";
 import Worksheet from "@/Forms/Mak/Worksheet";
-import { AnggotaRumahTangga, PageProps, RincianQc, SubTotal } from "@/types";
+import { AnggotaRumahTangga, PageProps, Rincian, SubTotal } from "@/types";
 import Blok_QC from "@/Forms/Mak/Blok_QC";
 import {
     ArrowLeftOutlined,
@@ -218,7 +218,7 @@ const Mak = ({
     );
     const [loadingReval, setLoadingReval] = useState<boolean>(false);
 
-    const [daftarQc, setDaftarQc] = useState<RincianQc[]>([
+    const [daftarQc, setDaftarQc] = useState<Rincian[]>([
         {
             rincian: "Kalori per Kapita per Hari",
             id: 0,
