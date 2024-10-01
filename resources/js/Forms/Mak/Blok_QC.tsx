@@ -66,13 +66,6 @@ const Blok4_3: React.FC<{
                 </Blok>
 
                 {contextHolder}
-                {/* Blok I  */}
-                {/* <Form.Item name="kode_prov" label="Provinsi">
-                    <Select
-                        options={daftarProv}
-                        onChange={() => setKabkotDisable(false)}
-                    />
-                </Form.Item> */}
             </Form>
         </Space>
     );

@@ -251,9 +251,6 @@ const Mak = ({
             id: 3,
             value: 0,
             dataType: "integer",
-            rules: [
-                { message: "Nilai harus diatas 0", min: 0, warningOnly: true },
-            ],
         },
         {
             rincian: "Jumlah Semua Komoditas",
