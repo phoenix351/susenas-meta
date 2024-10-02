@@ -35,6 +35,7 @@ interface Rincian {
     dataType?: string;
     rules?: Rule[];
     value?: number | string | undefined;
+    editable?: boolean;
 }
 interface RekapMak {
     beli: number;

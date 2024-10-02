@@ -251,6 +251,7 @@ const Mak = ({
             id: 3,
             value: 0,
             dataType: "integer",
+            editable: true,
         },
         {
             rincian: "Jumlah Semua Komoditas",

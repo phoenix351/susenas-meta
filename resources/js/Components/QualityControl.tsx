@@ -11,7 +11,12 @@ const QualityControl: React.FC<{
     // label: number | string;
 }> = ({ rincian, row_index }) => {
     return (
-        <tr key={row_index}>
+        <tr
+            key={row_index}
+            style={{
+                backgroundColor: rincian.editable ? "#ffffcc" : "",
+            }}
+        >
             <td style={{ ...centerCell, width: "30px" }}>{row_index + 1}</td>
             <td style={{ ...cellStyle, width: "auto" }}>{rincian.rincian}</td>
 
