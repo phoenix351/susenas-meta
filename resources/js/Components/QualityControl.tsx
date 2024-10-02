@@ -8,10 +8,16 @@ import { Rule } from "antd/es/form";
 const QualityControl: React.FC<{
     rincian: Rincian;
     row_index: number;
+    editable?: boolean;
     // label: number | string;
-}> = ({ rincian, row_index }) => {
+}> = ({ rincian, row_index, editable }) => {
     return (
-        <tr key={row_index}>
+        <tr
+            key={row_index}
+            style={{
+                backgroundColor: rincian.editable ? "#ffffcc" : "",
+            }}
+        >
             <td style={{ ...centerCell, width: "30px" }}>{row_index + 1}</td>
             <td style={{ ...cellStyle, width: "auto" }}>{rincian.rincian}</td>
 
@@ -21,6 +27,7 @@ const QualityControl: React.FC<{
                         <RupiahInput
                             key={row_index}
                             inputName={`blokqc_${rincian.id}`}
+                            readOnly
                         />
                     </>
                 ) : (
@@ -40,6 +47,10 @@ const QualityControl: React.FC<{
                                 style={{
                                     textAlign: "right",
                                     width: "100%",
+                                    cursor: "text",
+                                    pointerEvents: rincian.editable
+                                        ? "visible"
+                                        : "none",
                                     // backgroundColor: "red",
                                 }}
                                 formatter={(value) => {

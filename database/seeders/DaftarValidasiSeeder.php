@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\DaftarValidasiModel;
 use App\Models\Nks;
 use Illuminate\Database\Seeder;
-
+use Illuminate\Support\Facades\Storage;
 
 class DaftarValidasiSeeder extends Seeder
 {
@@ -15,14 +15,32 @@ class DaftarValidasiSeeder extends Seeder
     public function run(): void
     {
 
-        $data = [
-            'blok' => 'Quality Control',
-            'nama_variabel' => 'blokqc_3',
-            'deskripsi_variabel' => 'Jumlah Komoditas Non Makanan',
-            'nama_rule' => 'min',
-            'value' => 1
-        ];
+        $file_name = 'public/seeder/komoditas.csv';
+        if (Storage::exists($file_name)) {
+            $csv_data = Storage::get($file_name);
+        } else {
+            $csv_data = file_get_contents($file_name);
+        }
+        $lines = preg_split("/\r\n|\n|\r/", $csv_data);
+        $rows = array_map('str_getcsv', $lines);
+        $headers = array_shift($rows);
+        // dd($lines);
+        foreach ($rows as $index => $row) {
+            $komoditas = new DaftarValidasiModel(
+                [
+                    'id' => $row[0],
+                    'nama_komoditas' => $row[1],
+                    'id_kelompok' => $row[2],
+                    'nama_kelompok' => $row[3],
+                    'satuan' => $row[4],
+                    'kode_coicop' => $row[5],
+                    'kalori' => $row[6],
+                    'flag_basket' => $row[7],
+                    'type' => $row[8],
 
-        DaftarValidasiModel::create($data);
+                ]
+            );
+            $komoditas->save();
+        }
     }
 }
