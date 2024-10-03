@@ -21,24 +21,7 @@ const handleExport = (columns: any[], tableData: any[]) => {
         "\n" +
         tableData
             .map((row) =>
-                columns
-                    .map((column) => {
-                        if (column.render) {
-                            // Use custom render function if present
-                            const renderedValue = column.render(
-                                row[column.dataIndex],
-                                row
-                            );
-                            const value =
-                                renderedValue && renderedValue.props
-                                    ? renderedValue.props.children
-                                    : renderedValue;
-                            return value;
-                        } else {
-                            return row[column.dataIndex];
-                        }
-                    })
-                    .join(";")
+                columns.map((column) => row[column.dataIndex]).join(";")
             )
             .join("\n");
     // console.log({ csvContent });
@@ -96,7 +79,7 @@ const Periksa = ({
             title: "NKS",
             dataIndex: "nks",
             key: "nks",
-            render: (_: any, record: any) => `${record.nks}`,
+            // render: (_: any, record: any) => `${record.nks}`,
             sorter: nksSorter as CompareFn<object>,
         },
         {
