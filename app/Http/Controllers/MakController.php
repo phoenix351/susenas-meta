@@ -865,7 +865,10 @@ class MakController extends Controller
                         // kesesuaian total 
                     }
                     if ($nilai_mak == 0) {
-
+                        $konsumsi = [
+                            'id_komoditas' => 159,
+                            'nama_komoditas' => 'M. MAKANAN DAN MINUMAN JADI [R.160 s.d. R.191]'
+                        ];
                         $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
                     }
                     $nomor++;
