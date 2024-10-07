@@ -1,4 +1,6 @@
 import { Rule } from "antd/es/form";
+import { ValidateStatus } from "antd/es/form/FormItem";
+import { SelectProps } from "antd/es/select";
 
 export interface User {
     id: number;
@@ -55,4 +57,25 @@ interface RekapMak {
     beli: number;
     produksi: number;
     total: number;
+}
+
+interface RincianWorksheet {
+    id: number;
+    nomor?: number | null | string;
+    rincian?: JSX.Element | string;
+    type: string;
+    options?: SelectProps["options"] | undefined;
+    dependentValues?: string[] | number[];
+    children?: RincianWorksheet[];
+    dependencies?: string[];
+    rules?: any;
+    changes?: any;
+}
+
+interface WorksheetRuleProps {
+    ruleName: "less" | "greater" | "less equal" | "greater equal" | "equal";
+    message: string;
+    status: ValidateStatus;
+    dependentName?: string;
+    dependentValue?: number;
 }

@@ -1008,6 +1008,45 @@ class MakController extends Controller
                 $columnsToCheck = $this->wtfDependecies;
                 $fields_check = [];
                 $currentWtf = [];
+                // cek apakah jumlah art lebih dari 0
+                if ($data_mak['wtf_1'] < 1) {
+                    $pesan = [
+                        'variable' => "1. Jumlah ART",
+                        'type' => 'warning',
+                        'pesan' => "Jumlah ART minimal satu",
+
+                    ];
+
+                    $daftar_warning[] = $pesan;
+                }
+                if ($data_mak['wtf_2'] >= $data_mak['wtf_1']) {
+                    $pesan = [
+                        'variable' => "2. Jumlah Balita",
+                        'type' => 'warning',
+                        'pesan' => "Jumlah Balita tidak boleh sama atau lebih daripada Jumlah ART",
+                    ];
+
+                    $daftar_warning[] = $pesan;
+                }
+                if ($data_mak['wtf_3'] >= $data_mak['wtf_1']) {
+                    $pesan = [
+                        'variable' => "3. Jumlah ART yang masih bersekolah",
+                        'type' => 'warning',
+                        'pesan' => "Jumlah ART bersekolah tidak boleh lebih daripada Jumlah ART",
+                    ];
+
+                    $daftar_warning[] = $pesan;
+                }
+                if ($data_mak['wtf_11'] > $data_mak['wtf_3']) {
+                    $pesan = [
+                        'variable' => "11. Jumlah ART yang menerima PIP",
+                        'type' => 'warning',
+                        'pesan' => "Jumlah ART yang menerima PIP tidak boleh lebih daripada Jumlah ART",
+                    ];
+
+                    $daftar_warning[] = $pesan;
+                }
+                // dd($data_mak);
                 foreach ($columnsToCheck as $column) {
                     if (isset($column['fields'])) {
                         $fields_check = array_merge($fields_check, $column['fields']);
@@ -1019,7 +1058,7 @@ class MakController extends Controller
                     }
                 }
 
-                // dd($currentWtf);
+
 
                 if ($jumlah_art != $data_mak['wtf_1']) {
                     $warning = [
@@ -1029,6 +1068,8 @@ class MakController extends Controller
                     ];
                     $daftar_warning[] = $warning;
                 }
+
+
 
                 foreach ($columnsToCheck as $dependency) {
 
