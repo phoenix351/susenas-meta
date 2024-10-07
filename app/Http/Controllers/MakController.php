@@ -1012,6 +1012,8 @@ class MakController extends Controller
                 if ($data_mak['wtf_1'] < 1) {
                     $pesan = [
                         'variable' => "1. Jumlah ART",
+                        'rincian' => "1. Jumlah ART",
+                        'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah ART minimal satu",
 
@@ -1022,6 +1024,8 @@ class MakController extends Controller
                 if ($data_mak['wtf_2'] >= $data_mak['wtf_1']) {
                     $pesan = [
                         'variable' => "2. Jumlah Balita",
+                        'rincian' => "2. Jumlah Balita",
+                        'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah Balita tidak boleh sama atau lebih daripada Jumlah ART",
                     ];
@@ -1031,6 +1035,8 @@ class MakController extends Controller
                 if ($data_mak['wtf_3'] >= $data_mak['wtf_1']) {
                     $pesan = [
                         'variable' => "3. Jumlah ART yang masih bersekolah",
+                        'rincian' => "3. Jumlah ART yang masih bersekolah",
+                        'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah ART bersekolah tidak boleh lebih daripada Jumlah ART",
                     ];
@@ -1040,6 +1046,8 @@ class MakController extends Controller
                 if ($data_mak['wtf_11'] > $data_mak['wtf_3']) {
                     $pesan = [
                         'variable' => "11. Jumlah ART yang menerima PIP",
+                        'rincian' => "11. Jumlah ART yang menerima PIP",
+                        'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah ART yang menerima PIP tidak boleh lebih daripada Jumlah ART",
                     ];
@@ -1064,6 +1072,7 @@ class MakController extends Controller
                     $warning = [
                         'rincian' => "Jumlah Art pada Blok IV.1 tidak sama dengan Rincian Worksheet",
                         'variable' => "Pertanyaan worksheet Nomor 2",
+                        'blok' => 'Worksheet',
                         'type' => 'warning'
                     ];
                     $daftar_warning[] = $warning;

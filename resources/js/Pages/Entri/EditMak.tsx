@@ -725,7 +725,6 @@ const Mak = ({
         });
 
         // initialize last saved
-        form.validateFields();
         setLastSaved(new Date(data.updated_at));
     }, []);
 
