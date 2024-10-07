@@ -1,16 +1,5 @@
-import MetaSelect from "@/Components/MetaSelect";
-import RupiahInput from "@/Components/RupiahInput";
-import {
-    Form,
-    FormInstance,
-    Input,
-    InputNumber,
-    Space,
-    Typography,
-} from "antd";
-import { Rule } from "antd/es/form";
-import { useEffect, useState } from "react";
-// import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import WorksheetRow from "@/Components/WorksheetRow";
+import { Form, FormInstance, message, Space, Typography } from "antd";
 
 const { Text, Title } = Typography;
 
@@ -27,160 +16,6 @@ const centerCell: React.CSSProperties = {
     textAlign: "center",
     padding: "5px",
 };
-const rightStyle: React.CSSProperties = {
-    borderStyle: "solid",
-    border: "solid 1px black",
-    // width: "100%",
-    textAlign: "right",
-    padding: "5px",
-};
-const formItemStyle = {
-    margin: "auto",
-    padding: "5px",
-};
-interface SelectItem {
-    label: string;
-    value: string | number;
-}
-interface RincianWorksheet {
-    id: number;
-    nomor?: number | null | string;
-    rincian?: JSX.Element | string;
-    type: string;
-    options?: SelectItem[] | undefined;
-    dependentValues?: string[] | number[];
-    children?: RincianWorksheet[];
-    dependencies?: string[];
-    rules?: Rule[];
-}
-const InputComponent: React.FC<{
-    type: string;
-    name: string;
-    customKey: number; // Use a different name
-    options?: SelectItem[];
-    children?: RincianWorksheet[];
-    setValue?: (value: any) => void;
-    rules?: Rule[];
-    dependencies?: string[];
-}> = ({
-    type,
-    name,
-    options,
-    customKey,
-    children,
-    setValue,
-    dependencies,
-    rules,
-}) => {
-    const inputComponents: { [type: string]: JSX.Element } = {
-        number: (
-            <Form.Item
-                name={name}
-                label={null}
-                dependencies={dependencies}
-                rules={rules}
-            >
-                <InputNumber />
-            </Form.Item>
-        ),
-        binary: (
-            <MetaSelect
-                name={name}
-                options={[
-                    { label: "[1] YA", value: 1 },
-                    { label: "[5] TIDAK", value: 5 },
-                ]}
-                onChange={setValue && ((value) => setValue(value))}
-            />
-        ),
-        rupiah: <RupiahInput inputName={name} editable={customKey === 26} />, // Use customKey
-        multi: (
-            <MetaSelect
-                name={name}
-                options={options ?? []}
-                onChange={setValue && ((value) => setValue(value))}
-            />
-        ),
-    };
-    return inputComponents[type];
-};
-
-const renderRow: React.FC<{ props: RincianWorksheet; defaultValue: any }> = ({
-    props,
-    defaultValue,
-}) => {
-    const [value, setValue] = useState<null | string | number>(defaultValue);
-    const [activeChild, setActiveChild] = useState<JSX.Element[]>([]);
-    const commonColumns = (
-        <>
-            <td style={centerCell}>{props.nomor}</td>
-            <td style={cellStyle}>{props.rincian}</td>
-        </>
-    );
-
-    useEffect(() => {
-        if (props.children) {
-            let activeChild = props.children
-                .filter((item: RincianWorksheet, index: number) => {
-                    let logic = false;
-                    if (item.dependentValues) {
-                        item.dependentValues.forEach((val) => {
-                            if (val == value) {
-                                logic = true;
-                            }
-                        });
-                    }
-
-                    return logic;
-                })
-                .map((child: any) => (
-                    <tr key={props.id}>
-                        <td style={centerCell}>{}</td>
-                        <td style={cellStyle}>{child.rincian}</td>
-                        <td style={centerCell}>
-                            <InputComponent
-                                type={child.type}
-                                name={`wtf_${child.nomor}`}
-                                options={child.options}
-                                key={child.nomor}
-                                customKey={child.id}
-                                dependencies={child.dependencies}
-                                rules={child.rules}
-                            />
-                        </td>
-                    </tr>
-                ));
-            setActiveChild(activeChild);
-        }
-    }, [value, props.children]);
-    // setValue("1");
-
-    return (
-        <>
-            <tr
-                style={{
-                    backgroundColor: props.id % 2 === 0 ? " #fffae6" : "",
-                }}
-            >
-                {commonColumns}
-                <td style={centerCell}>
-                    <InputComponent
-                        type={props.type}
-                        name={`wtf_${props.id}`}
-                        options={props.options}
-                        key={props.id}
-                        customKey={props.id}
-                        children={props.children}
-                        setValue={setValue}
-                        dependencies={props.dependencies}
-                        rules={props.rules}
-                    />
-                </td>
-            </tr>
-            {activeChild.map((child) => child)}
-        </>
-    );
-};
 
 const getRules = (
     { getFieldValue }: { getFieldValue: (arg0: string) => any },
@@ -189,6 +24,8 @@ const getRules = (
     message: string
 ) => ({
     validator(rule: any, value: number, callback: any) {
+        console.log({ rule });
+
         const dependentValue = getFieldValue(dependentName);
         let test = true;
         if (ruleName == "less") {
@@ -216,16 +53,12 @@ const daftarRincian = [
         nomor: 1,
         rincian: "Jumlah ART (Blok III Rincian 301)",
         type: "number",
-        rules: [
-            () => ({
-                validator(rule: any, value: number, callback: any) {
-                    if (value < 1) {
-                        return Promise.reject("Jumlah ART minimal satu");
-                    }
-                    return Promise.resolve();
-                },
-            }),
-        ],
+        rules: {
+            ruleName: "greater equal",
+            message: "Jumlah ART minimal satu",
+            status: "error",
+            dependentValue: 1,
+        },
     },
     {
         id: 2,
@@ -234,41 +67,27 @@ const daftarRincian = [
         type: "number",
 
         dependencies: ["wtf_1"],
-        rules: [
-            // ({ getFieldValue }: { getFieldValue: (arg0: string) => any }) => ({
-            //     validator(rule: any, value: number, callback: any) {
-            //         const wtf_1 = getFieldValue("wtf_1");
-            //         if (value > wtf_1) {
-            //             return Promise.reject(
-            //                 "Jumlah Balita tidak bisa melebihi jumlah ART"
-            //             );
-            //         }
-            //         return Promise.resolve();
-            //     },
-            // }),
-            ({ getFieldValue }: { getFieldValue: (arg0: string) => any }) =>
-                getRules(
-                    { getFieldValue },
-                    "wtf_1",
-                    "less",
-                    "Jumlah Balita tidak bisa melebihi atau sama dengan jumlah ART"
-                ),
-        ],
+        rules: {
+            ruleName: "less",
+            message:
+                "Jumlah Balita tidak boleh sama atau lebih dari jumlah ART",
+            status: "error",
+            dependentName: "wtf_1",
+        },
     },
     {
         id: 3,
         nomor: 3,
         rincian: "Jumlah ART yang masih bersekolah (R1402=2)",
         type: "number",
-        rules: [
-            ({ getFieldValue }: { getFieldValue: (arg0: string) => any }) =>
-                getRules(
-                    { getFieldValue },
-                    "wtf_1",
-                    "less equal",
-                    "Jumlah ART yang bersekolah tidak bisa melebihi jumlah ART"
-                ),
-        ],
+
+        rules: {
+            ruleName: "less equal",
+            message:
+                "Jumlah ART yang bersekolah tidak bisa melebihi jumlah ART",
+            status: "error",
+            dependentName: "wtf_1",
+        },
     },
 
     {
@@ -353,19 +172,13 @@ const daftarRincian = [
                 dependentValues: [1],
                 rincian: "berapa ART yang menerima PIP? (SD s.d. Kuliah)",
                 type: "number",
-                rules: [
-                    ({
-                        getFieldValue,
-                    }: {
-                        getFieldValue: (arg0: string) => any;
-                    }) =>
-                        getRules(
-                            { getFieldValue },
-                            "wtf_3",
-                            "less equal",
-                            "Jumlah ART yang menerima PIP tidak bisa melebihi ART yang bersekolah"
-                        ),
-                ],
+                rules: {
+                    ruleName: "less equal",
+                    message:
+                        "Jumlah ART yang menerima PIP tidak bisa melebihi ART yang bersekolah",
+                    status: "warning",
+                    dependentName: "wtf_3",
+                },
             },
         ],
     },
@@ -432,37 +245,15 @@ const Worksheet: React.FC<{
                     </thead>
                     <tbody>
                         {/* render rows */}
-                        {daftarRincian.map((rincian) =>
-                            renderRow({
-                                props: rincian,
-                                defaultValue: form.getFieldValue(
+                        {daftarRincian.map((rincian, index) => (
+                            <WorksheetRow
+                                key={index}
+                                props={rincian}
+                                defaultValue={form.getFieldValue(
                                     `wtf_${rincian.id}`
-                                ),
-                            })
-                        )}
-                        {/* <tr style={{ backgroundColor: "#fffae6" }}>
-                            <td style={centerCell}>1</td>
-                            <td style={centerCell}>Banyaknya ART</td>
-
-                            <td style={centerCell}>
-                                <Form.Item name="wtf_1">
-                                    <Input />
-                                </Form.Item>
-                            </td>
-                        </tr>
-                        <tr style={{ backgroundColor: "#fffae6" }}>
-                            <td style={centerCell}>2</td>
-                            <td style={centerCell}>Jumlah Balita</td>
-
-                            <td style={centerCell}>
-                                <Form.Item
-                                    name="wtf_2"
-                                   
-                                >
-                                    <Input />
-                                </Form.Item>
-                            </td>
-                        </tr> */}
+                                )}
+                            />
+                        ))}
                     </tbody>
                 </table>
             </Form>
