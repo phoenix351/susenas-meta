@@ -12,9 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('komoditas', function (Blueprint $table) {
-        //     $table->integer("nomor_urut")->default(0);
-        // });
+        Schema::table('komoditas', function (Blueprint $table) {
+            $table->integer("nomor_urut")->default(0);
+        });
         $daftar_komoditas = Komoditas::all();
         foreach ($daftar_komoditas as $komoditas) {
             # code...
@@ -30,7 +30,6 @@ return new class extends Migration
     {
         Schema::table('komoditas', function (Blueprint $table) {
             $table->dropColumn("komoditas");
-            
         });
     }
 };

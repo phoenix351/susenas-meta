@@ -1,6 +1,12 @@
 import MyModal from "@/Components/Modal";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { DeleteOutlined, EditOutlined, HeartOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+    DeleteOutlined,
+    EditOutlined,
+    HeartOutlined,
+    PlusOutlined,
+    ReloadOutlined,
+} from "@ant-design/icons";
 import {
     Button,
     Form,
@@ -198,38 +204,36 @@ const index = () => {
             {contextHolder}
 
             <div>Komoditas</div>
-            <Popconfirm 
-            title="Nomor Urut akan direset sesuai urutan yang sekarang dari 1 sampai n"
-            onConfirm={async ()=>{
-                try {
-                    messageApi.open({
-                        type:"loading",
-                        content:"Sedang Mengurutkan kembali Komoditas",
-                        key:"urut"
-                    })
-                    const response = await axios.get(route("komoditas.sort"));
-                    messageApi.open({
-                        type:"success",
-                        content:"Selesai mengurutkan Komoditas",
-                        key:"urut"
-                    })
-                    getData();
-                } catch (error) {
-                    messageApi.open({
-                        type:"error",
-                        content:"Terjadi kesalahan, silahkan hubungi pengembang.",
-                        key:"urut"
-                    })
-                    
-                }
-            }}
+            <Popconfirm
+                title="Nomor Urut akan direset sesuai urutan yang sekarang dari 1 sampai n"
+                onConfirm={async () => {
+                    try {
+                        messageApi.open({
+                            type: "loading",
+                            content: "Sedang Mengurutkan kembali Komoditas",
+                            key: "urut",
+                        });
+                        const response = await axios.get(
+                            route("komoditas.sort")
+                        );
+                        messageApi.open({
+                            type: "success",
+                            content: "Selesai mengurutkan Komoditas",
+                            key: "urut",
+                        });
+                        getData();
+                    } catch (error) {
+                        messageApi.open({
+                            type: "error",
+                            content:
+                                "Terjadi kesalahan, silahkan hubungi pengembang.",
+                            key: "urut",
+                        });
+                    }
+                }}
             >
-
-            <Button
-                icon={<ReloadOutlined />}            >
-                Reset Nomor Urut
-            </Button>
-                    </Popconfirm>
+                <Button icon={<ReloadOutlined />}>Reset Nomor Urut</Button>
+            </Popconfirm>
             <Button
                 icon={<PlusOutlined />}
                 onClick={() => {

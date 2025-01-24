@@ -36,6 +36,7 @@
         "postcss-preset-env": "^8.4.2",
         "react-csv": "^2.2.2",
         "react-highlight-words": "^0.20.0",
-        "react-input-mask": "^2.0.4"
+        "react-input-mask": "^2.0.4",
+        "recharts": "^2.15.0"
     }
 }

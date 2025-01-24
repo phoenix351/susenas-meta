@@ -172,7 +172,7 @@ class MakController extends Controller
         ];
 
         // $kondisi_total = 100;
-        return Inertia::render('Dashboard', $data);
+        return Inertia::render('Progress/index', $data);
     }
 
     public function store(Request $request)

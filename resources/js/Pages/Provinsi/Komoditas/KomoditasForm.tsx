@@ -86,9 +86,9 @@ const KomoditasForm = ({
                             onChange={(value: SegmentedValue) => {
                                 if (value === "Setelah") {
                                     setShowKomoditas(true);
-                                    return
+                                    return;
                                 }
-setShowKomoditas(false)
+                                setShowKomoditas(false);
                             }}
                         />
                     </Form.Item>
@@ -96,7 +96,7 @@ setShowKomoditas(false)
                         <Form.Item name={"after_id"} wrapperCol={{ offset: 8 }}>
                             <Select
                                 options={daftarKomoditas.map((komoditas) => ({
-                                    label: `${komoditas.id}. ${komoditas.nama_komoditas}`,
+                                    label: `${komoditas.nomor_urut}. ${komoditas.nama_komoditas}`,
                                     value: komoditas.id,
                                 }))}
                                 showSearch

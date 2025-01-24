@@ -134,7 +134,7 @@ Route::middleware('auth')->group(function () {
     route::get('/periksa', [PeriksaController::class, 'index'])->name('periksa');
     route::get('/unduh-raw', [MakController::class, 'unduh_raw'])->name('unduh_raw');
 
-    
+
 
 
 
@@ -147,17 +147,17 @@ Route::middleware('auth')->group(function () {
     route::get('/range-harga', [RangeHargaController::class, 'index'])->name('range_harga.index');
     route::get('/range-harga/fetch', [RangeHargaController::class, 'fetch'])->name('range_harga.fetch');
     route::post('/range-harga/upload', [RangeHargaController::class, 'upload'])->name('range_harga.upload');
-    
-    
-    
+
+
+
     //route komoditas
     route::get('/komoditas', [KomoditasController::class, 'index'])->name('komoditas.index');
     route::post('/komoditas', [KomoditasController::class, 'store'])->name('komoditas.store');
     route::put('/komoditas', [KomoditasController::class, 'update'])->name('komoditas.update');
     route::delete('/komoditas/{id}', [KomoditasController::class, 'destroy'])->name('komoditas.destroy');
     route::get('/komoditas/sort', [KomoditasController::class, 'sort'])->name('komoditas.sort');
-    
-    
+
+
     Route::get('/editable', function () {
         return Inertia::render('Editable');
     });

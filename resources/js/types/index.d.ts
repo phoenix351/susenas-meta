@@ -89,4 +89,13 @@ interface KomoditasDataType {
     kalori: number;
     flag_basket: number | boolean;
     type: string;
+    nomor_urut: number;
+}
+
+interface ProgressData {
+    name: string;
+    target: number;
+    error: number;
+    warning: number;
+    clean: number;
 }

@@ -894,6 +894,7 @@ const Mak = ({
                                     daftarQc={daftarQc}
                                 />
                             ),
+                            disabled: true,
                         },
                     ]}
                 />
