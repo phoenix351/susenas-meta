@@ -79,3 +79,14 @@ interface WorksheetRuleProps {
     dependentName?: string;
     dependentValue?: number;
 }
+
+interface KomoditasDataType {
+    id: number;
+    nama_komoditas: string;
+    id_kelompok: number;
+    nama_kelompok: string;
+    satuan: string;
+    kalori: number;
+    flag_basket: number | boolean;
+    type: string;
+}

@@ -1,21 +1,12 @@
-import ApplicationLogo from "@/Components/ApplicationLogo";
 import { Menu, Space } from "antd";
 import Sider from "antd/es/layout/Sider";
 import {
     DashboardOutlined,
-    BarChartOutlined,
-    ShoppingOutlined,
-    FileOutlined,
     UsergroupAddOutlined,
-    DatabaseOutlined,
-    FileDoneOutlined,
-    HomeOutlined,
-    DesktopOutlined,
     EditOutlined,
-    EyeOutlined,
     AuditOutlined,
-    SettingOutlined,
     MoneyCollectOutlined,
+    ShoppingOutlined,
 } from "@ant-design/icons";
 import { User } from "@/types";
 type AuthSiderProps = {
@@ -84,6 +75,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 icon: <MoneyCollectOutlined />,
                 onClick: () => handleMenuClick("range_harga.index"),
                 label: "Range Harga",
+            },
+            {
+                key: "komoditas",
+                icon: <ShoppingOutlined />,
+                onClick: () => handleMenuClick("komoditas.index"),
+                label: "Komoditas",
             },
         ];
     }

@@ -1,0 +1,49 @@
+[
+    { "id_kelompok": "0", "nama_kelompok": "A. PADI-PADIAN [R.2 s.d. R.7]" },
+    { "id_kelompok": "1", "nama_kelompok": "B. UMBI-UMBIAN [R.9 s.d. R.15]" },
+    {
+        "id_kelompok": "2",
+        "nama_kelompok": "C. IKAN/UDANG/CUMI/KERANG [R.17 s.d. R.54]"
+    },
+    { "id_kelompok": "3", "nama_kelompok": "D. DAGING [R.56 s.d. R.64]" },
+    {
+        "id_kelompok": "4",
+        "nama_kelompok": "E. TELUR DAN SUSU [R.66 s.d. R.74]"
+    },
+    {
+        "id_kelompok": "5",
+        "nama_kelompok": "F. SAYUR-SAYURAN [R.76 s.d. R.101]"
+    },
+    {
+        "id_kelompok": "6",
+        "nama_kelompok": "G. KACANG-KACANGAN [R.103 s.d. R.109]"
+    },
+    {
+        "id_kelompok": "7",
+        "nama_kelompok": "H. BUAH-BUAHAN [R.111 s.d. R.125]"
+    },
+    {
+        "id_kelompok": "8",
+        "nama_kelompok": "I. MINYAK DAN KELAPA [R.127 s.d. R.130]"
+    },
+    {
+        "id_kelompok": "9",
+        "nama_kelompok": "J. BAHAN MINUMAN [R.132 s.d. R.138]"
+    },
+    {
+        "id_kelompok": "10",
+        "nama_kelompok": "K. BUMBU-BUMBUAN [R.140 s.d. R.153]"
+    },
+    {
+        "id_kelompok": "11",
+        "nama_kelompok": "L. BAHAN MAKANAN LAINNYA [R.155 s.d. R.158]"
+    },
+    {
+        "id_kelompok": "12",
+        "nama_kelompok": "M. MAKANAN DAN MINUMAN JADI [R.160 s.d. R.191]"
+    },
+    {
+        "id_kelompok": "13",
+        "nama_kelompok": "N. ROKOK DAN TEMBAKAU [R.193 s.d. R.197]"
+    }
+]

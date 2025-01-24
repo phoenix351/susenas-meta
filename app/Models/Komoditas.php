@@ -17,7 +17,9 @@ class Komoditas extends Model
         'nama_kelompok',
         'satuan',
         'kode_coicop',
-        'kalori'
+        'kalori',
+        'flag_basket',
+        'nomor_urut'
     ];
     public $timestamps = false;
     public function konsumsi(): HasMany
