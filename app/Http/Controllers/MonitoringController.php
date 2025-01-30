@@ -171,4 +171,48 @@ class MonitoringController extends Controller
             throw $th;
         }
     }
+    public function get_rekap_wilayah($tipe, $kode)
+    {
+
+        if ($tipe == "kabkot") {
+            $rekap_kabkot = DB::table('kabkot_summary')->get();
+            $data = [];
+            foreach ($rekap_kabkot as  $kabkot) {
+                # code...
+                $data[]=[
+                    "name"=>$kabkot->kode_kabkot.". ".$kabkot->kabkot,
+                    "error"=>$kabkot->dok_error,
+                    "warning"=>$kabkot->dok_warning,
+                    "clean"=>$kabkot->dok_clean,
+                    "target"=>$kabkot->jumlah_dok,
+                    "tipe"=>"nks",
+                    "kode"=>$kabkot->kode_kabkot,
+                ];
+            }
+            return response()->json($data, 200);
+        }
+        if ($tipe == "nks") {
+            $rekap_nks = DB::table('nks_summary');
+            if ($kode != '00') {
+                $rekap_nks = $rekap_nks->where('kode_kabkot', $kode);
+            }
+            $rekap_nks = $rekap_nks->get();
+            $data = [];
+            foreach ($rekap_nks as  $nks) {
+                # code...
+                $data[]=[
+                    "name"=>$nks->nks,
+                    "error"=>$nks->dok_error,
+                    "warning"=>$nks->dok_warning,
+                    "clean"=>$nks->dok_clean,
+                    "target"=>$nks->jumlah_dok,
+                    "tipe"=>"null",
+                    "kode"=>$kode,
+                ];
+            }
+            return response()->json($data, 200);
+        }
+        
+        return response()->json([], 200);
+    }
 }

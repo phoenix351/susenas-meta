@@ -98,4 +98,6 @@ interface ProgressData {
     error: number;
     warning: number;
     clean: number;
+    tipe:string;
+    kode:string;
 }

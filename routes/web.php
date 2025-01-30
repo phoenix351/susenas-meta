@@ -128,6 +128,7 @@ Route::middleware('auth')->group(function () {
 
     route::get('/api/monitoring/rekap-kabkot', [MonitoringController::class, 'get_rekap_kabkot'])->name('api.monitoring.rekap_kabkot');
     route::get('/api/monitoring/rekap-nks', [MonitoringController::class, 'get_rekap_nks'])->name('api.monitoring.rekap_nks');
+    route::get('/api/monitoring/wilayah/{tipe}/{kode}', [MonitoringController::class, 'get_rekap_wilayah'])->name('api.monitoring.wilayah');
     route::get('/api/monitoring/rekap-user', [MonitoringController::class, 'get_rekap_user'])->name('api.monitoring.rekap_user');
 
     route::get('/kelola-entri', [MakController::class, 'kelola_entri'])->name('kelola-entri');

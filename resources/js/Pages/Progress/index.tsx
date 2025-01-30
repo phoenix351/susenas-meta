@@ -85,9 +85,10 @@ const Index = () => {
                         error: kabkot.dok_error,
                         warning: kabkot.dok_warning,
                         clean: kabkot.dok_clean,
+                        tipe:"nks",
+                        kode:kabkot.kode_kabkot,
                     })
                 );
-                console.log({ progress });
 
                 setProgressData(progress);
                 const response_nks = await axios.get(
