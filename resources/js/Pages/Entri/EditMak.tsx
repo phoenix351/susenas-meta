@@ -911,6 +911,7 @@ const Mak = ({
                 title="Daftar Evaluasi"
                 key={"range-harga-modal"}
                 width="1200px"
+                noFooter
             >
                 <Space
                     style={{
@@ -955,12 +956,15 @@ const Mak = ({
                         <Tabs
                             onChange={handleChange}
                             type="card"
+                            tabBarStyle={{padding:0,margin:0}}
                             items={[
                                 {
                                     label: (
-                                        <Badge count={errorList.length}>
-                                            Error Isian
-                                        </Badge>
+                                        
+                                            <Badge count={errorList.length}>
+                                                Error Isian
+                                            </Badge>
+                                        
                                     ),
                                     key: "1",
                                     children: (

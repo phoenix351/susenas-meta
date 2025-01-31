@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Konsumsi;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +18,10 @@ class MonitoringController extends Controller
     public function index()
     {
         return Inertia::render('Progress/index');
+    }
+    public function dashboard()
+    {
+        return Inertia::render('Provinsi/Dashboard/index');
     }
     public function get_rekap_nks()
     {
@@ -179,14 +185,15 @@ class MonitoringController extends Controller
             $data = [];
             foreach ($rekap_kabkot as  $kabkot) {
                 # code...
-                $data[]=[
-                    "name"=>$kabkot->kode_kabkot.". ".$kabkot->kabkot,
-                    "error"=>$kabkot->dok_error,
-                    "warning"=>$kabkot->dok_warning,
-                    "clean"=>$kabkot->dok_clean,
-                    "target"=>$kabkot->jumlah_dok,
-                    "tipe"=>"nks",
-                    "kode"=>$kabkot->kode_kabkot,
+                $data[] = [
+                    "name" => $kabkot->kabkot,
+                    "error" => $kabkot->dok_error,
+                    "warning" => $kabkot->dok_warning,
+                    "clean" => $kabkot->dok_clean,
+                    "target" => $kabkot->jumlah_dok,
+                    "tipe" => "nks",
+                    "kode" => $kabkot->kode_kabkot,
+                    "fullcode" => "71" . $kabkot->kode_kabkot,
                 ];
             }
             return response()->json($data, 200);
@@ -200,19 +207,38 @@ class MonitoringController extends Controller
             $data = [];
             foreach ($rekap_nks as  $nks) {
                 # code...
-                $data[]=[
-                    "name"=>$nks->nks,
-                    "error"=>$nks->dok_error,
-                    "warning"=>$nks->dok_warning,
-                    "clean"=>$nks->dok_clean,
-                    "target"=>$nks->jumlah_dok,
-                    "tipe"=>"null",
-                    "kode"=>$kode,
+                $temp = [
+                    "name" => $nks->nks,
+                    "error" => $nks->dok_error,
+                    "warning" => $nks->dok_warning,
+                    "clean" => $nks->dok_clean,
+                    "target" => $nks->jumlah_dok,
+                    "tipe" => "null",
+                    "kode" => $kode,
                 ];
+                $temp["fullcode"] = $temp["name"];
+                $data[] = $temp;
             }
             return response()->json($data, 200);
         }
-        
+
         return response()->json([], 200);
+    }
+    private function konsumsi_perkapita_total($kode_kabkot)
+    {
+        $konsumsi_ruta = Konsumsi::with(["komoditas"])->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
+            $query->where("status_dok", "like", "clean")
+                ->where("kode_kabkot", $kode_kabkot);
+        })
+            
+            ->where("volume_total",">",0)
+            ->get();
+
+        return $konsumsi_ruta;
+    }
+    public function update_dashboard()
+    {
+        $konsumsi_perkapita = $this->konsumsi_perkapita_total("08");
+        return response()->json($konsumsi_perkapita, 200);
     }
 }

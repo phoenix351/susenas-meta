@@ -13,6 +13,7 @@ export interface User {
     bidang: string;
     role: string;
     jabatan: string;
+    kode_kabkot:string;
 }
 
 export type PageProps<
@@ -100,4 +101,17 @@ interface ProgressData {
     clean: number;
     tipe:string;
     kode:string;
+    fullcode:string;
+}
+interface ModalProps {
+    title: string;
+    openModal: boolean;
+    handleOk: () => void;
+    confirmLoadingModal: boolean;
+    handleCancel: () => void;
+    okText?: string;
+    cancelText?: string;
+    maskClosable?: boolean;
+    width?: number | string;
+    noFooter?:boolean;
 }

@@ -7,6 +7,7 @@ import {
     AuditOutlined,
     MoneyCollectOutlined,
     ShoppingOutlined,
+    DatabaseOutlined,
 } from "@ant-design/icons";
 import { User } from "@/types";
 type AuthSiderProps = {
@@ -22,6 +23,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
     selectedKey,
     handleMenuClick,
 }) => {
+    
     let menuItems = [
         // {
         //     key: "dashboard",
@@ -40,10 +42,63 @@ const AuthSider: React.FC<AuthSiderProps> = ({
     if (user.role === "ADMIN") {
         menuItems = [
             {
-                key: "dashboard",
+                key: "progress",
                 icon: <DashboardOutlined />,
                 onClick: () => handleMenuClick("dashboard"),
-                label: "Monitoring",
+                label: "Progress",
+            },
+
+            {
+                key: "entri",
+                icon: <EditOutlined />,
+                onClick: () => handleMenuClick("entri"),
+                label: "Entri",
+            },
+            // {
+            //     key: "kelola-entri",
+            //     icon: <SettingOutlined />,
+            //     onClick: () => handleMenuClick("kelola-entri"),
+            //     label: "Kelola Entri",
+            // },
+            {
+                key: "periksa",
+                icon: <AuditOutlined />,
+                onClick: () => handleMenuClick("periksa"),
+                label: "periksa",
+            },
+            {
+                key: "users",
+                icon: <UsergroupAddOutlined />,
+                onClick: () => handleMenuClick("users.index"),
+                label: "Kelola Petugas",
+            },
+            {
+                key: "range_harga",
+                icon: <MoneyCollectOutlined />,
+                onClick: () => handleMenuClick("range_harga.index"),
+                label: "Range Harga",
+            },
+            {
+                key: "komoditas",
+                icon: <ShoppingOutlined />,
+                onClick: () => handleMenuClick("komoditas.index"),
+                label: "Komoditas",
+            },
+        ];
+    }
+    if(user.kode_kabkot==="00"){
+        menuItems = menuItems = [
+            {
+                key: "progress",
+                icon: <DashboardOutlined />,
+                onClick: () => handleMenuClick("progress"),
+                label: "Progress",
+            },
+            {
+                key: "dashboard",
+                icon: <DatabaseOutlined />,
+                onClick: () => handleMenuClick("dashboard"),
+                label: "Dashboard",
             },
 
             {

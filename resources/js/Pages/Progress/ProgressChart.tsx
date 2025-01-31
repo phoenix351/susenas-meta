@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     BarChart,
     Bar,
@@ -10,14 +10,16 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { ProgressData } from "@/types";
-import { Button, message, TooltipProps } from "antd";
+import { Button, message, Space, Typography } from "antd";
 import axios from "axios";
 import { LeftOutlined } from "@ant-design/icons";
+import CustomTooltip from "./CustomTooltip";
+const { Title } = Typography;
 
 const ProgressChart = ({ data }: { data: ProgressData[] }) => {
     const [hoveredData, setHoveredData] = useState(null);
     const [currentData, setCurrentData] = useState(data);
-    const [level, setLevel] = useState("kabkot");
+    const [wilayah, setWilayah] = useState({tipe:"kabkot",nama:"Sulawesi Utara"});
     const [messageApi, contextHolder] = message.useMessage();
     async function getData(tipe: string, kode: string) {
         if (tipe == "null") {
@@ -38,7 +40,7 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
                 route("api.monitoring.wilayah", { tipe, kode })
             );
             setCurrentData(data);
-            setLevel(tipe);
+            setWilayah({tipe,nama:kode});
             messageApi.open({
                 content: "selesai memuat data",
                 key: "get-data",
@@ -53,7 +55,7 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
         }
     }
     function goBack() {
-        if (level == "kabkot") {
+        if (wilayah.tipe == "kabkot") {
             messageApi.open({
                 content: "asik asik jos",
                 key: "get-data",
@@ -61,57 +63,78 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
             });
             return;
         }
-        getData("kabkot","00");
+        getData("kabkot", "00");
     }
+    useEffect(() => {
+        getData("kabkot", "00");
+    }, []);
+
     return (
         <>
             {" "}
             {contextHolder}
-            <Button onClick={goBack}>
-                <LeftOutlined /> Kembali
-            </Button>
-            <BarChart
-                width={1000}
-                height={600}
-                data={currentData}
-                margin={{
-                    top: 20,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                }}
-                onClick={() => {
-                    if (hoveredData) {
-                        const tipe = hoveredData[0]["payload"]["tipe"];
-                        const kode = hoveredData[0]["payload"]["kode"];
-                        getData(tipe, kode);
-                    }
-                }}
-                onMouseMove={(event: any) => {
-                    if (event && event.activePayload) {
-                        setHoveredData(event.activePayload);
-                    } else {
-                        setHoveredData(null);
-                    }
-                }}
-            >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {/* <Bar dataKey="target" stackId="a" fill="grey" /> */}
-                <Bar
-                    dataKey="clean"
-                    stackId="a"
-                    fill="green"
-                    onClick={(data, index) => {
-                        console.log({ data, index });
+            <Space align="center" style={{
+                
+                marginRight:30,
+                marginLeft:20,
+                width:"100%"
+            }}>
+                <Button onClick={goBack}>
+                    <LeftOutlined /> Kembali
+                </Button>
+                <Space style={{marginLeft:"26vw",textAlign:'center'}}>
+
+                <Title>Progress Pendataan 71{wilayah.nama}</Title>
+                </Space>
+
+            </Space>
+            <ResponsiveContainer width={"100%"}  height={500}>
+                <BarChart
+                    data={currentData}
+                    margin={{
+                        top: 20,
+                        right: 30,
+                        left: 20,
+                        bottom: 10,
                     }}
-                />
-                <Bar dataKey="warning" stackId="a" fill="orange" />
-                <Bar dataKey="error" stackId="a" fill="red" />
-            </BarChart>
+                    
+                    onClick={() => {
+                        if (hoveredData) {
+                            const tipe = hoveredData[0]["payload"]["tipe"];
+                            const kode = hoveredData[0]["payload"]["kode"];
+                            getData(tipe, kode);
+                        }
+                    }}
+                    onMouseMove={(event: any) => {
+                        if (event && event.activePayload) {
+                            setHoveredData(event.activePayload);
+                        } else {
+                            setHoveredData(null);
+                        }
+                    }}
+                    >
+                    <Legend
+                        layout="horizontal"
+                        verticalAlign="top"
+                        align="center"
+                    />
+                    <CartesianGrid strokeDasharray="3 3"  />
+                    <XAxis dataKey="fullcode" angle={-30} textAnchor="end" />
+                    <YAxis />
+                    <Tooltip content={<CustomTooltip />} />
+                    {/* <Bar dataKey="target" stackId="a" fill="grey" /> */}
+                    <Bar
+                        dataKey="clean"
+                        stackId="a"
+                        fill="green"
+                        onClick={(data, index) => {
+                            console.log({ data, index });
+                        }}
+                    />
+                    <Bar dataKey="warning" stackId="a" fill="orange" />
+                    <Bar dataKey="error" stackId="a" fill="red" />
+                </BarChart>
+            </ResponsiveContainer>
         </>
     );
 };

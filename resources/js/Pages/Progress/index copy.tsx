@@ -457,7 +457,10 @@ const Index = () => {
     return (
         <>
             <Head title="Index" />
-           <ProgressChart data={progressdata} key={"2-1"}/>
+            <Tabs
+                style={{ backgroundColor: "#fff", padding: "10px" }}
+                items={items}
+            />
         </>
     );
 };

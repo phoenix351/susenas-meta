@@ -30,7 +30,7 @@ class PenggunaController extends Controller
             ->get();
 
         // Return the view with the users
-        return Inertia::render('Pengguna', ['users' => $users, 'kode_kabkot' => $kode_kabkot]);
+        return Inertia::render('Petugas/index', ['users' => $users, 'kode_kabkot' => $kode_kabkot]);
     }
     public function store(Request $request)
     {

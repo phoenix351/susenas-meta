@@ -1,17 +1,8 @@
 import React, { PropsWithChildren, useState } from "react";
 import { Button, Divider, Modal } from "antd";
+import { ModalProps } from "@/types";
 
-interface ModalProps {
-    title: string;
-    openModal: boolean;
-    handleOk: () => void;
-    confirmLoadingModal: boolean;
-    handleCancel: () => void;
-    okText?: string;
-    cancelText?: string;
-    maskClosable?: boolean;
-    width?: number | string;
-}
+
 const MyModal = ({
     title,
     openModal,
@@ -22,6 +13,7 @@ const MyModal = ({
     cancelText,
     width,
     maskClosable,
+    noFooter,
     children,
 }: PropsWithChildren<ModalProps>) => {
     return (
@@ -36,6 +28,7 @@ const MyModal = ({
             mask={true}
             maskClosable={maskClosable}
             width={width}
+            footer={noFooter?null:undefined}
         >
             <Divider />
             {children}
