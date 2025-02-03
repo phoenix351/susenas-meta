@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AnggotaRuta extends Model
@@ -19,4 +20,9 @@ class AnggotaRuta extends Model
     {
         return $this->hasMany(KonsumsiArt::class);
     }
+    public function ruta():BelongsTo
+    {
+        return $this->belongsTo(SusenasMak::class,"id_ruta");
+    }
 }
+

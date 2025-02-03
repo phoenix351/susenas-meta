@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Konsumsi;
+use App\Models\KonsumsiArt;
+use App\Models\SusenasMak;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -224,21 +226,198 @@ class MonitoringController extends Controller
 
         return response()->json([], 200);
     }
-    private function konsumsi_perkapita_total($kode_kabkot)
+    private function get_total_kapita($kode_kabkot)
+    {
+        $total_kapita = SusenasMak::where("status_dok", "like", "clean")->where("kode_kabkot", $kode_kabkot)
+            ->selectRaw("sum(wtf_1) as jumlah_kapita")->first();
+        return $total_kapita ? (float)$total_kapita->jumlah_kapita : (float)0;
+    }
+    private function get_konsumsi_ruta_total($kode_kabkot)
     {
         $konsumsi_ruta = Konsumsi::with(["komoditas"])->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
             $query->where("status_dok", "like", "clean")
                 ->where("kode_kabkot", $kode_kabkot);
         })
-            
-            ->where("volume_total",">",0)
-            ->get();
 
-        return $konsumsi_ruta;
+            ->where("volume_total", ">", 0)
+            ->get();
+        $total_konsumsi_ruta_kalori = 0;
+        $total_konsumsi_ruta_kalori_basket = 0;
+
+        foreach ($konsumsi_ruta as $konsumsi) {
+            # code...
+            $volume = $konsumsi->volume_total;
+            $kalori = $konsumsi->komoditas->kalori;
+            $konsumsi_kalori = $volume * $kalori;
+            $total_konsumsi_ruta_kalori = $total_konsumsi_ruta_kalori + $konsumsi_kalori;
+            if ($konsumsi->komoditas->flag_basket) {
+
+                $total_konsumsi_ruta_kalori_basket = $total_konsumsi_ruta_kalori_basket + $konsumsi_kalori;
+            }
+        }
+        return ["total" => $total_konsumsi_ruta_kalori, "basket" => $total_konsumsi_ruta_kalori_basket];
+    }
+    private function get_konsumsi_art_total($kode_kabkot)
+    {
+        $konsumsi_art = KonsumsiArt::with(["komoditas"])->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
+            $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
+                $query_2->where("status_dok", "like", "clean")
+                    ->where("kode_kabkot", $kode_kabkot);
+            });
+        })->where("volume_total", ">", 0)
+            ->get();
+        $total_konsumsi_art_kalori = 0;
+        $total_konsumsi_art_kalori_basket = 0;
+        foreach ($konsumsi_art as $konsumsi) {
+            # code...
+            $volume = $konsumsi->volume_total;
+            $kalori = $konsumsi->komoditas->kalori;
+            $konsumsi_kalori = $volume * $kalori;
+            $total_konsumsi_art_kalori = $total_konsumsi_art_kalori + $konsumsi_kalori;
+            if ($konsumsi->komoditas->flag_basket) {
+
+                $total_konsumsi_art_kalori_basket = $total_konsumsi_art_kalori_basket + $konsumsi_kalori;
+            }
+        }
+        return ["total" => $total_konsumsi_art_kalori, "basket" => $total_konsumsi_art_kalori_basket];
+    }
+    private function konsumsi_perkapita_total($kode_kabkot)
+    {
+        $jumlah_kapita = $this->get_total_kapita($kode_kabkot);
+
+        // get konsumsi total
+
+        $total_konsumsi_ruta_kalori = $this->get_konsumsi_ruta_total($kode_kabkot);
+        $total_konsumsi_art_kalori = $this->get_konsumsi_art_total($kode_kabkot);
+        $konsumsi_kalori_perkapita_total = ($total_konsumsi_art_kalori["total"] + $total_konsumsi_ruta_kalori["total"]) * 30 / 7 / $jumlah_kapita;
+        $konsumsi_kalori_perkapita_basket_komoditas = ($total_konsumsi_art_kalori["basket"] + $total_konsumsi_ruta_kalori["basket"]) * 30 / 7 / $jumlah_kapita;
+        // hitung konsumsi total per kapita
+        return [
+            "total" => $konsumsi_kalori_perkapita_total,
+            "basket" => $konsumsi_kalori_perkapita_basket_komoditas,
+        ];
+    }
+    private function komoditas_summary($kode_kabkot)
+    {
+        // volume, 
+        // kalori
+        // harga per satuan
+        $komoditas_summary_ruta = Konsumsi::with("komoditas")
+            ->join('komoditas', 'konsumsi.id_komoditas', '=', 'komoditas.id') // Join with the komoditas table
+            ->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
+                $query->where("status_dok", "like", "clean")
+                    ->where("kode_kabkot", "like", $kode_kabkot);
+            })
+            ->where("konsumsi.volume_total", ">", 0) // Specify the table name for clarity
+            ->selectRaw("
+        konsumsi.id_komoditas,
+        sum(konsumsi.volume_total) as sum_volume,
+        sum(komoditas.kalori * konsumsi.volume_total) as total_kalori, 
+        sum(konsumsi.harga_total / konsumsi.volume_total) as sum_harga_satuan
+    ")
+            ->groupBy("konsumsi.id_komoditas")
+            ->get();
+        $komoditas_summary_art = KonsumsiArt::with("komoditas")
+            ->join('komoditas', 'konsumsi_art.id_komoditas', '=', 'komoditas.id') // Join with the komoditas table
+            ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
+                $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
+                    $query_2->where("status_dok", "like", "clean")
+                        ->where("kode_kabkot", $kode_kabkot);
+                });
+            })
+            ->where("konsumsi_art.volume_total", ">", 0) // Specify the table name for clarity
+            ->selectRaw("
+        konsumsi_art.id_komoditas,
+        sum(konsumsi_art.volume_total) as sum_volume,
+        sum(komoditas.kalori * konsumsi_art.volume_total) as  sum_kalori, 
+        sum(konsumsi_art.harga_total / konsumsi_art.volume_total) as average_harga_satuan
+    ")
+            ->groupBy("konsumsi_art.id_komoditas")
+            ->get();
+        return [$komoditas_summary_ruta, $komoditas_summary_art];
     }
     public function update_dashboard()
     {
-        $konsumsi_perkapita = $this->konsumsi_perkapita_total("08");
-        return response()->json($konsumsi_perkapita, 200);
+        $kode_kabkot = "08";
+        $konsumsi_perkapita = $this->konsumsi_perkapita_total($kode_kabkot);
+        $konsumsi_perkapita_total = $konsumsi_perkapita["total"];
+        $konsumsi_perkapita_basket_komoditas = $konsumsi_perkapita["basket"];
+        DB::table("kabkot_summary")->where("kode_kabkot", "like", $kode_kabkot)->update([
+            "konsumsi_perkapita_total" => $konsumsi_perkapita_total,
+            "konsumsi_perkapita_basket_komoditas" => $konsumsi_perkapita_basket_komoditas,
+        ]);
+
+        $komoditas_summary = $this->komoditas_summary("08");
+        foreach ($komoditas_summary[0] as $komoditas) {
+            # code...
+            $current_komoditas = DB::table("komoditas_kabkot_summary")
+                ->where("kode_kabkot", $kode_kabkot)
+                ->where("id_komoditas", $komoditas->id_komoditas)
+                ->first();
+            if ($current_komoditas) {
+                // If a row exists, update it
+                DB::table('komoditas_kabkot_summary')
+                    ->where("kode_kabkot", $kode_kabkot)
+                    ->where("id_komoditas", $komoditas->id_komoditas)
+                    ->update([
+                        'sum_volume' => $komoditas->sum_volume ?? 0,
+                        'sum_kalori' => $komoditas->sum_kalori ?? 0,
+                        'average_harga' => $komoditas->average_harga_satuan ?? 0 ,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+            } else {
+                // If no row exists, insert a new one
+                DB::table('komoditas_kabkot_summary')
+                    ->insert([
+                        'kode_kabkot' => $kode_kabkot,
+                        'id_komoditas' => $komoditas->id_komoditas,
+                        'sum_volume' => $komoditas->sum_volume ?? 0,
+                        'sum_kalori' => $komoditas->sum_kalori ?? 0,
+                        'average_harga' => $komoditas->average_harga_satuan ?? 0 ,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+            }
+        }
+        foreach ($komoditas_summary[1] as $komoditas) {
+            # code...
+            $current_komoditas = DB::table("komoditas_kabkot_summary")
+                ->where("kode_kabkot", $kode_kabkot)
+                ->where("id_komoditas", $komoditas->id_komoditas)
+                ->first();
+            if ($current_komoditas) {
+                // If a row exists, update it
+                DB::table('komoditas_kabkot_summary')
+                    ->where("kode_kabkot", $kode_kabkot)
+                    ->where("id_komoditas", $komoditas->id_komoditas)
+                    ->update([
+                        'sum_volume' => $komoditas->sum_volume ?? 0,
+                        'sum_kalori' => $komoditas->sum_kalori ?? 0,
+                        'average_harga' => $komoditas->average_harga_satuan ?? 0 ,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+            } else {
+                // If no row exists, insert a new one
+                DB::table('komoditas_kabkot_summary')
+                    ->insert([
+                        'kode_kabkot' => $kode_kabkot,
+                        'id_komoditas' => $komoditas->id_komoditas,
+                        'sum_volume' => $komoditas->sum_volume ?? 0,
+                        'sum_kalori' => $komoditas->sum_kalori ?? 0,
+                        'average_harga' => $komoditas->average_harga_satuan ?? 0 ,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+            }
+        }
+
+        $data = [
+            // "konsumsi_perkapita_total"=>$konsumsi_perkapita_total,
+            // "konsumsi_perkapita_basket_komoditas"=>$konsumsi_perkapita_basket_komoditas,
+            "volume_perkomoditas" => $komoditas_summary,
+        ];
+        return response()->json($data, 200);
     }
 }
