@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('komoditas_kabkot_summary', function (Blueprint $table) {
             $table->string("kode_kabkot");
-            $table->float("sum_volume")->default(0);
-            $table->float("sum_kalori")->default(0);
-            $table->float("average_harga")->default(0);
+            $table->integer("id_komoditas");
+            $table->double("sum_volume", 20, 3)->default(0);
+            $table->double("sum_kalori", 20, 3)->default(0);
+            $table->double("average_harga", 20, 3)->default(0);
             $table->timestamps();
         });
     }

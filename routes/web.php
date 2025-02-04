@@ -128,7 +128,8 @@ Route::middleware('auth')->group(function () {
     route::post('/monitoring/update', [MonitoringController::class, 'update'])->name('monitoring.update');
     route::get('/dashboard/update', [MonitoringController::class, 'update_dashboard'])->name('dashboard.update');
 
-    route::get('/api/monitoring/rekap-kabkot', [MonitoringController::class, 'get_rekap_kabkot'])->name('api.monitoring.rekap_kabkot');
+    route::get('/api/monitoring/rekap-kabkot/{kode_kabkot}', [MonitoringController::class, 'get_rekap_kabkot'])->name('api.monitoring.rekap_kabkot');
+    route::get('/api/monitoring/rekap-komoditas/{kode_kabkot}', [MonitoringController::class, 'get_rekap_komoditas'])->name('api.monitoring.rekap_komoditas');
     route::get('/api/monitoring/rekap-nks', [MonitoringController::class, 'get_rekap_nks'])->name('api.monitoring.rekap_nks');
     route::get('/api/monitoring/wilayah/{tipe}/{kode}', [MonitoringController::class, 'get_rekap_wilayah'])->name('api.monitoring.wilayah');
     route::get('/api/monitoring/rekap-user', [MonitoringController::class, 'get_rekap_user'])->name('api.monitoring.rekap_user');

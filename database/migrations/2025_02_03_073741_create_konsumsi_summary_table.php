@@ -12,15 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('kabkot_summary', function (Blueprint $table) {
-            $table->float("konsumsi_perkapita_total")->default(0);
-            $table->float("konsumsi_perkapita_basket_komoditas")->default(0);
+            $table->double("konsumsi_perkapita_total", 20, 3)->default(0)->change();
+            $table->integer("jumlah_individu")->default(0)->change();
+            $table->integer("jumlah_ruta")->default(0)->change();
+            $table->double("konsumsi_perkapita_basket_komoditas", 20, 3)->default(0)->change();
         });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-    }
+    public function down(): void {}
 };

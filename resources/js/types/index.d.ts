@@ -13,7 +13,7 @@ export interface User {
     bidang: string;
     role: string;
     jabatan: string;
-    kode_kabkot:string;
+    kode_kabkot: string;
 }
 
 export type PageProps<
@@ -99,9 +99,9 @@ interface ProgressData {
     error: number;
     warning: number;
     clean: number;
-    tipe:string;
-    kode:string;
-    fullcode:string;
+    tipe: string;
+    kode: string;
+    fullcode: string;
 }
 interface ModalProps {
     title: string;
@@ -113,5 +113,24 @@ interface ModalProps {
     cancelText?: string;
     maskClosable?: boolean;
     width?: number | string;
-    noFooter?:boolean;
+    noFooter?: boolean;
+}
+interface KomoditasSummary {
+    average_harga: number;
+    created_at: Date;
+    flag_basket: number;
+    id: number;
+    id_kelompok: number;
+    id_komoditas: number;
+    kalori: number;
+    kode_coicop: string;
+    kode_kabkot: string;
+    nama_kelompok: string;
+    nama_komoditas: string;
+    nomor_urut: number;
+    satuan: string;
+    sum_kalori: number;
+    sum_volume: number;
+    type: string;
+    updated_at: Date;
 }
