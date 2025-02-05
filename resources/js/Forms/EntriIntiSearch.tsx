@@ -24,7 +24,7 @@ const EntriIntiForm: React.FC<{
     const [daftarNks, setDaftarNks] = useState([]);
 
     const fetchKabkot = async () => {
-        const url = route("api.entri.kabkot");
+        const url = route("api.wilayah.kabkot");
 
         const { data } = await axios.get(url);
         console.log({ data });

@@ -39,12 +39,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
             label: "Entri",
         },
     ];
-    if (user.role === "ADMIN") {
+    if (user.role === "ADMIN" && user.kode_kabkot!=="00") {
         menuItems = [
             {
                 key: "progress",
                 icon: <DashboardOutlined />,
-                onClick: () => handleMenuClick("dashboard"),
+                onClick: () => handleMenuClick("progress"),
                 label: "Progress",
             },
 

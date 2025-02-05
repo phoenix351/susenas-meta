@@ -5,8 +5,10 @@ import {
     ArrowUpOutlined,
     ShopOutlined,
     ShoppingOutlined,
+    SyncOutlined,
 } from "@ant-design/icons";
 import {
+    Button,
     Card,
     Col,
     Divider,
@@ -30,6 +32,7 @@ import KomoditasSummaryTable from "./KomoditasSummaryTable";
 import CardSkeleton from "./CardSkeleton";
 import Search from "antd/es/transfer/search";
 import Title from "antd/es/typography/Title";
+import { router } from "@inertiajs/react";
 
 interface KabkotSummary {
     dok_clean: number;
@@ -59,7 +62,7 @@ const index = () => {
     const [loadingData, setLoadingData] = useState<boolean>(false);
     async function getKabkot() {
         try {
-            const { data } = await axios.get(route("api.entri.kabkot"));
+            const { data } = await axios.get(route("api.wilayah.kabkot"));
             // console.log({ data });
 
             setDaftarKabkot(
@@ -114,11 +117,48 @@ const index = () => {
     useEffect(() => {
         getKabkot();
     }, []);
-
+    async function syncSummary() {
+        try {
+            setLoadingData(true)
+            messageApi.open({
+                content: "sedang sinkron data...",
+                type: "loading",
+                key: "sync",
+            });
+            const response = await axios.get(route("dashboard.update"));
+            messageApi.open({
+                content: "berhasil sinkronkan data...",
+                type: "success",
+                key: "sync",
+            });
+        } catch (error) {
+            messageApi.open({
+                content: "error ketika sinkron data...",
+                type: "error",
+                key: "sync",
+            });
+        } finally {
+            router.get(
+                route("dashboard"),
+                {},
+                { preserveScroll: true, preserveState: true }
+            );
+            setLoadingData(false)
+        }
+    }
     return (
         <div>
             {contextHolder}
-            <Title>Dashboard</Title>
+            <Space
+                direction="horizontal"
+                align="center"
+                style={{ display: "flex", justifyContent: "space-between" }}
+            >
+                <Title>Dashboard</Title>
+                <Button icon={<SyncOutlined />} onClick={syncSummary}>
+                    Sync Data
+                </Button>
+            </Space>
             <Form>
                 <Form.Item>
                     <Select

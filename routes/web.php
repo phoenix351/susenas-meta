@@ -78,7 +78,7 @@ Route::middleware('auth')->group(function () {
         return response()->json([$tingkatList]);
     })->name('admin.master.jabatan.tingkat');
 
-    route::get('/api/entri/kabkot', [MasterWilayahController::class, 'fetch_kabkot'])->name('api.entri.kabkot');
+    route::get('/api/wilayah/kabkot', [MasterWilayahController::class, 'fetch_kabkot'])->name('api.wilayah.kabkot');
     route::get('/api/entri/semester', function () {
         $data = [];
         return response()->json(['data' => $data]);
@@ -151,6 +151,7 @@ Route::middleware('auth')->group(function () {
     route::get('/range-harga', [RangeHargaController::class, 'index'])->name('range_harga.index');
     route::get('/range-harga/fetch', [RangeHargaController::class, 'fetch'])->name('range_harga.fetch');
     route::post('/range-harga/upload', [RangeHargaController::class, 'upload'])->name('range_harga.upload');
+    route::put('/range-harga/update', [RangeHargaController::class, 'update'])->name('range_harga.update');
 
 
 

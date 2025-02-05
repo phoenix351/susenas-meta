@@ -78,7 +78,7 @@ const Blok1_2: React.FC<{
     };
 
     const fetchKabkot = async () => {
-        const url = route("api.entri.kabkot");
+        const url = route("api.wilayah.kabkot");
 
         const { data } = await axios.get(url);
         const daftarKabkot = data.data.map((item: any) => ({

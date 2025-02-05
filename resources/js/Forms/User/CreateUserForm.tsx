@@ -14,8 +14,8 @@ const CreateUserForm: React.FC<{
     useEffect(() => {
         const fetchKabkot = async (kode_kabkot: string) => {
             const { data } = await axios.get(
-                // route("api.entri.kabkot")
-                route("api.entri.kabkot", { kode_kabkot: kode_kabkot })
+                // route("api.wilayah.kabkot")
+                route("api.wilayah.kabkot", { kode_kabkot: kode_kabkot })
             );
             // console.log({ data });
             let listData = data.data.map(

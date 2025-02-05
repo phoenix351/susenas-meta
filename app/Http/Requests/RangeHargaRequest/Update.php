@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\RangeHargaRequest;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class KomoditasUpdateRequest extends FormRequest
+class Update extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,14 +22,10 @@ class KomoditasUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id'=>'required|numeric',
-            'id_kelompok'=>'required|numeric',
-            'nama_kelompok'=>'required',
-            'nama_komoditas'=>'required',
-            'satuan'=>'nullable',
-            'kalori'=>'required|numeric',
-            'flag_basket'=>'required|numeric',
-            'type'=>'required',
+            "kode_kabkot"=>"required",
+            "id_komoditas"=>"required",
+            "min"=>"required",
+            "max"=>"required",
         ];
     }
 }

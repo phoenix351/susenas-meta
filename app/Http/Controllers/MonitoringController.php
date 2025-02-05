@@ -455,15 +455,17 @@ class MonitoringController extends Controller
 
     public function update_dashboard()
     {
+        set_time_limit(300);
         $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
         foreach ($daftar_kabkot as $kabkot) {
             # code...
             $kode_kabkot = $kabkot->kode;
             $this->hitung_summary_kabupaten_kota($kode_kabkot);
-        }
 
+        }
         return response()->json([
             "message" => "selesai menghitung summary"
         ], 200);
+
     }
 }

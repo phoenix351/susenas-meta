@@ -4,6 +4,7 @@ import kelompokKomoditas from "./kelompokKomoditas.json";
 import { useEffect, useState } from "react";
 import { KomoditasDataType } from "@/types";
 import { SegmentedValue } from "antd/es/segmented";
+
 const KomoditasForm = ({
     form,
     daftarKomoditas,
@@ -17,6 +18,12 @@ const KomoditasForm = ({
     flag: boolean;
     SwitchFlag: () => void;
 }) => {
+    function pressEnterToSubmit(event: React.KeyboardEvent<HTMLFormElement>) {
+        const keyPressed = event.key;
+        if (keyPressed.toLowerCase() === "enter") {
+            form.submit();
+        }
+    }
     const [showKomoditas, setShowKomoditas] = useState(false);
     return (
         <Form
@@ -24,6 +31,7 @@ const KomoditasForm = ({
             wrapperCol={{ span: 16 }}
             form={form}
             onFinish={onFinish}
+            onKeyUp={pressEnterToSubmit}
         >
             <Form.Item name={"id"} label="id" hidden>
                 <Input />

@@ -79,6 +79,8 @@ const index = () => {
                 type: "error",
                 key: "save",
             });
+        } finally {
+            setOpenEditModal(false)
         }
     }
     async function handleStore(values: KomoditasDataType) {

@@ -29,7 +29,9 @@ import {
 import { render } from "react-dom";
 import TextRupiah from "@/Components/TextRupiah";
 import MyModal from "@/Components/Modal";
-import UpdateRangeHarga from "./UpdateRangeHarga";
+import UpdateRangeHarga from "./Form/UpdateRangeHarga";
+import UpdateForm from "./Form/UpdateForm";
+import { router } from "@inertiajs/react";
 interface Komoditas {
     id: number;
     nama_komoditas: string;
@@ -81,8 +83,11 @@ const index = ({
 
     const [openModalUpdateRangeHarga, setOpenModalUpdateRangeHarga] =
         useState<boolean>(false);
+    const [openUpdate, setOpenUpdate] = useState<boolean>(false);
+    const [updateLoading, setUpdateLoading] = useState<boolean>(false);
 
     const [filterForm] = Form.useForm();
+    const [updateForm] = Form.useForm();
     const fetchDaftarRangeHarga = async () => {
         setLoadingData(true);
         let { data } = await axios.get(route("range_harga.fetch"));
@@ -115,13 +120,7 @@ const index = ({
     };
     useEffect(() => {
         fetchDaftarRangeHarga();
-        filterForm.setFieldsValue({
-            nama_komoditas: "beras",
-            kelompok_id: 0,
-            kode_kabkot: "02",
-            min: 1000,
-            max: 100000,
-        });
+       
         // console.log({ kelompok });
     }, []);
 
@@ -162,18 +161,18 @@ const index = ({
                 <TextRupiah color="#000" value={value} />
             ),
         },
-        {
-            title: "Kalori",
-            dataIndex: "komoditas.kalori",
-            key: "komoditas.kalori",
-            render: (_: any, record: RangeHarga) => record.komoditas.kalori,
-        },
+        // {
+        //     title: "Kalori",
+        //     dataIndex: "komoditas.kalori",
+        //     key: "komoditas.kalori",
+        //     render: (_: any, record: RangeHarga) => record.komoditas.kalori,
+        // },
         {
             title: "Aksi",
             key: "aksi",
             dataIndex: "aksi",
             render: (_: any, record: RangeHarga) => (
-                <Button onClick={() => handleEdit(record.komoditas_id)}>
+                <Button onClick={() => handleEdit(record)}>
                     <EditOutlined /> Ubah
                 </Button>
             ),
@@ -195,7 +194,35 @@ const index = ({
         setDaftarRangeHarga(data);
         setLoadingData(false);
     };
-
+    function handleEdit(record: any) {
+        updateForm.resetFields();
+        updateForm.setFieldsValue({
+            kode_kabkot: record.kode_kabkot,
+            id_komoditas: record.komoditas_id,
+            max: record.max,
+            min: record.min,
+            nama_kelompok: record.komoditas.nama_kelompok,
+            nama_komoditas: record.komoditas.nama_komoditas,
+        });
+        setOpenUpdate(true);
+    }
+    async function handleUpdateRangeHarga(values: FormData) {
+        try {
+            setUpdateLoading(true);
+            const response = await axios.put(
+                route("range_harga.update"),
+                values
+            );
+        } catch (error) {
+            console.error(error);
+            // delete if production
+            console.error("error update range harga");
+        } finally {
+            setUpdateLoading(false);
+           fetchDaftarRangeHarga()
+           setOpenUpdate(false)
+        }
+    }
     return (
         <>
             <Button
@@ -296,13 +323,27 @@ const index = ({
             <Modal
                 open={openModalUpdateRangeHarga}
                 okText=""
-                confirmLoading={false}
+                confirmLoading={updateLoading}
                 onOk={() => {}}
                 onCancel={() => setOpenModalUpdateRangeHarga(false)}
                 title="Update Range Harga"
                 width={1000}
             >
                 <UpdateRangeHarga />
+            </Modal>
+            <Modal
+                open={openUpdate}
+                okText="Simpan"
+                confirmLoading={updateLoading}
+                onOk={() => updateForm.submit()}
+                onCancel={() => setOpenUpdate(false)}
+                title="Update Range Harga"
+                width={500}
+            >
+                <UpdateForm
+                    form={updateForm}
+                    onFinish={handleUpdateRangeHarga}
+                />
             </Modal>
         </>
     );
@@ -321,6 +362,3 @@ index.layout = (
 // export default Pengguna;
 
 export default index;
-function handleEdit(id: any): void {
-    throw new Error("Function not implemented.");
-}

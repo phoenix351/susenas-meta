@@ -14,7 +14,7 @@ class KonsumsiArt extends Model
 
     public function komoditas()
     {
-        return $this->belongsTo(Komoditas::class, 'id_komoditas');
+        return $this->belongsTo(Komoditas::class, 'id_komoditas',"nomor_urut");
     }
     public function anggota_ruta()
     {

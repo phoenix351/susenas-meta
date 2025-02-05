@@ -8,7 +8,10 @@ use App\Models\MasterWilayah;
 use App\Models\RangeHarga;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use App\Http\Requests\RangeHargaRequest\Update;
+use App\Http\Requests\StoreBarangRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -65,9 +68,25 @@ class RangeHargaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Update $request)
     {
-        //
+        try {
+            //code...
+            DB::beginTransaction();
+            $new_range_harga = $request->validated();
+            $komoditas = RangeHarga::where("kode_kabkot", $new_range_harga["kode_kabkot"])
+                ->where("id_komoditas", $new_range_harga["id_komoditas"])->firstOrFail();
+            // dd($komoditas);
+            RangeHarga::where("kode_kabkot", $new_range_harga["kode_kabkot"])
+                ->where("id_komoditas", $new_range_harga["id_komoditas"])->update([
+                    "min" => $new_range_harga["min"],
+                    "max" => $new_range_harga["max"],
+                ]);
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
     }
 
     /**

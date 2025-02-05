@@ -10,9 +10,11 @@ class RangeHarga extends Model
 {
     use HasFactory;
     protected $table = 'range_harga_komoditas';
+    protected $fillable = ["min","max"];
     public $timestamps = false;
+    
     public function komoditas(): BelongsTo
     {
-        return $this->belongsTo(Komoditas::class, 'id_komoditas', 'id');
+        return $this->belongsTo(Komoditas::class, 'id_komoditas', 'nomor_urut');
     }
 }
