@@ -86,7 +86,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
             },
         ];
     }
-    if(user.kode_kabkot==="00"){
+    if(user.role==="ADMIN"&&user.kode_kabkot==="00"){
         menuItems = menuItems = [
             {
                 key: "progress",

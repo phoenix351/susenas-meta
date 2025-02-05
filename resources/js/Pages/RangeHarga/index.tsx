@@ -120,7 +120,7 @@ const index = ({
     };
     useEffect(() => {
         fetchDaftarRangeHarga();
-       
+
         // console.log({ kelompok });
     }, []);
 
@@ -219,31 +219,35 @@ const index = ({
             console.error("error update range harga");
         } finally {
             setUpdateLoading(false);
-           fetchDaftarRangeHarga()
-           setOpenUpdate(false)
+            fetchDaftarRangeHarga();
+            setOpenUpdate(false);
         }
     }
     return (
         <>
-            <Button
-                onClick={() => setShowFilter(!showFilter)}
-                style={{ marginBottom: showFilter ? 0 : 20 }}
-            >
-                <FilterOutlined /> Filter Data
-            </Button>
-            <Button onClick={() => setOpenModalUpdateRangeHarga(true)}>
-                <FileOutlined /> Update Range Harga
-            </Button>
+            <Space style={{ display: "flex", justifyContent: "end" }}>
+                <Button
+                    onClick={() => setShowFilter(!showFilter)}
+                    style={{ marginBottom: 20 }}
+                >
+                    <FilterOutlined /> Filter Data
+                </Button>
+            </Space>
             <Form
                 form={filterForm}
                 layout="vertical"
                 style={{
                     width: 400,
-                    margin: "20px 0px 20px 0px",
+                    // margin: "40px 0px 20px 0px",
                     backgroundColor: "#fff",
                     padding: 20,
                     borderRadius: 20,
                     display: showFilter ? "" : "none",
+                    position: "absolute",
+                    zIndex: 1000,
+                    right: 40,
+                    boxShadow:
+                        "rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px",
                 }}
                 onFinish={handleFilter}
                 onKeyDown={(event: React.KeyboardEvent) => {
@@ -315,6 +319,9 @@ const index = ({
                     </Space>
                 </Form.Item>
             </Form>
+            {/* <Button  onClick={() => setOpenModalUpdateRangeHarga(true)}>
+                <FileOutlined /> Update Range Harga
+            </Button> */}
             <Table
                 dataSource={daftarRangeHarga}
                 columns={rangeHargaColumns}

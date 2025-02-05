@@ -186,10 +186,10 @@ const index = () => {
                                               kabkotSummary.konsumsi_perkapita_total /
                                               30
                                           )
-                                              .toLocaleString()
-                                              .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                                              .replace(/,/g, ".") // Replace ',' with '.'
-                                              .replace(/#/g, ",")
+                                              .toLocaleString("id-ID")
+                                            //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                                            //   .replace(/,/g, ".") // Replace ',' with '.'
+                                            //   .replace(/#/g, ",")
                                         : "-"
                                 }
                                 precision={3}
@@ -213,10 +213,10 @@ const index = () => {
                                               kabkotSummary.konsumsi_perkapita_basket_komoditas /
                                               30
                                           )
-                                              .toLocaleString()
-                                              .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                                              .replace(/,/g, ".") // Replace ',' with '.'
-                                              .replace(/#/g, ",")
+                                              .toLocaleString("id-ID")
+                                            //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                                            //   .replace(/,/g, ".") // Replace ',' with '.'
+                                            //   .replace(/#/g, ",")
                                         : "-"
                                 }
                                 precision={3}
@@ -237,10 +237,10 @@ const index = () => {
                                 value={
                                     kabkotSummary?.garis_kemiskinan
                                         ? kabkotSummary.garis_kemiskinan
-                                              .toLocaleString()
-                                              .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                                              .replace(/,/g, ".") // Replace ',' with '.'
-                                              .replace(/#/g, ",")
+                                              .toLocaleString("id-ID")
+                                            //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                                            //   .replace(/,/g, ".") // Replace ',' with '.'
+                                            //   .replace(/#/g, ",")
                                         : "-"
                                 }
                                 precision={3}

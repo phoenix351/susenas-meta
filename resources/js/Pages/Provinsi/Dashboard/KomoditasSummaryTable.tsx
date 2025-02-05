@@ -37,7 +37,7 @@ const KomoditasSummaryTable = ({
             key: "nomor_urut",
             sorter: (a, b) => a.id_komoditas - b.id_komoditas,
             sortOrder:
-                sortedInfo.columnKey === "id_komoditas"
+                sortedInfo.columnKey === "nomor_urut"
                     ? sortedInfo.order
                     : null,
             ellipsis: true,
@@ -71,10 +71,12 @@ const KomoditasSummaryTable = ({
                     ellipsis: true,
                     render: (value: number, record: KomoditasSummary) =>
                         `${value
-                            .toLocaleString()
-                            .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                            .replace(/,/g, ".") // Replace ',' with '.'
-                            .replace(/#/g, ",")} ${record.satuan}`, // Replace '#' with ','
+                            .toLocaleString("id-ID")
+                            // .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                            // .replace(/,/g, ".") // Replace ',' with '.'
+                            // .replace(/#/g, ",")
+                        } 
+                            ${record.satuan}`, // Replace '#' with ','
                 },
                 // kalori
                 {
@@ -89,10 +91,10 @@ const KomoditasSummaryTable = ({
                     ellipsis: true,
                     render: (value: number) =>
                         value
-                            .toLocaleString()
-                            .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                            .replace(/,/g, ".") // Replace ',' with '.'
-                            .replace(/#/g, ","), // Replace '#' with ','
+                            .toLocaleString("id-ID")
+                            // .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                            // .replace(/,/g, ".") // Replace ',' with '.'
+                            // .replace(/#/g, ","), // Replace '#' with ','
                 },
             ],
         },
@@ -110,10 +112,11 @@ const KomoditasSummaryTable = ({
             ellipsis: true,
             render: (value: number, record) =>
                 `Rp ${value
-                    .toLocaleString()
-                    .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                    .replace(/,/g, ".") // Replace ',' with '.'
-                    .replace(/#/g, ",")} / ${record.satuan}`,
+                    .toLocaleString("id-ID")
+                    // .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                    // .replace(/,/g, ".") // Replace ',' with '.'
+                    // .replace(/#/g, ",")
+                } / ${record.satuan}`,
         },
     ];
     function handleChange(
