@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\UpdateDashboardJob;
 use App\Models\Kabkot;
 use App\Models\Konsumsi;
 use App\Models\KonsumsiArt;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 
 class MonitoringController extends Controller
 {
@@ -247,59 +250,105 @@ class MonitoringController extends Controller
 
     private function get_total_kapita($kode_kabkot)
     {
-        $total_kapita = SusenasMak::where("status_dok", "like", "clean")->where("kode_kabkot", $kode_kabkot)
-            ->selectRaw("sum(wtf_1) as jumlah_kapita")->first();
+        $total_kapita = SusenasMak::where("status_dok", "like", "clean")
+            ->where("kode_kabkot", $kode_kabkot)
+            ->selectRaw("sum(wtf_1) as jumlah_kapita")
+            ->first();
         return $total_kapita ? (float)$total_kapita->jumlah_kapita : (float)0;
     }
 
+    private function get_konsumsi_total($model, $relationship, $kode_kabkot, $nestedRelationship = null)
+    {
+        $query = $model::with(["komoditas"])
+            ->whereHas($relationship, function (Builder $query_) use ($kode_kabkot, $nestedRelationship) {
+                if ($nestedRelationship) {
+                    $query_->whereHas($nestedRelationship, function (Builder $query__) use ($kode_kabkot) {
+                        $query__->where("status_dok", "like", "clean")
+                            ->where("kode_kabkot", $kode_kabkot);
+                    });
+                } else {
+                    $query_->where("status_dok", "like", "clean")
+                        ->where("kode_kabkot", $kode_kabkot);
+                }
+            })
+            ->where("volume_total", ">", "0");
+        $total_kalori = $query->get()->sum(function ($konsumsi) {
+            return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
+        });
+
+        $total_kalori_basket = $query->clone()
+            ->whereHas("komoditas", function (Builder $query) {
+                $query->where("flag_basket", true);
+            })
+            ->get()
+            ->sum(function ($konsumsi) {
+                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
+            });
+        return [
+            "total" => $total_kalori,
+            "basket" => $total_kalori_basket
+        ];
+    }
     private function get_konsumsi_ruta_total($kode_kabkot)
     {
-        $konsumsi_ruta = Konsumsi::with(["komoditas"])->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
-            $query->where("status_dok", "like", "clean")
-                ->where("kode_kabkot", $kode_kabkot);
-        })
-
+        $total_konsumsi_ruta_kalori = Konsumsi::with(["komoditas"])
+            ->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
+                $query->where("status_dok", "like", "clean")
+                    ->where("kode_kabkot", $kode_kabkot);
+            })
             ->where("volume_total", ">", 0)
-            ->get();
-        $total_konsumsi_ruta_kalori = 0;
-        $total_konsumsi_ruta_kalori_basket = 0;
+            ->get()
+            ->sum(function ($konsumsi) {
+                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
+            });
+        $total_konsumsi_ruta_kalori_basket = Konsumsi::with(["komoditas"])
+            ->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
+                $query->where("status_dok", "like", "clean")
+                    ->where("kode_kabkot", $kode_kabkot);
+            })
+            ->where("volume_total", ">", 0)
+            ->whereHas("komoditas", function (Builder $query) {
+                $query->where("flag_basket", true);
+            })
+            ->get()
+            ->sum(function ($konsumsi) {
+                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
+            });
 
-        foreach ($konsumsi_ruta as $konsumsi) {
-            # code...
-            $volume = $konsumsi->volume_total;
-            $kalori = $konsumsi->komoditas->kalori;
-            $konsumsi_kalori = $volume * $kalori;
-            $total_konsumsi_ruta_kalori = $total_konsumsi_ruta_kalori + $konsumsi_kalori;
-            if ($konsumsi->komoditas->flag_basket) {
 
-                $total_konsumsi_ruta_kalori_basket = $total_konsumsi_ruta_kalori_basket + $konsumsi_kalori;
-            }
-        }
         return ["total" => $total_konsumsi_ruta_kalori, "basket" => $total_konsumsi_ruta_kalori_basket];
     }
 
     private function get_konsumsi_art_total($kode_kabkot)
     {
-        $konsumsi_art = KonsumsiArt::with(["komoditas"])->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
-            $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
-                $query_2->where("status_dok", "like", "clean")
-                    ->where("kode_kabkot", $kode_kabkot);
+        $total_konsumsi_art_kalori = KonsumsiArt::with(["komoditas"])
+            ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
+                $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
+                    $query_2->where("status_dok", "like", "clean")
+                        ->where("kode_kabkot", $kode_kabkot);
+                });
+            })
+            ->where("volume_total", ">", 0)
+            ->get()
+            ->sum(function ($konsumsi) {
+                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
             });
-        })->where("volume_total", ">", 0)
-            ->get();
-        $total_konsumsi_art_kalori = 0;
-        $total_konsumsi_art_kalori_basket = 0;
-        foreach ($konsumsi_art as $konsumsi) {
-            # code...
-            $volume = $konsumsi->volume_total;
-            $kalori = $konsumsi->komoditas->kalori;
-            $konsumsi_kalori = $volume * $kalori;
-            $total_konsumsi_art_kalori = $total_konsumsi_art_kalori + $konsumsi_kalori;
-            if ($konsumsi->komoditas->flag_basket) {
+        $total_konsumsi_art_kalori_basket = KonsumsiArt::with(["komoditas"])
+            ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
+                $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
+                    $query_2->where("status_dok", "like", "clean")
+                        ->where("kode_kabkot", $kode_kabkot);
+                });
+            })
+            ->where("volume_total", ">", 0)
+            ->whereHas("komoditas", function (Builder $query) {
+                $query->where("flag_basket", true);
+            })
+            ->get()
+            ->sum(function ($konsumsi) {
+                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
+            });
 
-                $total_konsumsi_art_kalori_basket = $total_konsumsi_art_kalori_basket + $konsumsi_kalori;
-            }
-        }
         return ["total" => $total_konsumsi_art_kalori, "basket" => $total_konsumsi_art_kalori_basket];
     }
 
@@ -321,7 +370,7 @@ class MonitoringController extends Controller
         ];
     }
 
-    private function komoditas_summary($kode_kabkot)
+    private function komoditas_summary_c($kode_kabkot)
     {
         // volume, 
         // kalori
@@ -341,7 +390,7 @@ class MonitoringController extends Controller
     ")
             ->groupBy("konsumsi.id_komoditas")
             ->get();
-        // ->toArray();
+
         $komoditas_summary_art = KonsumsiArt::with("komoditas")
             ->join('komoditas', 'konsumsi_art.id_komoditas', '=', 'komoditas.id') // Join with the komoditas table
             ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
@@ -361,9 +410,68 @@ class MonitoringController extends Controller
             ->get();
         // dd($komoditas_summary_ruta);
         // return response()->json($komoditas_summary_ruta, 200);
+        dd([$komoditas_summary_ruta, $komoditas_summary_art]);
         return [$komoditas_summary_ruta, $komoditas_summary_art];
     }
-    private function hitung_summary_kabupaten_kota($kode_kabkot)
+    private function komoditas_summary($kode_kabkot)
+    {
+        $komoditas_summary = DB::table(function ($query) use ($kode_kabkot) {
+            $query->selectRaw("
+            konsumsi.id_komoditas,
+            sum(konsumsi.volume_total) as sum_volume,
+            sum(komoditas.kalori * konsumsi.volume_total) as sum_kalori, 
+            avg(konsumsi.harga_total / konsumsi.volume_total) as average_harga_satuan
+        ")
+                ->from("konsumsi")
+                ->join("komoditas", "konsumsi.id_komoditas", "=", "komoditas.id")
+                ->whereExists(function ($subquery) use ($kode_kabkot) {
+                    $subquery->select(DB::raw(1))
+                        ->from("vsusenas_mak")
+                        ->whereColumn("vsusenas_mak.id", "konsumsi.id_ruta")
+                        ->where("vsusenas_mak.status_dok", "clean")
+                        ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
+                })
+                ->where("konsumsi.volume_total", ">", 0)
+                ->groupBy("konsumsi.id_komoditas")
+
+                ->unionAll(
+                    DB::table("konsumsi_art")
+                        ->selectRaw("
+                    konsumsi_art.id_komoditas,
+                    sum(konsumsi_art.volume_total) as sum_volume,
+                    sum(komoditas.kalori * konsumsi_art.volume_total) as sum_kalori, 
+                    avg(konsumsi_art.harga_total / konsumsi_art.volume_total) as average_harga_satuan
+                ")
+                        ->join("komoditas", "konsumsi_art.id_komoditas", "=", "komoditas.id")
+                        ->whereExists(function ($subquery) use ($kode_kabkot) {
+                            $subquery->select(DB::raw(1))
+                                ->from("anggota_ruta")
+                                ->whereColumn("anggota_ruta.id", "konsumsi_art.id_art")
+                                ->whereExists(function ($subquery2) use ($kode_kabkot) {
+                                    $subquery2->select(DB::raw(1))
+                                        ->from("vsusenas_mak")
+                                        ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
+                                        ->where("vsusenas_mak.status_dok", "clean")
+                                        ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
+                                });
+                        })
+                        ->where("konsumsi_art.volume_total", ">", 0)
+                        ->groupBy("konsumsi_art.id_komoditas")
+                );
+        }, 'komoditas_summary')
+            ->selectRaw("
+        id_komoditas,
+        sum(sum_volume) as sum_volume,
+        sum(sum_kalori) as sum_kalori,
+        avg(average_harga_satuan) as average_harga_satuan
+    ")
+            ->groupBy("id_komoditas")
+            ->get();
+        // dd($komoditas_summary);
+        return $komoditas_summary;
+    }
+
+    public function hitung_summary_kabupaten_kota($kode_kabkot)
     {
         $jumlah_ruta = SusenasMak::selectRaw("count(id) as jumlah_ruta")
             ->where("kode_kabkot", $kode_kabkot)
@@ -378,94 +486,49 @@ class MonitoringController extends Controller
             "jumlah_individu" => $konsumsi_perkapita["jumlah_individu"],
             "jumlah_ruta" => $jumlah_ruta
         ]);
-
+        $upsertData = [];
         $komoditas_summary = $this->komoditas_summary($kode_kabkot);
-        foreach ($komoditas_summary[0] as $komoditas) {
+        foreach ($komoditas_summary as $komoditas) {
             # code...
-            $current_komoditas = DB::table("komoditas_kabkot_summary")
-                ->where("kode_kabkot", $kode_kabkot)
-                ->where("id_komoditas", $komoditas->id_komoditas)
-                ->first();
-            if ($current_komoditas) {
-                // If a row exists, update it
-                DB::table('komoditas_kabkot_summary')
-                    ->where("kode_kabkot", $kode_kabkot)
-                    ->where("id_komoditas", $komoditas->id_komoditas)
-                    ->update([
-                        'sum_volume' => round($komoditas->sum_volume, 3),
-                        'sum_kalori' => round($komoditas->sum_kalori, 3),
-                        'average_harga' => round($komoditas->average_harga_satuan, 3),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-            } else {
-                // If no row exists, insert a new one
-                DB::table('komoditas_kabkot_summary')
-                    ->insert([
-                        'kode_kabkot' => $kode_kabkot,
-                        'id_komoditas' => $komoditas->id_komoditas,
-                        'sum_volume' => round($komoditas->sum_volume, 3),
-                        'sum_kalori' => round($komoditas->sum_kalori, 3),
-                        'average_harga' => round($komoditas->average_harga_satuan, 3),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-            }
+            $upsertData[] = [
+                "kode_kabkot" => $kode_kabkot,
+                "id_komoditas" => $komoditas->id_komoditas,
+                "sum_volume" => $komoditas->sum_volume,
+                "sum_kalori" => $komoditas->sum_kalori,
+                "average_harga" => $komoditas->average_harga_satuan,
+                "created_at" => now(),
+                "updated_at" => now(),
+            ];
         }
-        foreach ($komoditas_summary[1] as $komoditas) {
-            # code...
-            $current_komoditas = DB::table("komoditas_kabkot_summary")
-                ->where("kode_kabkot", $kode_kabkot)
-                ->where("id_komoditas", $komoditas->id_komoditas)
-                ->first();
-            if ($current_komoditas) {
-                // If a row exists, update it
-                DB::table('komoditas_kabkot_summary')
-                    ->where("kode_kabkot", $kode_kabkot)
-                    ->where("id_komoditas", $komoditas->id_komoditas)
-                    ->update([
-                        'sum_volume' => round($komoditas->sum_volume, 3),
-                        'sum_kalori' => round($komoditas->sum_kalori, 3),
-                        'average_harga' => round($komoditas->average_harga_satuan, 3),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-            } else {
-                // If no row exists, insert a new one
-                DB::table('komoditas_kabkot_summary')
-                    ->insert([
-                        'kode_kabkot' => $kode_kabkot,
-                        'id_komoditas' => $komoditas->id_komoditas,
-                        'sum_volume' => round($komoditas->sum_volume, 3),
-                        'sum_kalori' => round($komoditas->sum_kalori, 3),
-                        'average_harga' => round($komoditas->average_harga_satuan, 3),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-            }
-        }
-
-        // $data = [
-        //     // "konsumsi_perkapita_total"=>$konsumsi_perkapita_total,
-        //     // "konsumsi_perkapita_basket_komoditas"=>$konsumsi_perkapita_basket_komoditas,
-        //     "volume_perkomoditas" => $komoditas_summary,
-        // ];
-        // return $data;
+        // Perform bulk upsert
+        DB::table('komoditas_kabkot_summary')->upsert(
+            $upsertData,
+            ['kode_kabkot', 'id_komoditas'], // Unique constraints for conflict resolution
+            ['sum_volume', 'sum_kalori', 'average_harga', 'updated_at'] // Fields to update if conflict occurs
+        );
     }
 
     public function update_dashboard()
     {
-        set_time_limit(300);
-        $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
-        foreach ($daftar_kabkot as $kabkot) {
-            # code...
-            $kode_kabkot = $kabkot->kode;
-            $this->hitung_summary_kabupaten_kota($kode_kabkot);
-
-        }
+        // $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
+        // foreach ($daftar_kabkot as $kabkot) {
+        //     # code...
+        //     $kode_kabkot = $kabkot->kode;
+        //     $this->hitung_summary_kabupaten_kota($kode_kabkot);
+        // }
+        // return response()->json([
+        //     "message" => "selesai menghitung summary"
+        // ], 200);
+        $job = new UpdateDashboardJob();
+        $jobId = Queue::push($job);
         return response()->json([
-            "message" => "selesai menghitung summary"
+            "message" => "Summary update started",
+            "job_id" => $jobId // Return job ID for frontend tracking
         ], 200);
-
+    }
+    public function check_job_status($jobId)
+    {
+        $jobExists = DB::table("jobs")->where("id", $jobId)->exists();
+        return response()->json(["status" => $jobExists ? "processing" : "completed"], 200);
     }
 }

@@ -127,6 +127,7 @@ Route::middleware('auth')->group(function () {
     route::get('/dashboard', [MonitoringController::class, 'dashboard'])->name('dashboard');
     route::post('/monitoring/update', [MonitoringController::class, 'update'])->name('monitoring.update');
     route::get('/dashboard/update', [MonitoringController::class, 'update_dashboard'])->name('dashboard.update');
+    route::get('/api/dashboard/queue-status/{jobId}', [MonitoringController::class, 'check_job_status'])->name('api.dashboard.queue-status');
 
     route::get('/api/monitoring/rekap-kabkot/{kode_kabkot}', [MonitoringController::class, 'get_rekap_kabkot'])->name('api.monitoring.rekap_kabkot');
     route::get('/api/monitoring/rekap-komoditas/{kode_kabkot}', [MonitoringController::class, 'get_rekap_komoditas'])->name('api.monitoring.rekap_komoditas');
