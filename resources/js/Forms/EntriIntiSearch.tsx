@@ -123,8 +123,8 @@ const EntriIntiForm: React.FC<{
                         optionFilterProp="label"
                         // disabled={semesterDisable}
                         options={[
-                            // { label: "Semester I", value: "1",},
-                            { label: "Semester II", value: "2" },
+                            { label: "Semester I", value: "1",},
+                            // { label: "Semester II", value: "2" },
                         ]}
                         disabled
                     />
