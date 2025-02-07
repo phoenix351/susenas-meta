@@ -12,6 +12,7 @@ use App\Models\MasterWilayah;
 use App\Models\SusenasMak;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,12 @@ use function PHPSTORM_META\type;
 
 class MakController extends Controller
 {
+    private function eligileToUpdate()
+    {
+        // dd(App::environment());
+        // return false;
+        return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("local"));
+    }
     private $wtfDependecies = [
         [
             'target' => 'wtf_8',
@@ -178,8 +185,9 @@ class MakController extends Controller
     public function store(Request $request)
     {
 
-        if (auth()->user()->role !== "PML") {
-            return abort('403');
+        if (!$this->eligileToUpdate()) {
+            // return Inertia::render('Error/Error_403');
+            return abort(403);
         }
         try {
             //code...
@@ -304,8 +312,9 @@ class MakController extends Controller
     }
     public function update(Request $request)
     {
-        if (auth()->user()->role !== "PML") {
-            return abort('403');
+        if (!$this->eligileToUpdate()) {
+            // return Inertia::render('Error/Error_403');
+            return abort(403);
         }
         try {
 
@@ -396,8 +405,9 @@ class MakController extends Controller
 
     public function konsumsi_store(Request $request)
     {
-        if (auth()->user()->role !== "PML") {
-            return abort('403');
+        if (!$this->eligileToUpdate()) {
+            // return Inertia::render('Error/Error_403');
+            return abort(403);
         }
         try {
             $input = $request->all();
@@ -473,8 +483,9 @@ class MakController extends Controller
     }
     public function konsumsi_art_store(Request $request)
     {
-        if (auth()->user()->role !== "PML") {
-            return abort('403');
+        if (!$this->eligileToUpdate()) {
+            // return Inertia::render('Error/Error_403');
+            return abort(403);
         }
         try {
             $input = $request->all();
@@ -548,9 +559,11 @@ class MakController extends Controller
     public function create(Request $request)
     {
         // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
+
         $user = auth()->user();
-        if (auth()->user()->role !== "PML") {
-            return abort('403');
+        if (!$this->eligileToUpdate()) {
+            // return Inertia::render('Error/Error_403');
+            return abort(403);
         }
 
         $identitas_wilayah = $request->all();
@@ -567,49 +580,6 @@ class MakController extends Controller
             $kalori_basket = 0;
             $pengeluaran = 0;
 
-
-
-
-            // $konsumsi_ruta = Konsumsi::with('komoditas')
-            //     ->where('id_ruta', $id_ruta)
-            //     ->where(function ($query) {
-            //         $query->where('volume_beli', '>', '0')
-            //             ->orWhere('volume_produksi', '>', '0');
-            //     })
-            //     ->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
-
-
-            // $konsumsi_art = KonsumsiArt::with(['anggota_ruta', 'komoditas'])
-            //     ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
-            //     ->where('anggota_ruta.id_ruta', $id_ruta)
-            //     ->where(function ($query) {
-            //         $query->where('volume_beli', '>', 0)
-            //             ->orWhere('volume_produksi', '>', 0);
-            //     })
-            //     ->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
-
-            // $all_konsumsi = $konsumsi_ruta->merge($konsumsi_art);
-            // dd([sizeof($konsumsi_art), sizeof($konsumsi_ruta)]);
-
-            // $kalori_ruta = $konsumsi_ruta->sum(function ($value) {
-            //     return $value->komoditas->kalori * ($value->volume_beli + $value->volume_produksi);
-            // });
-            // $kalori_art = $konsumsi_art->sum(function ($value) {
-            //     return $value->komoditas->kalori * ($value->volume_beli + $value->volume_produksi);
-            // });
-
-            // $kalori_basket_art = $konsumsi_art->filter(function ($value) use ($komoditas_basket) {
-            //     return $komoditas_basket->contains($value->komoditas->id);
-            // })->sum(function ($value) {
-            //     return $value->komoditas->kalori * ($value->volume_beli + $value->volume_produksi);
-            // });
-            // $kalori_basket_ruta = $konsumsi_ruta->filter(function ($value) use ($komoditas_basket) {
-            //     return $komoditas_basket->contains($value->komoditas->id);
-            // })->sum(function ($value) {
-            //     return $value->komoditas->kalori * ($value->volume_beli + $value->volume_produksi);
-            // });
-            // $kalori_basket = $kalori_basket_art + $kalori_basket_ruta;
-            // $kalori_total = $kalori_ruta + $kalori_art;
             $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
                 $query->where('volume_beli', '>', '0')
                     ->orWhere('volume_produksi', '>', '0');
@@ -1372,18 +1342,4 @@ class MakController extends Controller
             return false;
         }
     }
-    // public function unduh_raw()
-    // {
-    //     $ruta = SusenasMak::get();
-    //     $art = AnggotaRuta::get();
-    //     $konsumsi_ruta = Konsumsi::get();
-    //     $konsumsi_art = KonsumsiArt::get();
-    //     $data = [
-    //         'ruta' => $ruta,
-    //         'art' => $art,
-    //         'konsumsi_ruta' => $konsumsi_ruta,
-    //         'konsumsi_art' => $konsumsi_art
-    //     ];
-    //     return response()->json($data, 200);
-    // }
 }

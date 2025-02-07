@@ -251,12 +251,19 @@ const Dashboard = ({
                         type="primary"
                         disabled={!cariForm.getFieldValue("nks")}
                         onClick={() =>
-                            router.visit(
+                            { try {
+                                
+                                router.visit(
                                 route(
                                     "entri.mak.create",
                                     cariForm.getFieldsValue()
                                 )
                             )
+                            } catch (error) {
+                            console.log("hoho");
+                                   
+                            }
+                        }
                         }
                     >
                         <PlusCircleOutlined /> Tambah Ruta
