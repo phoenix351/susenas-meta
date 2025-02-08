@@ -144,7 +144,7 @@ const index = () => {
         setOpenEditModal(true);
     }
     const columns: TableProps<KomoditasDataType>["columns"] = [
-        { title: "id", dataIndex: "id", key: "id" },
+        // { title: "id", dataIndex: "id", key: "id" },
         { title: "nomor_urut", dataIndex: "nomor_urut", key: "nomor_urut" },
         {
             title: "nama_komoditas",
