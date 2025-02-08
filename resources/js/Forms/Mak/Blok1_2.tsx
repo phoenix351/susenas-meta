@@ -30,6 +30,7 @@ const Blok1_2: React.FC<{
     setDaftarArt: (value: any) => void;
     editable: boolean;
     identitas_wilayah?: any;
+    ubahStatusCacah: (value: string) => void;
     // record: any;
 }> = ({
     form,
@@ -38,6 +39,7 @@ const Blok1_2: React.FC<{
     setDaftarArt,
     editable,
     identitas_wilayah,
+    ubahStatusCacah,
 }) => {
     const formItemLayout = {
         // wrapperCol: { span: 24 },
@@ -278,7 +280,7 @@ const Blok1_2: React.FC<{
                 >
                     <Image {...imageProps} src="/images/garuda.png" />
                     <Title level={5}>
-                        SURVEI SOSIAL EKONOMI SEMESTER I 2024
+                        SURVEI SOSIAL EKONOMI NASIONAL SEMESTER I 2025
                     </Title>
                     <Text>KETERANGAN KONSUMSI MAKANAN RUMAH TANGGA</Text>
                 </Space>
@@ -759,6 +761,7 @@ const Blok1_2: React.FC<{
                             {/* <td>Sulawesi Utara</td> */}
                             <td style={cellStyle} colSpan={4}>
                                 <MetaSelect
+                                    onChange={ubahStatusCacah}
                                     name="r203"
                                     options={[
                                         {

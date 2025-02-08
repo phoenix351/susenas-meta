@@ -49,6 +49,7 @@ const { Text, Title } = Typography;
 
 const Blok4_1: React.FC<{
     form: FormInstance;
+    id_ruta: string;
     onFinish: (values: any) => void;
     artForm: FormInstance;
     artFormFinish: (values: any) => void;
@@ -62,15 +63,14 @@ const Blok4_1: React.FC<{
     // record: any;
 }> = ({
     artForm,
+    id_ruta,
     artFormFinish,
     tabContentStyle,
     daftarArt,
     setDaftarArt,
     calculateKalori,
 }) => {
-    const blok4_1_hal2Finish = (values: any) => {
-        // console.log({ values });
-    };
+    const blok4_1_hal2Finish = (values: any) => {};
 
     // usestate
 
@@ -81,7 +81,6 @@ const Blok4_1: React.FC<{
     const [artLoading, setArtLoading] = useState(false);
 
     const newTabIndex = useRef(1);
-    // const [items, setItems] = useState(defaultItems);
 
     const [messageApi, contextHolder] = message.useMessage();
     const add = async () => {
@@ -92,16 +91,14 @@ const Blok4_1: React.FC<{
             const { data } = await axios.post(route("entri.mak.art.store"), {
                 nama: newActiveKey,
                 nomor_art: daftarArt.length + 1, // Note: It's usually not recommended to modify the array length directly
-                id_ruta: daftarArt[0].id_ruta,
+                id_ruta,
             });
-            // const { id_art } = data;
-            // console.log({ data });
 
             const updatedDaftarArt = [
                 ...daftarArt,
                 {
                     id: data.id,
-                    id_ruta: data.id_ruta,
+                    id_ruta,
                     nomor_art: newTabIndex.current++,
                     nama: newActiveKey,
                     key: newActiveKey,
@@ -111,13 +108,14 @@ const Blok4_1: React.FC<{
                     },
                 },
             ];
-            // console.log({ updatedDaftarArt });
+
             setDaftarArt([...updatedDaftarArt]);
             // Do any synchronous operations relying on the updatedDaftarArt here
 
             setActiveKey(newActiveKey);
         } catch (error) {
             console.error("Error in add function:", error);
+            console.log(id_ruta);
         } finally {
             setArtLoading(false);
         }
@@ -134,14 +132,7 @@ const Blok4_1: React.FC<{
             return;
         }
 
-        // messageApi.open({
-        //     content: "menghapus anggota rumah tangga...",
-        //     type: "loading",
-        //     key: id_art,
-        // });
         try {
-            // console.log({ id_art });
-
             const { data } = await axios.delete(
                 route("entri.mak.art.delete", { id_art: id_art })
             );
@@ -171,7 +162,6 @@ const Blok4_1: React.FC<{
 
     const handleCellEdit = (index: number, key: string, value: any) => {
         const updatedArts = [...daftarArt];
-        // console.log({ value });
 
         updatedArts[index][key] = value.trim();
         setDaftarArt(updatedArts);
@@ -201,7 +191,7 @@ const Blok4_1: React.FC<{
             // console.log({ konten });
             setListKomoditas([...konten]);
         };
-        fetchKomoditasList(159, 197);
+        fetchKomoditasList(159, 200);
         setLoading(false);
         const items = daftarArt.map((art: any, index: number) => ({
             label: art.nama,

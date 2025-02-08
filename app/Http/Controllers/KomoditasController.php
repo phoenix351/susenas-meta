@@ -127,9 +127,9 @@ class KomoditasController extends Controller
                 $from = $request->input('from');
                 $to = $request->input('to');
 
-                $data = Komoditas::where('id', '>=', $from)->where('id', '<=', $to)->orderBy("nomor_urut", "asc")->get();
+                $data = Komoditas::where('nomor_urut', '>=', $from)->where('nomor_urut', '<=', $to)->orderBy("nomor_urut", "asc")->get();
             } else {
-                $data = Komoditas::orderBy("nomor_urut","asc")->get();
+                $data = Komoditas::orderBy("nomor_urut", "asc")->get();
             }
             return response()->json($data, 200);
         } catch (\Throwable $th) {

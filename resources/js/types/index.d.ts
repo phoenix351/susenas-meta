@@ -30,6 +30,7 @@ interface SubTotal {
     total: number;
 }
 interface Rincian {
+    hidden?: boolean;
     id: number;
     nomor?: number;
     subKey?: string;

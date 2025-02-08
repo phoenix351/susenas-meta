@@ -30,17 +30,15 @@ class UpdateDashboardJob implements ShouldQueue
         try {
             //code...
             Log::info("Processing UpdateDashboardJob started");
-            
-            $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
+
+            $daftar_kabkot = Kabkot::get();
             foreach ($daftar_kabkot as $kabkot) {
                 Log::info("Processing kabkot: " . $kabkot->kode);
                 # code...
                 app()->call('App\Http\Controllers\MonitoringController@hitung_summary_kabupaten_kota', ['kode_kabkot' => $kabkot->kode]);
                 Log::info("Finished processing kabkot: " . $kabkot->kode);
-
             }
             Log::info("UpdateDashboardJob completed successfully");
-
         } catch (\Exception $e) {
             Log::error("Job Failed: " . $e->getMessage());
             throw $e; // Let Laravel retry if needed

@@ -117,19 +117,20 @@ const index = () => {
     useEffect(() => {
         getKabkot();
     }, []);
-    function pollJobStatus(jobId:number){
+    function pollJobStatus(jobId: number) {
         let interval = setInterval(async () => {
             try {
-                
-                const {data} = await axios.get(route("api.dashboard.queue-status",{jobId}));
-                
-                if(data.status==="completed") {
+                const { data } = await axios.get(
+                    route("api.dashboard.queue-status", { jobId })
+                );
+
+                if (data.status === "completed") {
                     clearInterval(interval);
                     messageApi.open({
-                        content:"sinkron data sudah selesai",
-                        type:"success",
-                        key:"sync"
-                    })
+                        content: "sinkron data sudah selesai",
+                        type: "success",
+                        key: "sync",
+                    });
                 }
             } catch (error) {
                 clearInterval(interval);
@@ -139,8 +140,6 @@ const index = () => {
                     key: "sync",
                 });
                 console.log(error);
-                
-                
             } finally {
                 router.get(
                     route("dashboard"),
@@ -152,26 +151,27 @@ const index = () => {
     }
     async function syncSummary() {
         try {
-            setLoadingData(true)
+            setLoadingData(true);
             messageApi.open({
-                content: "sedang sinkron data, anda bisa lanjut eksplorasi data",
+                content:
+                    "sedang sinkron data, anda bisa lanjut eksplorasi data",
                 type: "loading",
                 key: "sync",
-                duration:0
+                duration: 0,
             });
-            const {data} = await axios.get(route("dashboard.update"));
-            if(data.job_id){
+            const { data } = await axios.get(route("dashboard.update"));
+            if (data.job_id) {
                 pollJobStatus(data.job_id);
             }
-            
-            setLoadingData(false)
+
+            setLoadingData(false);
         } catch (error) {
             messageApi.open({
                 content: "error ketika sinkron data...",
                 type: "error",
                 key: "sync",
             });
-        } 
+        }
     }
     return (
         <div>
@@ -189,7 +189,13 @@ const index = () => {
             <Form>
                 <Form.Item>
                     <Select
-                        options={daftarKabkot}
+                        options={[
+                            ...daftarKabkot,
+                            {
+                                label: "[00] PROVINSI SULAWESI UTARA",
+                                value: "00",
+                            },
+                        ]}
                         showSearch
                         showArrow
                         optionFilterProp="label"
@@ -212,12 +218,11 @@ const index = () => {
                                         ? (
                                               kabkotSummary.konsumsi_perkapita_total /
                                               30
-                                          )
-                                              .toLocaleString("id-ID")
-                                            //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                                            //   .replace(/,/g, ".") // Replace ',' with '.'
-                                            //   .replace(/#/g, ",")
-                                        : "-"
+                                          ).toLocaleString("id-ID")
+                                        : //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                                          //   .replace(/,/g, ".") // Replace ',' with '.'
+                                          //   .replace(/#/g, ",")
+                                          "-"
                                 }
                                 precision={3}
                                 valueStyle={{ color: "#000" }}
@@ -239,12 +244,11 @@ const index = () => {
                                         ? (
                                               kabkotSummary.konsumsi_perkapita_basket_komoditas /
                                               30
-                                          )
-                                              .toLocaleString("id-ID")
-                                            //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                                            //   .replace(/,/g, ".") // Replace ',' with '.'
-                                            //   .replace(/#/g, ",")
-                                        : "-"
+                                          ).toLocaleString("id-ID")
+                                        : //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                                          //   .replace(/,/g, ".") // Replace ',' with '.'
+                                          //   .replace(/#/g, ",")
+                                          "-"
                                 }
                                 precision={3}
                                 valueStyle={{ color: "#3f8600" }}
@@ -263,12 +267,13 @@ const index = () => {
                                 title="Garis Kemisikinan Sementara"
                                 value={
                                     kabkotSummary?.garis_kemiskinan
-                                        ? kabkotSummary.garis_kemiskinan
-                                              .toLocaleString("id-ID")
-                                            //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
-                                            //   .replace(/,/g, ".") // Replace ',' with '.'
-                                            //   .replace(/#/g, ",")
-                                        : "-"
+                                        ? kabkotSummary.garis_kemiskinan.toLocaleString(
+                                              "id-ID"
+                                          )
+                                        : //   .replace(/\./g, "#") // Temporarily replace '.' with '#'
+                                          //   .replace(/,/g, ".") // Replace ',' with '.'
+                                          //   .replace(/#/g, ",")
+                                          "-"
                                 }
                                 precision={3}
                                 valueStyle={{ color: "#3f8600" }}

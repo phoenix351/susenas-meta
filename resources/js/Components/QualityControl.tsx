@@ -15,6 +15,7 @@ const QualityControl: React.FC<{
             key={row_index}
             style={{
                 backgroundColor: rincian.editable ? "#ffffcc" : "",
+                display: rincian.hidden ? "none" : "",
             }}
         >
             <td style={{ ...centerCell, width: "30px" }}>{row_index + 1}</td>

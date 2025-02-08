@@ -251,26 +251,18 @@ class MakController extends Controller
     }
     public function edit($id)
     {
-        // $id = $request->query('id');
-
-
-        // $data = Inti::where('kode_id', $id)->where('semester', $semester)->get();
         $data = $this->get_ruta('00', '00', '1', $id);
-        // dd($data);
 
-        $konsumsi_ruta = Konsumsi::where('id_ruta', $id)->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
-
+        $konsumsi_ruta = Konsumsi::where('id_ruta', $id)
+            ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
+            ->select('konsumsi.*', 'komoditas.id_kelompok')
+            ->get();
         $garis_kemiskinan = Kabkot::where('kode', $data->kode_kabkot)->pluck('garis_kemiskinan');
-
         $art = AnggotaRuta::where('id_ruta', $id)->get();
         // dd($art);
-
         $rekap_konsumsi = $this->get_konsumsi_ruta($id);
-
         $rekap_konsumsi_art = $this->get_konsumsi_art($id);
-        // $konsumsi_ruta = DB::table('konsumsi')->where('id_ruta', $id)->get();
 
-        // dd($konsumsi_ruta[2]);
         return Inertia::render("Entri/EditMak", [
             'data' => $data,
             'konsumsi_ruta' => $konsumsi_ruta,
@@ -477,7 +469,7 @@ class MakController extends Controller
             ], 201);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
+            // throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }

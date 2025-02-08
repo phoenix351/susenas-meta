@@ -107,7 +107,9 @@ const RowKonsumsi: React.FC<{
 
     useEffect(() => {
         totalHargaCek();
-    }, [rekapMak[data.subKey]["produksi"], rekapMak[data.subKey]["beli"]]);
+
+        // }, [rekapMak[data.subKey]["produksi"], rekapMak[data.subKey]["beli"]]);
+    }, [rekapMak]);
 
     useEffect(() => {
         totalHargaCek();
@@ -149,7 +151,6 @@ const RowKonsumsi: React.FC<{
             Number(form.getFieldValue(hargaBeliName)) ??
             0 + Number(form.getFieldValue(hargaProduksiName)) ??
             0;
-        // console.log({ value, total, ...data });
 
         setIsTotalEqual(value == total);
         if (data.type == "sub") {

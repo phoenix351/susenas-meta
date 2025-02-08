@@ -136,7 +136,7 @@ const WorksheetInput: React.FC<{
         multi: (
             <MetaSelect
                 name={name}
-                options={options ?? []}
+                options={options ? options : []}
                 onChange={setValue && ((value) => setValue(value))}
             />
         ),

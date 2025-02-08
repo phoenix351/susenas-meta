@@ -25,6 +25,11 @@ const KomoditasForm = ({
         }
     }
     const [showKomoditas, setShowKomoditas] = useState(false);
+    function cancelSubmit(event: any) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+        }
+    }
     return (
         <Form
             labelCol={{ span: 8 }}
@@ -41,6 +46,9 @@ const KomoditasForm = ({
             </Form.Item>
             <Form.Item name={"id_kelompok"} label="Kelompok Komoditas">
                 <Select
+                    onKeyDown={cancelSubmit}
+                    showSearch
+                    optionFilterProp="label"
                     options={kelompokKomoditas.map((kelompok) => ({
                         value: Number(kelompok.id_kelompok),
                         label: kelompok.nama_kelompok,

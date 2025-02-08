@@ -68,12 +68,9 @@ const Art: React.FC<{
         subKey: number;
         jenis: keyof SubTotal;
     }) => {
-        // return;
-        // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
         const pattern = `${jenis}_harga${subKey}`;
         const allFieldValues = form.getFieldsValue();
-        // console.log({ pattern, allFieldValues });
 
         const sum = Object.entries(allFieldValues)
             .filter(([fieldName]) => fieldName.endsWith(pattern))
@@ -84,7 +81,6 @@ const Art: React.FC<{
             );
 
         let newDaftarArt = [...daftarArt];
-        // console.log({ disini: newSubTotalHarga });
 
         const updatedArray = newDaftarArt.map((obj) => {
             let rekap = { ...obj.rekap };
@@ -94,8 +90,6 @@ const Art: React.FC<{
         setDaftarArt(updatedArray);
     };
     const calculateRekap = _debounce(() => {
-        // return;
-        // console.log({ subKey, jenis });
         // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
         // const pattern = `${jenis}_harga${subKey}`;
         const beli_0 = `beli_harga12`;
@@ -104,7 +98,6 @@ const Art: React.FC<{
         const produksi_1 = `produksi_harga13`;
 
         const allFieldValues = form.getFieldsValue();
-        // console.log({ allFieldValues });
 
         const sum_beli_0 = Object.entries(allFieldValues)
             .filter(
@@ -149,7 +142,6 @@ const Art: React.FC<{
                 0
             );
 
-        // console.log({ disini: newSubTotalHarga });
         let newDaftarArt = [...daftarArt];
         const updatedArt = newDaftarArt.map((obj) => {
             let newSubTotalHarga = { ...obj.rekap }; // Create a new object
@@ -171,11 +163,9 @@ const Art: React.FC<{
                 : obj;
         });
 
-        // console.log({ newDaftarArt });
-
         setDaftarArt(updatedArt);
     }, 600);
-    // const handleSubmit = _debounce(() => form.submit(), 3000);
+
     const handleValueChange = _debounce(() => {
         calculateRekap();
         form.submit();
@@ -191,11 +181,6 @@ const Art: React.FC<{
             const { data } = await axios.get(
                 route("api.mak.konsumsi.art", { id_art: id_art })
             );
-            // daftarArt.forEach((element: any) => {
-            //     if (element.id === id_art) {
-            //         setSubTotalHarga(element.rekap);
-            //     }
-            // });
 
             const daftarSub: number[] = [159, 192];
             let konsumsiArt = data.map(
@@ -311,22 +296,15 @@ const Art: React.FC<{
                             <Input readOnly />
                         </Form.Item>
                     </Space>
-                    {/* <Form.Item
-                        style={{ margin: "auto" }}
-                        name="hal6_jml_komoditas"
-                    >
-                        <InputNumber max={30} style={{ width: "40px" }} />
-                    </Form.Item> */}
                 </Space>
-                {
-                    <TabelBlok
-                        form={form}
-                        konten={konten}
-                        title={title}
-                        calculate={calculateSubTotalHarga}
-                        rekapMak={art.rekap}
-                    />
-                }
+
+                <TabelBlok
+                    form={form}
+                    konten={konten}
+                    title={title}
+                    calculate={calculateSubTotalHarga}
+                    rekapMak={art.rekap}
+                />
             </Form>
         </Space>
     );

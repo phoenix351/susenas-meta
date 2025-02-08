@@ -55,8 +55,13 @@ class MonitoringController extends Controller
     public function get_rekap_komoditas($kode_kabkot)
     {
         $rekap_komoditas = DB::table('komoditas_kabkot_summary')
-            ->join("komoditas", "id_komoditas", "=", "id")
-            ->where("kode_kabkot", "like", $kode_kabkot)
+            ->join("komoditas", "id_komoditas", "=", "id");
+        if ($kode_kabkot != "00") {
+            $rekap_komoditas = $rekap_komoditas
+                ->where("kode_kabkot", "like", $kode_kabkot);
+        }
+
+        $rekap_komoditas = $rekap_komoditas
             ->orderBy("id_komoditas", "asc")
             ->get();
         return response()->json($rekap_komoditas, 200);
@@ -251,6 +256,7 @@ class MonitoringController extends Controller
     private function get_total_kapita($kode_kabkot)
     {
         $total_kapita = SusenasMak::where("status_dok", "like", "clean")
+
             ->where("kode_kabkot", $kode_kabkot)
             ->selectRaw("sum(wtf_1) as jumlah_kapita")
             ->first();
@@ -293,8 +299,12 @@ class MonitoringController extends Controller
     {
         $total_konsumsi_ruta_kalori = Konsumsi::with(["komoditas"])
             ->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
-                $query->where("status_dok", "like", "clean")
-                    ->where("kode_kabkot", $kode_kabkot);
+                if ($kode_kabkot == "00") {
+                    $query->where("status_dok", "like", "clean");
+                } else {
+                    $query->where("status_dok", "like", "clean")
+                        ->where("kode_kabkot", $kode_kabkot);
+                }
             })
             ->where("volume_total", ">", 0)
             ->get()
@@ -303,8 +313,12 @@ class MonitoringController extends Controller
             });
         $total_konsumsi_ruta_kalori_basket = Konsumsi::with(["komoditas"])
             ->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
-                $query->where("status_dok", "like", "clean")
-                    ->where("kode_kabkot", $kode_kabkot);
+                if ($kode_kabkot == "00") {
+                    $query->where("status_dok", "like", "clean");
+                } else {
+                    $query->where("status_dok", "like", "clean")
+                        ->where("kode_kabkot", $kode_kabkot);
+                }
             })
             ->where("volume_total", ">", 0)
             ->whereHas("komoditas", function (Builder $query) {
@@ -324,8 +338,12 @@ class MonitoringController extends Controller
         $total_konsumsi_art_kalori = KonsumsiArt::with(["komoditas"])
             ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
                 $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
-                    $query_2->where("status_dok", "like", "clean")
-                        ->where("kode_kabkot", $kode_kabkot);
+                    if ($kode_kabkot == "00") {
+                        $query_2->where("status_dok", "like", "clean");
+                    } else {
+                        $query_2->where("status_dok", "like", "clean")
+                            ->where("kode_kabkot", $kode_kabkot);
+                    }
                 });
             })
             ->where("volume_total", ">", 0)
@@ -336,8 +354,12 @@ class MonitoringController extends Controller
         $total_konsumsi_art_kalori_basket = KonsumsiArt::with(["komoditas"])
             ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
                 $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
-                    $query_2->where("status_dok", "like", "clean")
-                        ->where("kode_kabkot", $kode_kabkot);
+                    if ($kode_kabkot == "00") {
+                        $query_2->where("status_dok", "like", "clean");
+                    } else {
+                        $query_2->where("status_dok", "like", "clean")
+                            ->where("kode_kabkot", $kode_kabkot);
+                    }
                 });
             })
             ->where("volume_total", ">", 0)
@@ -425,11 +447,18 @@ class MonitoringController extends Controller
                 ->from("konsumsi")
                 ->join("komoditas", "konsumsi.id_komoditas", "=", "komoditas.id")
                 ->whereExists(function ($subquery) use ($kode_kabkot) {
-                    $subquery->select(DB::raw(1))
-                        ->from("vsusenas_mak")
-                        ->whereColumn("vsusenas_mak.id", "konsumsi.id_ruta")
-                        ->where("vsusenas_mak.status_dok", "clean")
-                        ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
+                    if ($kode_kabkot != "00") {
+                        $subquery->select(DB::raw(1))
+                            ->from("vsusenas_mak")
+                            ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
+                            ->where("vsusenas_mak.status_dok", "clean")
+                            ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
+                    } else {
+                        $subquery->select(DB::raw(1))
+                            ->from("vsusenas_mak")
+                            ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
+                            ->where("vsusenas_mak.status_dok", "clean");
+                    }
                 })
                 ->where("konsumsi.volume_total", ">", 0)
                 ->groupBy("konsumsi.id_komoditas")
@@ -448,11 +477,18 @@ class MonitoringController extends Controller
                                 ->from("anggota_ruta")
                                 ->whereColumn("anggota_ruta.id", "konsumsi_art.id_art")
                                 ->whereExists(function ($subquery2) use ($kode_kabkot) {
-                                    $subquery2->select(DB::raw(1))
-                                        ->from("vsusenas_mak")
-                                        ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
-                                        ->where("vsusenas_mak.status_dok", "clean")
-                                        ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
+                                    if ($kode_kabkot != "00") {
+                                        $subquery2->select(DB::raw(1))
+                                            ->from("vsusenas_mak")
+                                            ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
+                                            ->where("vsusenas_mak.status_dok", "clean")
+                                            ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
+                                    } else {
+                                        $subquery2->select(DB::raw(1))
+                                            ->from("vsusenas_mak")
+                                            ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
+                                            ->where("vsusenas_mak.status_dok", "clean");
+                                    }
                                 });
                         })
                         ->where("konsumsi_art.volume_total", ">", 0)
@@ -473,19 +509,45 @@ class MonitoringController extends Controller
 
     public function hitung_summary_kabupaten_kota($kode_kabkot)
     {
-        $jumlah_ruta = SusenasMak::selectRaw("count(id) as jumlah_ruta")
-            ->where("kode_kabkot", $kode_kabkot)
-            ->first()->toArray()["jumlah_ruta"];
+        $jumlah_ruta = SusenasMak::selectRaw("count(id) as jumlah_ruta");
+        if ($kode_kabkot != "00") {
+            $jumlah_ruta = $jumlah_ruta->where("kode_kabkot", $kode_kabkot);
+        }
+
+
+        $jumlah_ruta = $jumlah_ruta->first()->toArray()["jumlah_ruta"];
         // dd($jumlah_ruta);
         $konsumsi_perkapita = $this->konsumsi_perkapita_total($kode_kabkot);
         $konsumsi_perkapita_total = $konsumsi_perkapita["total"];
         $konsumsi_perkapita_basket_komoditas = $konsumsi_perkapita["basket"];
-        DB::table("kabkot_summary")->where("kode_kabkot", "like", $kode_kabkot)->update([
-            "konsumsi_perkapita_total" => round($konsumsi_perkapita_total, 3),
-            "konsumsi_perkapita_basket_komoditas" => round($konsumsi_perkapita_basket_komoditas, 3),
-            "jumlah_individu" => $konsumsi_perkapita["jumlah_individu"],
-            "jumlah_ruta" => $jumlah_ruta
-        ]);
+        if ($kode_kabkot == "00") {
+            $upsertProvinsi = [
+                "kode_prov" => "00",
+                "kode_prov" => "00",
+                "kabkot" => "PROVINSI SULAWESI UTARA",
+                "jumlah_dok" => 0,
+                "target_nks" => 0,
+                "dok_error" => 0,
+                "dok_clean" => 0,
+                "dok_warning" => 0,
+                "konsumsi_perkapita_total" => round($konsumsi_perkapita_total, 3),
+                "konsumsi_perkapita_basket_komoditas" => round($konsumsi_perkapita_basket_komoditas, 3),
+                "jumlah_individu" => $konsumsi_perkapita["jumlah_individu"],
+                "jumlah_ruta" => $jumlah_ruta
+            ];
+            DB::table('komoditas_kabkot_summary')->upsert(
+                $upsertProvinsi,
+                ['kode_kabkot'], // Unique constraints for conflict resolution
+                ['konsumsi_perkapita_total', 'konsumsi_perkapita_basket_komoditas', 'jumlah_individu', 'jumlah_ruta'] // Fields to update if conflict occurs
+            );
+        } else {
+            DB::table("kabkot_summary")->where("kode_kabkot", "like", $kode_kabkot)->update([
+                "konsumsi_perkapita_total" => round($konsumsi_perkapita_total, 3),
+                "konsumsi_perkapita_basket_komoditas" => round($konsumsi_perkapita_basket_komoditas, 3),
+                "jumlah_individu" => $konsumsi_perkapita["jumlah_individu"],
+                "jumlah_ruta" => $jumlah_ruta
+            ]);
+        }
         $upsertData = [];
         $komoditas_summary = $this->komoditas_summary($kode_kabkot);
         foreach ($komoditas_summary as $komoditas) {

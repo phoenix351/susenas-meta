@@ -195,8 +195,6 @@ const Mak = ({
     rekap_konsumsi: any[];
     rekap_konsumsi_art: any[];
 }) => {
-    // console.log({ rekap_konsumsi_art });
-
     const tabContentStyle: React.CSSProperties = {
         backgroundColor: "#fff",
         paddingLeft: "10px",
@@ -225,12 +223,14 @@ const Mak = ({
             id: 0,
             value: 0,
             dataType: "decimal",
+            hidden: true,
         },
         {
             rincian: "Kalori 52 basket komoditas per Kapita per Hari",
             id: 6,
             value: 0,
             dataType: "decimal",
+            hidden: true,
         },
         {
             rincian: "Jumlah Komoditas Bahan Makanan/Minuman",
@@ -274,6 +274,7 @@ const Mak = ({
     const [warningList, setWarningList] = useState<any[]>([]);
     const [warningRHList, setWarningRHList] = useState<any[]>([]);
     const [errorList, setErrorList] = useState<any[]>([]);
+
     const modalCancel = () => {
         setOpenModal(false);
     };
@@ -296,6 +297,7 @@ const Mak = ({
             }
         }
     };
+
     const artFormFinish = async (values: any) => {
         try {
             const url = route("entri.mak.art.update");
@@ -628,6 +630,7 @@ const Mak = ({
                 // olah rekap konsumsi art
                 var newDaftarArt = [...art];
                 let newRekap_konsumsi_art = rekap_konsumsi_art.map((item) => ({
+                    // id_komoditas: item.id,
                     id_art: item.id_art,
                     id_kelompok: item.id_kelompok,
                     beli: Number(item.beli),
@@ -638,19 +641,21 @@ const Mak = ({
                     newDaftarArt = newDaftarArt.map((art) => {
                         // console.log({ element, art });
                         if (art.id === element.id_art) {
-                            art["rekap"][element.id_kelompok].produksi =
-                                element.produksi;
-                            art["rekap"][element.id_kelompok].beli =
-                                element.beli;
-                            art["rekap"][element.id_kelompok].total =
-                                element.beli + element.produksi;
+                            try {
+                                art["rekap"][element.id_kelompok].produksi =
+                                    element.produksi;
+                                art["rekap"][element.id_kelompok].beli =
+                                    element.beli;
+                                art["rekap"][element.id_kelompok].total =
+                                    element.beli + element.produksi;
+                            } catch (error) {
+                                console.log({ element, art });
+                            }
                         }
                         return art;
                     });
                     return element;
-                    // assign newdaftarart[index].rekap[element.id_kelompok]['produksi'] = element.produksi;
                 });
-                // console.log({ newDaftarArt });
 
                 setDaftarArt(newDaftarArt);
             }
@@ -718,7 +723,7 @@ const Mak = ({
             }
             return result;
         }, {});
-        // console.log({ singleObject });
+
         blok4_1Form.setFieldsValue(singleObject);
         artForm.setFieldsValue({
             id_ruta: data.id,
@@ -726,7 +731,17 @@ const Mak = ({
 
         // initialize last saved
         setLastSaved(new Date(data.updated_at));
+
+        ubahStatusPencacahan(data.r203);
     }, []);
+    const [statusCacah, setStatusCacah] = useState(true);
+    function ubahStatusPencacahan(value: string) {
+        if (value == "1") {
+            setStatusCacah(true);
+            return;
+        }
+        setStatusCacah(false);
+    }
 
     return (
         <>
@@ -809,6 +824,7 @@ const Mak = ({
                             key: "1",
                             children: (
                                 <Blok1_2
+                                    ubahStatusCacah={ubahStatusPencacahan}
                                     tabContentStyle={tabContentStyle}
                                     form={form}
                                     onFinish={blok1_2Finish}
@@ -833,6 +849,7 @@ const Mak = ({
                                     onFinish={blok1_2Finish}
                                 />
                             ),
+                            disabled: !statusCacah,
                         },
                         {
                             label: "Blok IV.1",
@@ -849,12 +866,14 @@ const Mak = ({
                                     // onFinish={blok4_1Finish}
                                 />
                             ),
+                            disabled: !statusCacah,
                         },
                         {
                             label: "Blok IV.1 ART",
                             key: "4",
                             children: (
                                 <Blok4_1art
+                                    id_ruta={data.id}
                                     tabContentStyle={tabContentStyle}
                                     form={blok4_1artForm}
                                     artForm={artForm}
@@ -867,6 +886,7 @@ const Mak = ({
                                     calculateKalori={calculateKalori}
                                 />
                             ),
+                            disabled: !statusCacah,
                         },
                         {
                             label: "Blok IV.3",
@@ -882,6 +902,7 @@ const Mak = ({
                                     setRekapMak={setRekapMak}
                                 />
                             ),
+                            disabled: !statusCacah,
                         },
                         {
                             label: "Blok QC",
@@ -894,7 +915,7 @@ const Mak = ({
                                     daftarQc={daftarQc}
                                 />
                             ),
-                            disabled: true,
+                            disabled: !statusCacah,
                         },
                     ]}
                 />
@@ -956,15 +977,13 @@ const Mak = ({
                         <Tabs
                             onChange={handleChange}
                             type="card"
-                            tabBarStyle={{padding:0,margin:0}}
+                            tabBarStyle={{ padding: 0, margin: 0 }}
                             items={[
                                 {
                                     label: (
-                                        
-                                            <Badge count={errorList.length}>
-                                                Error Isian
-                                            </Badge>
-                                        
+                                        <Badge count={errorList.length}>
+                                            Error Isian
+                                        </Badge>
                                     ),
                                     key: "1",
                                     children: (

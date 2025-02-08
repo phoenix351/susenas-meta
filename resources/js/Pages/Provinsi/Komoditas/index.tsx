@@ -80,7 +80,7 @@ const index = () => {
                 key: "save",
             });
         } finally {
-            setOpenEditModal(false)
+            setOpenEditModal(false);
         }
     }
     async function handleStore(values: KomoditasDataType) {
@@ -144,6 +144,7 @@ const index = () => {
         setOpenEditModal(true);
     }
     const columns: TableProps<KomoditasDataType>["columns"] = [
+        { title: "id", dataIndex: "id", key: "id" },
         { title: "nomor_urut", dataIndex: "nomor_urut", key: "nomor_urut" },
         {
             title: "nama_komoditas",

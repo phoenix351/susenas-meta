@@ -1,5 +1,6 @@
 import WorksheetRow from "@/Components/WorksheetRow";
 import { Form, FormInstance, message, Space, Typography } from "antd";
+import { values } from "lodash";
 
 const { Text, Title } = Typography;
 
@@ -24,8 +25,6 @@ const getRules = (
     message: string
 ) => ({
     validator(rule: any, value: number, callback: any) {
-        console.log({ rule });
-
         const dependentValue = getFieldValue(dependentName);
         let test = true;
         if (ruleName == "less") {
@@ -93,14 +92,32 @@ const daftarRincian = [
     {
         id: 4,
         nomor: 4,
-        rincian: "Status Kepemilikan Bangunan Tempat Tinggal (R1901)",
+        rincian:
+            "Apakah ART pernah mendapat Program Makan Siang Gratis? (R618)",
         type: "multi",
         options: [
-            { label: "Milik Sendiri", value: 1 },
-            { label: "Kontrak/Sewa", value: 2 },
-            { label: "Bebas Sewa", value: 3 },
-            { label: "Dinas", value: 4 },
-            { label: "Lainnya", value: 99 },
+            { label: "Ya, Program MBG", value: 1 },
+            { label: "Ya, Program selain MBG", value: 2 },
+            { label: "tidak mendapatkan", value: 3 },
+        ],
+        children: [
+            {
+                id: 9,
+                nomor: 9,
+                rincian:
+                    "Menu Makan Siang Gratis yang paling disukai RT? (Blok Catatan)",
+                type: "multi",
+                dependentValues: [1],
+                options: [
+                    { label: "A", value: 1 },
+                    { label: "B", value: 2 },
+                    { label: "C", value: 3 },
+                    { label: "D", value: 4 },
+                    { label: "E", value: 5 },
+                    { label: "F", value: 6 },
+                    { label: "G", value: 7 },
+                ],
+            },
         ],
     },
     {
@@ -108,7 +125,7 @@ const daftarRincian = [
         nomor: 5,
         rincian: (
             <span>
-                Luas Lantai per Kapita (m<sup>2</sup>) (R1902)
+                Luas Lantai Bangunan Utama (m<sup>2</sup>) (R1604)
             </span>
         ),
         type: "number",
@@ -116,25 +133,25 @@ const daftarRincian = [
     {
         id: 6,
         nomor: 6,
-        rincian: "Sumber air minum (R1903)",
+        rincian: "Sumber air minum (R1610)",
         type: "multi",
         options: [
-            { label: "Air kemasan bermerek", value: 1 },
-            { label: "Air isi ulang", value: 2 },
-            { label: "Leding/sumur bor/pompa", value: 3 },
-            { label: "Lainnya", value: 99 },
+            { label: "Air kemasan bermerk/isi ulang", value: 1 },
+            { label: "Leding", value: 2 },
+            { label: "Sumur bor/pompa/mata air", value: 3 },
+            { label: "Air sungai/danau/kolam/air hujan/lainnya", value: 4 },
         ],
     },
     {
         id: 7,
         nomor: 7,
-        rincian: "Sumber air mandi/cuci/dll (R1904)",
+        rincian: "Sumber air mandi/cuci/dll (R1614A)",
         type: "multi",
         options: [
-            { label: "Air kemasan bermerek", value: 1 },
-            { label: "Air isi ulang", value: 2 },
-            { label: "Leding/sumur bor/pompa", value: 3 },
-            { label: "Lainnya", value: 99 },
+            { label: "Air kemasan bermerk/isi ulang", value: 1 },
+            { label: "Leding", value: 2 },
+            { label: "Sumur bor/pompa/mata air", value: 3 },
+            { label: "Air sungai/danau/kolam/air hujan/lainnya", value: 4 },
         ],
     },
 
@@ -143,49 +160,26 @@ const daftarRincian = [
         nomor: 8,
         rincian: "Apakah tercatat sebagai menerima PKH? (R2003a)",
         type: "binary",
-        children: [
-            {
-                id: 9,
-                nomor: 9,
-                rincian: "Penggunaan PKH (R2003b)",
-                type: "multi",
-                dependentValues: [1],
-                options: [
-                    { label: "Belanja Pangan", value: 1 },
-                    { label: "Biaya Sekolah", value: 2 },
-                    { label: "Pembayaran Utang/Kredit", value: 3 },
-                    { label: "Lainnya", value: 99 },
-                ],
-            },
-        ],
-    },
-
-    {
-        id: 10,
-        nomor: 10,
-        rincian: "Apakah ART menerima PIP?",
-        type: "binary",
-        children: [
-            {
-                id: 11,
-                nomor: 11,
-                dependentValues: [1],
-                rincian: "berapa ART yang menerima PIP? (SD s.d. Kuliah)",
-                type: "number",
-                rules: {
-                    ruleName: "less equal",
-                    message:
-                        "Jumlah ART yang menerima PIP tidak bisa melebihi ART yang bersekolah",
-                    status: "warning",
-                    dependentName: "wtf_3",
-                },
-            },
-        ],
+        // children: [
+        //     {
+        //         id: 9,
+        //         nomor: 9,
+        //         rincian: "Penggunaan PKH (R2003b)",
+        //         type: "multi",
+        //         dependentValues: [1],
+        //         options: [
+        //             { label: "Belanja Pangan", value: 1 },
+        //             { label: "Biaya Sekolah", value: 2 },
+        //             { label: "Pembayaran Utang/Kredit", value: 3 },
+        //             { label: "Lainnya", value: 99 },
+        //         ],
+        //     },
+        // ],
     },
 
     {
         id: 26,
-        nomor: "",
+        nomor: "10",
         rincian: "Garis Kemiskinan Maret 2024",
         type: "rupiah",
     },
