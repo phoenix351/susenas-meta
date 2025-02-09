@@ -1,1 +1,0 @@
-import{a as t}from"./app-99d6f54e.js";import{L as e}from"./index-5dd3d3e8.js";const{Header:i,Footer:s,Sider:m,Content:n}=e;function l({children:r}){return t(e,{style:{backgroundColor:"transparent"},children:t(n,{style:{maxWidth:"500px",margin:"auto",minHeight:"100vh",display:"flex",justifyContent:"center",alignItems:"center"},children:r})})}export{l as G};

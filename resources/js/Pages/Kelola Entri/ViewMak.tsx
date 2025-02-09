@@ -844,6 +844,7 @@ const Mak = ({
                             key: "4",
                             children: (
                                 <Blok4_1art
+                                    id_ruta={data.id}
                                     tabContentStyle={tabContentStyle}
                                     form={blok4_1artForm}
                                     artForm={artForm}

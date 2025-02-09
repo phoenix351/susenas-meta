@@ -30,7 +30,7 @@ const Blok1_2: React.FC<{
     setDaftarArt: (value: any) => void;
     editable: boolean;
     identitas_wilayah?: any;
-    ubahStatusCacah: (value: string) => void;
+    ubahStatusCacah?: (value: string) => void;
     // record: any;
 }> = ({
     form,

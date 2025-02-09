@@ -94,17 +94,6 @@ const Mak = ({
 
     // initialize the form
     useEffect(() => {
-        // form.setFieldsValue({
-        //     r108: "1A",
-        //     r109: 1,
-        //     r110: "Ponimin",
-        //     r111: "Jalan Maengket",
-        //     r201_nama: "Sinra Tenseiii",
-        //     r201_jabatan: "Mitra",
-        //     r202_nama: "Ponimin, S.Tr.Stat.",
-        //     r202_jabatan: "Staf BPS Provinsi",
-        //     r203: "1",
-        // });
         form.setFieldsValue({
             r202_nama: user.nama_lengkap,
             r202_jabatan: user.jabatan,
