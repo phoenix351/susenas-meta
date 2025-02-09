@@ -29,7 +29,7 @@ const Dashboard = ({
     semester: string | number;
 }) => {
     useEffect(() => {
-        // console.log({ data_susenas });
+        console.log({ semester });
         if (nks && kode_kabkot) {
             cariForm.setFieldsValue({
                 nks: nks,
@@ -250,21 +250,18 @@ const Dashboard = ({
                     <Button
                         type="primary"
                         disabled={!cariForm.getFieldValue("nks")}
-                        onClick={() =>
-                            { try {
-                                
+                        onClick={() => {
+                            try {
                                 router.visit(
-                                route(
-                                    "entri.mak.create",
-                                    cariForm.getFieldsValue()
-                                )
-                            )
+                                    route(
+                                        "entri.mak.create",
+                                        cariForm.getFieldsValue()
+                                    )
+                                );
                             } catch (error) {
-                            console.log("hoho");
-                                   
+                                console.log("hoho");
                             }
-                        }
-                        }
+                        }}
                     >
                         <PlusCircleOutlined /> Tambah Ruta
                     </Button>

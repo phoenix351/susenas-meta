@@ -130,7 +130,7 @@ class MakController extends Controller
             $semester = $request->semester;
             // dd($semester);
             if (!isset($semester)) {
-                $semester = '2';
+                $semester = '1';
             }
             $data = $this->get_ruta($kode_kabkot, $nks, $semester);
             // dd([$data, $kode_kabkot, $nks, $semester]);

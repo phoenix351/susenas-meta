@@ -67,7 +67,7 @@ const EntriIntiForm: React.FC<{
             fetchKabkot();
             // fetchNks();
             form.setFieldValue("kode_prov", "71");
-            form.setFieldValue("semester", "2");
+            form.setFieldValue("semester", "1");
 
             // fetchSemester();
         } catch (error) {
@@ -123,7 +123,7 @@ const EntriIntiForm: React.FC<{
                         optionFilterProp="label"
                         // disabled={semesterDisable}
                         options={[
-                            { label: "Semester I", value: "1",},
+                            { label: "Semester I", value: "1" },
                             // { label: "Semester II", value: "2" },
                         ]}
                         disabled
