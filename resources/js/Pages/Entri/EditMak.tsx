@@ -223,14 +223,14 @@ const Mak = ({
             id: 0,
             value: 0,
             dataType: "decimal",
-            hidden: true,
+            // hidden: true,
         },
         {
             rincian: "Kalori 52 basket komoditas per Kapita per Hari",
             id: 6,
             value: 0,
             dataType: "decimal",
-            hidden: true,
+            // hidden: true,
         },
         {
             rincian: "Jumlah Komoditas Bahan Makanan/Minuman",

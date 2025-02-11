@@ -23,10 +23,7 @@ const TextRupiah: React.FC<{ value: number; color: string }> = ({
                 }}
             >
                 {value > 0
-                    ? `Rp ${Number(value)}`.replace(
-                          /\B(?=(\d{3})+(?!\d))/g,
-                          ","
-                      )
+                    ? `Rp ${Number(value).toLocaleString("id")}`
                     : ""}
                 {/* {value} */}
             </Text>

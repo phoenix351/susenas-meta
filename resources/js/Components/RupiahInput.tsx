@@ -55,6 +55,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
                 max={1000000000}
                 formatter={(value: number | undefined) => {
                     if (value == 0) return "";
+                    return `Rp ${Number(value)?.toLocaleString("id")}`;
                     return `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 }}
                 parser={(displayValue: string | undefined) => {

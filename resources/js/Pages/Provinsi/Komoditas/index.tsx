@@ -145,7 +145,7 @@ const index = () => {
     }
     const columns: TableProps<KomoditasDataType>["columns"] = [
         // { title: "id", dataIndex: "id", key: "id" },
-        { title: "nomor_urut", dataIndex: "nomor_urut", key: "nomor_urut" },
+        { title: "Kode", dataIndex: "id", key: "id" },
         {
             title: "nama_komoditas",
             dataIndex: "nama_komoditas",

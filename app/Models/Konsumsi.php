@@ -15,7 +15,7 @@ class Konsumsi extends Model
 
     public function komoditas()
     {
-        return $this->belongsTo(Komoditas::class, 'id_komoditas',"nomor_urut");
+        return $this->belongsTo(Komoditas::class, 'id_komoditas',"id");
     }
     public function ruta():BelongsTo
     {

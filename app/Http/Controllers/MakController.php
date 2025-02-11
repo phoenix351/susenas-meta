@@ -572,10 +572,11 @@ class MakController extends Controller
             $kalori_basket = 0;
             $pengeluaran = 0;
 
-            $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
-                $query->where('volume_beli', '>', '0')
-                    ->orWhere('volume_produksi', '>', '0');
-            })->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
+            $konsumsi_ruta = Konsumsi::with(["komoditas"])
+                ->where('id_ruta', $id_ruta)->where(function ($query) {
+                    $query->where('volume_beli', '>', '0')
+                        ->orWhere('volume_produksi', '>', '0');
+                })->get(['id_komoditas', 'volume_beli', 'volume_produksi', 'harga_beli', 'harga_produksi']);
 
             $konsumsi_art = KonsumsiArt::where('anggota_ruta.id_ruta', $id_ruta)
                 ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
@@ -611,17 +612,19 @@ class MakController extends Controller
             }
             $pengeluaran_non_makanan = SusenasMak::where('id', $id_ruta)->value('blok4_32_16_total');
             $komoditas_non_makanan = SusenasMak::where('id', $id_ruta)->value('blokqc_3');
-            $art = AnggotaRuta::where('id_ruta', $id_ruta)->pluck('id');
+            $art = SusenasMak::find($id_ruta)->wtf_1;
+            // return response()->json($konsumsi_ruta, 200);
             $pengeluaran = $pengeluaran * 30 / 7;
             $pengeluaran = $pengeluaran + $pengeluaran_non_makanan;
             $data_update = [
-                'blokqc_0' => $kalori_total / sizeof($art) / 7,
-                'blokqc_6' => $kalori_basket / sizeof($art) / 7,
+                'blokqc_0' => $kalori_total / $art / 7,
+                'blokqc_6' => $kalori_basket / $art / 7,
                 'blokqc_1' => sizeof($konsumsi_ruta),
                 'blokqc_2' => sizeof($konsumsi_art),
                 'blokqc_4' => $komoditas_non_makanan + sizeof($konsumsi_art) + sizeof($konsumsi_ruta),
-                'blokqc_5' => round($pengeluaran / sizeof($art)),
+                'blokqc_5' => round($pengeluaran / $art),
             ];
+            // dd([$data_update,$art,$pengeluaran]);
             DB::beginTransaction();
             SusenasMak::find($id_ruta)->update($data_update);
             DB::commit();

@@ -3,7 +3,6 @@
 use App\Http\Controllers\AnggotaRutaController;
 use App\Http\Controllers\KomoditasController;
 use App\Http\Controllers\MakController;
-use App\Http\Controllers\MasterJabatanController;
 use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\PeriksaController;
@@ -11,11 +10,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\RangeHargaController;
 use App\Models\Konsumsi;
-use App\Models\MasterJabatan;
 use App\Models\MasterWilayah;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -52,31 +49,14 @@ Route::middleware('auth')->group(function () {
 
     //route master barang
     //route master jabatan
-    route::get('/admin/master-jabatan', function () {
-        return Inertia::render('Admin/MasterJabatan', ['master_jabatan' => MasterJabatan::all()]);
-    })->name('admin.master.jabatan');
-    Route::patch('/admin/master-jabatan', [MasterJabatanController::class, 'update'])->name('master_jabatan.update');
-    Route::post('/admin/master-jabatan', [MasterJabatanController::class, 'store'])->name('master_jabatan.store');
-    Route::delete('/admin/master-jabatan', [MasterJabatanController::class, 'destroy'])->name('master_jabatan.destroy');
-
+   
     //route master ruangan
     route::get('/api/users', function () {
         $users = User::select('id', 'nama_lengkap')->get();
         return response()->json([$users]);
     })->name('users.get');
     // route api for jabatan
-    route::get('/api/master/jabatan/nama', function () {
-        $namaList = MasterJabatan::select(["nama"])->groupBy(['nama'])->get();
-        return response()->json([$namaList]);
-    })->name('admin.master.jabatan.nama');
-    route::get('/api/master/jabatan/jenis', function () {
-        $jenisList = MasterJabatan::select(["jenis"])->groupBy(['jenis'])->get();
-        return response()->json([$jenisList]);
-    })->name('admin.master.jabatan.jenis');
-    route::get('/api/master/jabatan/tingkat', function () {
-        $tingkatList = MasterJabatan::select(["tingkat"])->groupBy(['tingkat'])->get();
-        return response()->json([$tingkatList]);
-    })->name('admin.master.jabatan.tingkat');
+   
 
     route::get('/api/wilayah/kabkot', [MasterWilayahController::class, 'fetch_kabkot'])->name('api.wilayah.kabkot');
     route::get('/api/entri/semester', function () {

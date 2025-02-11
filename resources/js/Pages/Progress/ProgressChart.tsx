@@ -19,7 +19,10 @@ const { Title } = Typography;
 const ProgressChart = ({ data }: { data: ProgressData[] }) => {
     const [hoveredData, setHoveredData] = useState(null);
     const [currentData, setCurrentData] = useState(data);
-    const [wilayah, setWilayah] = useState({tipe:"kabkot",nama:"Sulawesi Utara"});
+    const [wilayah, setWilayah] = useState({
+        tipe: "kabkot",
+        nama: "Sulawesi Utara",
+    });
     const [messageApi, contextHolder] = message.useMessage();
     async function getData(tipe: string, kode: string) {
         if (tipe == "null") {
@@ -40,7 +43,7 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
                 route("api.monitoring.wilayah", { tipe, kode })
             );
             setCurrentData(data);
-            setWilayah({tipe,nama:kode});
+            setWilayah({ tipe, nama: kode });
             messageApi.open({
                 content: "selesai memuat data",
                 key: "get-data",
@@ -73,31 +76,30 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
         <>
             {" "}
             {contextHolder}
-            <Space align="center" style={{
-                
-                marginRight:30,
-                marginLeft:20,
-                width:"100%"
-            }}>
+            <Space
+                align="center"
+                style={{
+                    marginRight: 30,
+                    marginLeft: 20,
+                    width: "100%",
+                }}
+            >
                 <Button onClick={goBack}>
                     <LeftOutlined /> Kembali
                 </Button>
-                <Space style={{marginLeft:"26vw",textAlign:'center'}}>
-
-                <Title>Progress Pendataan 71{wilayah.nama}</Title>
+                <Space style={{ marginLeft: "26vw", textAlign: "center" }}>
+                    <Title>Progress Pendataan 71{wilayah.nama}</Title>
                 </Space>
-
             </Space>
-            <ResponsiveContainer width={"100%"}  height={500}>
+            <ResponsiveContainer width={"100%"} height={600}>
                 <BarChart
                     data={currentData}
                     margin={{
                         top: 20,
                         right: 30,
                         left: 20,
-                        bottom: 10,
+                        bottom: 50,
                     }}
-                    
                     onClick={() => {
                         if (hoveredData) {
                             const tipe = hoveredData[0]["payload"]["tipe"];
@@ -112,15 +114,30 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
                             setHoveredData(null);
                         }
                     }}
-                    >
+                >
                     <Legend
                         layout="horizontal"
                         verticalAlign="top"
                         align="center"
                     />
-                    <CartesianGrid strokeDasharray="3 3"  />
-                    <XAxis dataKey="fullcode" angle={-30} textAnchor="end" />
-                    <YAxis />
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                        dataKey="fullcode"
+                        angle={-30}
+                        textAnchor="end"
+                        label={{
+                            value: "Kabupaten/Kota",
+                            position: "insideBottom",
+                            offset: -30,
+                        }}
+                    />
+                    <YAxis
+                        label={{
+                            value: "Jumlah Dokumen",
+                            angle: -90,
+                            position: "insideLeft",
+                        }}
+                    />
                     <Tooltip content={<CustomTooltip />} />
                     {/* <Bar dataKey="target" stackId="a" fill="grey" /> */}
                     <Bar

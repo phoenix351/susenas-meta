@@ -95,6 +95,15 @@ const daftarRincian = [
         rincian:
             "Apakah ART pernah mendapat Program Makan Siang Gratis? (R618)",
         type: "multi",
+        dependencies:["wtf_3"],
+        rules: {
+            ruleName: "required if",
+            message:
+                "Isian ini diisi apabila Jumlah ART Bersekolah lebih dari 0",
+            status: "error",
+            dependentName: "wtf_3",
+            dependentValue: 1,
+        },
         options: [
             { label: "Ya, Program MBG", value: 1 },
             { label: "Ya, Program selain MBG", value: 2 },

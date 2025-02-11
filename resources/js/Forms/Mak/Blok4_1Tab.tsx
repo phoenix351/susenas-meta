@@ -33,7 +33,7 @@ const Blok4_1Tab: React.FC<{
                 route("api.mak.komoditas.list", { from: from, to: to })
             );
             const konten = data.map((item: any) => ({
-                nomor: item.nomor_urut,
+                id: item.id,
                 kode_coicop: item.kode_coicop,
                 rincian: item.nama_komoditas,
                 satuan: item.satuan,

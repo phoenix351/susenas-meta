@@ -77,12 +77,12 @@ const RowKonsumsi: React.FC<{
     const [isProduksiEqual, setIsProduksiEqual] = useState<boolean>(false);
     const [isVolumeEqual, setIsVolumeEqual] = useState<boolean>(false);
     const hargaProduksiName = `${data.type === "sub" ? "jumlah" : ""}${
-        data.nomor
+        data.id
     }_produksi_harga${data.subKey}`;
     const hargaBeliName = `${data.type === "sub" ? "jumlah" : ""}${
-        data.nomor
+        data.id
     }_beli_harga${data.subKey}`;
-    const hargaTotalName = `${data.nomor}_total_harga`;
+    const hargaTotalName = `${data.id}_total_harga`;
     useEffect(() => {
         let beli = Number(form.getFieldValue(hargaBeliName));
         if (!beli) {
@@ -97,7 +97,7 @@ const RowKonsumsi: React.FC<{
 
         if (!total) return;
         form.setFieldsValue({
-            [`${data.nomor}_total_harga_calculated`]: total,
+            [`${data.id}_total_harga_calculated`]: total,
         });
         totalHargaCek();
     }, [totalHarga]);
@@ -125,13 +125,13 @@ const RowKonsumsi: React.FC<{
         // Manually trigger the useEffect
         let hargaProduksi = form.getFieldValue(
             `${data.type === "sub" ? "jumlah" : ""}${
-                data.nomor
+                data.id
             }_produksi_harga${data.subKey}`
         );
         let total = value + hargaProduksi;
 
         form.setFieldsValue({
-            [`${data.nomor}_total_harga_calculated`]: total,
+            [`${data.id}_total_harga_calculated`]: total,
         });
         setTotalHarga(total);
         if (data.type === "sub") return;
@@ -140,12 +140,12 @@ const RowKonsumsi: React.FC<{
     function produksiHargaCalculate(value: number | undefined): void {
         setTotalHarga(
             parseFloat(String(value) ?? 0) +
-                parseFloat(form.getFieldValue(`${data.nomor}_beli_harga`) || 0)
+                parseFloat(form.getFieldValue(`${data.id}_beli_harga`) || 0)
         );
         if (data.type === "sub") return;
     }
     function totalHargaCek(): void {
-        const value = form.getFieldValue(`${data.nomor}_total_harga`);
+        const value = form.getFieldValue(`${data.id}_total_harga`);
 
         const total =
             Number(form.getFieldValue(hargaBeliName)) ??
@@ -156,12 +156,12 @@ const RowKonsumsi: React.FC<{
         if (data.type == "sub") {
             const hargaProduksi = form.getFieldValue(
                 `${data.type === "sub" ? "jumlah" : ""}${
-                    data.nomor
+                    data.id
                 }_produksi_harga${data.subKey}`
             );
             const hargaBeli = form.getFieldValue(
                 `${data.type === "sub" ? "jumlah" : ""}${
-                    data.nomor
+                    data.id
                 }_beli_harga${data.subKey}`
             );
             setIsBeliEqual(hargaBeli == rekapMak[data.subKey]["beli"]);
@@ -172,10 +172,10 @@ const RowKonsumsi: React.FC<{
     }
     function volumeCalculate(): void {
         const totalVolume =
-            form.getFieldValue(`${data.nomor}_beli_volume`) +
-            form.getFieldValue(`${data.nomor}_produksi_volume`);
+            form.getFieldValue(`${data.id}_beli_volume`) +
+            form.getFieldValue(`${data.id}_produksi_volume`);
         setVolume(totalVolume);
-        const volumeInput = form.getFieldValue(`${data.nomor}_total_volume`);
+        const volumeInput = form.getFieldValue(`${data.id}_total_volume`);
         setIsVolumeEqual(volumeInput == totalVolume);
     }
     return (
@@ -194,7 +194,7 @@ const RowKonsumsi: React.FC<{
                         width: "55px",
                     }}
                 >
-                    {data.nomor}
+                    {data.id}
                 </td>
                 {/* <td style={{ ...cellStyle, width: "130px" }}>{data.kode_coicop}</td> */}
 
@@ -206,7 +206,7 @@ const RowKonsumsi: React.FC<{
                 >
                     {data.rincian}
                     {data.type === "lain" && (
-                        <Form.Item name={`${data.nomor}_item`}>
+                        <Form.Item name={`${data.id}_item`}>
                             <Input placeholder="Sebutkan" />
                         </Form.Item>
                     )}
@@ -220,7 +220,7 @@ const RowKonsumsi: React.FC<{
                     }}
                 >
                     {data.type === "lain" ? (
-                        <Form.Item name={`${data.nomor}_satuan`}>
+                        <Form.Item name={`${data.id}_satuan`}>
                             <Input placeholder="Sebutkan" />
                         </Form.Item>
                     ) : (
@@ -234,7 +234,7 @@ const RowKonsumsi: React.FC<{
                 >
                     {data.type === "sub" || (
                         <NumberInput
-                            inputName={`${data.nomor}_beli_volume`}
+                            inputName={`${data.id}_beli_volume`}
                             onChange={_debounce(volumeCalculate, 400)}
                         />
                     )}
@@ -255,7 +255,7 @@ const RowKonsumsi: React.FC<{
                 >
                     {data.type === "sub" || (
                         <NumberInput
-                            inputName={`${data.nomor}_produksi_volume`}
+                            inputName={`${data.id}_produksi_volume`}
                             onChange={_debounce(volumeCalculate, 400)}
                         />
                     )}
@@ -274,7 +274,7 @@ const RowKonsumsi: React.FC<{
                 <td style={data.type === "sub" ? darkCell : cellStyle}>
                     {data.type === "sub" || (
                         <NumberInput
-                            inputName={`${data.nomor}_total_volume`}
+                            inputName={`${data.id}_total_volume`}
                             onChange={_debounce(volumeCalculate, 400)}
                             validateStatus={!isVolumeEqual ? "error" : ""}
                         />
@@ -333,7 +333,7 @@ const RowKonsumsi: React.FC<{
                                 border: "none",
                                 marginRight: "10px",
                             }}
-                            name={`${data.nomor}_total_volume_calculated`}
+                            name={`${data.id}_total_volume_calculated`}
                         >
                             {volume > 0 ? volume : ""}
                         </Form.Item>
@@ -348,7 +348,7 @@ const RowKonsumsi: React.FC<{
                             cursor: "text",
                         }}
                         readOnly={true}
-                        inputName={`${data.nomor}_total_harga_calculated`}
+                        inputName={`${data.id}_total_harga_calculated`}
                     />
                 </td>
             </tr>

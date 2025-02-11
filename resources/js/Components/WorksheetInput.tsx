@@ -32,37 +32,48 @@ const WorksheetInput: React.FC<{
 
     const getRules = (
         { getFieldValue }: { getFieldValue: (arg0: string) => any },
-        ruleName: "less" | "greater" | "less equal" | "greater equal" | "equal",
+        ruleName:
+            | "less"
+            | "greater"
+            | "less equal"
+            | "greater equal"
+            | "equal"
+            | "required if",
         message: string,
         status: ValidateStatus,
-        dependentName?: string,
-        dependentValue?: number
+        dependentName: string,
+        dependentValue: number
     ) => ({
         validator(rule: any, value: number, callback: any) {
             // let dependentValue;
+            let depValue;
             if (dependentName) {
-                dependentValue = getFieldValue(dependentName);
+                depValue = getFieldValue(dependentName);
             }
 
-            if (!dependentValue) {
-                // console.log({ dependentName, name, message });
-
-                setValidationMessage("Validasi error, contact admin!");
-                setValidationState(status);
-                setHasFeedback(false);
-                return Promise.resolve();
-            }
             let test = true;
             if (ruleName == "less") {
-                test = value < dependentValue;
+                depValue = depValue ?? 0;
+                test = value < depValue;
             } else if (ruleName == "equal") {
-                test = value == dependentValue;
+                depValue = depValue ?? 0;
+                test = value == depValue;
             } else if (ruleName == "greater") {
-                test = value > dependentValue;
+                depValue = depValue ?? 0;
+                test = value > depValue;
             } else if (ruleName == "less equal") {
-                test = value <= dependentValue;
+                depValue = depValue ?? 0;
+                test = value <= depValue;
             } else if (ruleName == "greater equal") {
-                test = value >= dependentValue;
+                depValue = depValue ?? 0;
+                test = value >= depValue;
+            } else if (ruleName == "required if") {
+                // required if depValue is equal or greater than conditionalValue
+                // const isIsianNull = Boolean(getFieldValue(dependentName));
+                // console.log({value,depValue});
+                
+                const isIsianRequired = depValue >= dependentValue;
+                test = isIsianRequired && value ? true : false;
             }
             console.log({ value, dependentValue, test, ruleName });
             if (value === null || value === undefined) {
@@ -108,6 +119,8 @@ const WorksheetInput: React.FC<{
     } else {
         currentRules = [];
     }
+    // console.log({currentRules,name});
+
     const inputComponents: { [type: string]: JSX.Element } = {
         number: (
             <Form.Item
@@ -137,6 +150,11 @@ const WorksheetInput: React.FC<{
             <MetaSelect
                 name={name}
                 options={options ? options : []}
+                rules={currentRules}
+                validationStatus={validationState}
+                help={validationMessage}
+                hasFeedback={hasFeedback}
+                dependencies={dependencies}
                 onChange={setValue && ((value) => setValue(value))}
             />
         ),

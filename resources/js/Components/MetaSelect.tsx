@@ -1,4 +1,5 @@
 import { Form, FormRule, Select, SelectProps } from "antd";
+import { ValidateStatus } from "antd/es/form/FormItem";
 import React from "react";
 interface Option {
     label: string;
@@ -14,9 +15,23 @@ const MetaSelect: React.FC<{
     name: string;
     onChange?: (value: any) => void;
     rules?: FormRule[];
-}> = ({ options, name, onChange, rules }) => {
+    validationStatus?: ValidateStatus;
+    help?: string;
+    hasFeedback?:boolean;
+    dependencies?:string[];
+}> = ({ options, name, onChange, rules, validationStatus, help,hasFeedback,dependencies }) => {
     return (
-        <Form.Item name={name} label={null} style={formItemStyle} rules={rules}>
+        <Form.Item
+            name={name}
+            label={null}
+            style={formItemStyle}
+            rules={rules}
+            validateStatus={validationStatus}
+            help={help}
+            hasFeedback={hasFeedback}
+            dependencies={dependencies}
+
+        >
             <Select
                 allowClear
                 showSearch

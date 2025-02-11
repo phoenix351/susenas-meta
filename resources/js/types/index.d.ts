@@ -78,8 +78,8 @@ interface WorksheetRuleProps {
     ruleName: "less" | "greater" | "less equal" | "greater equal" | "equal";
     message: string;
     status: ValidateStatus;
-    dependentName?: string;
-    dependentValue?: number;
+    dependentName: string;
+    dependentValue: number;
 }
 
 interface KomoditasDataType {

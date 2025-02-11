@@ -191,7 +191,7 @@ const Blok4_1: React.FC<{
             // console.log({ konten });
             setListKomoditas([...konten]);
         };
-        fetchKomoditasList(159, 200);
+        fetchKomoditasList(187, 225);
         setLoading(false);
         const items = daftarArt.map((art: any, index: number) => ({
             label: art.nama,
