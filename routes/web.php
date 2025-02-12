@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AnggotaRutaController;
 use App\Http\Controllers\KomoditasController;
+use App\Http\Controllers\KomoditasNonMakananController;
+use App\Http\Controllers\KonsumsiNonMakananController;
 use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\MonitoringController;
@@ -81,7 +83,11 @@ Route::middleware('auth')->group(function () {
     route::get('/api/mak/komoditas/list', [KomoditasController::class, 'list_komoditas'])->name('api.mak.komoditas.list');
     route::get('/api/mak/komoditas/kalori/{id}', [KomoditasController::class, 'fetch_kalori'])->name('api.mak.komoditas.kalori.fetch');
     route::get('/api/mak/calculate_qc/{id_ruta}', [MakController::class, 'calculate_qc'])->name('api.mak.calculate_qc');
-
+    
+    route::get('/api/non_mak/komoditas/list', [KomoditasNonMakananController::class, 'list'])->name('api.non_mak.komoditas.list');
+    route::get('/api/non_mak/komoditas/fetch/{id_ruta}', [KomoditasNonMakananController::class, 'fetch'])->name('api.non_mak.konsumsi.fetch');
+    route::post('/api/non_mak/konsumsi', [KonsumsiNonMakananController::class, 'store'])->name('api.non_mak.konsumsi.store');
+    
     route::get('/api/mak/revalidasi/{id_ruta}', [MakController::class, 'revalidasi'])->name('api.mak.revalidasi');
 
 
@@ -105,7 +111,7 @@ Route::middleware('auth')->group(function () {
     // route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
     route::get('/progress', [MonitoringController::class, 'index'])->name('progress');
     route::get('/dashboard', [MonitoringController::class, 'dashboard'])->name('dashboard');
-    route::post('/monitoring/update', [MonitoringController::class, 'update'])->name('monitoring.update');
+    route::get('/progress/update', [MonitoringController::class, 'update'])->name('monitoring.update');
     route::get('/dashboard/update', [MonitoringController::class, 'update_dashboard'])->name('dashboard.update');
     route::get('/api/dashboard/queue-status/{jobId}', [MonitoringController::class, 'check_job_status'])->name('api.dashboard.queue-status');
 

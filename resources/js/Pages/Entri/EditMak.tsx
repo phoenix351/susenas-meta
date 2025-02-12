@@ -33,6 +33,7 @@ import {
 } from "@ant-design/icons";
 import MyModal from "@/Components/Modal";
 import TextRupiah from "@/Components/TextRupiah";
+import BlokNonMakanan from "@/Forms/NonMakanan/NonMakanan";
 
 const daftarRincian432 = [
     {
@@ -863,6 +864,24 @@ const Mak = ({
                                     subTotalHarga={subTotalHarga}
                                     rekapMak={rekapMak}
                                     setRekapMak={setRekapMak}
+                                    // onFinish={blok4_1Finish}
+                                />
+                            ),
+                            disabled: !statusCacah,
+                        },
+                        {
+                            label: "Non Makanan",
+                            key: "7",
+                            children: (
+                                <BlokNonMakanan
+                                    id_ruta={data.id}
+                                    // onFinish={blok4_1Finish}
+                                    // form={blok4_1Form}
+                                    // tabContentStyle={tabContentStyle}
+                                    // calculate={calculateSubTotalHarga}
+                                    // subTotalHarga={subTotalHarga}
+                                    // rekapMak={rekapMak}
+                                    // setRekapMak={setRekapMak}
                                     // onFinish={blok4_1Finish}
                                 />
                             ),

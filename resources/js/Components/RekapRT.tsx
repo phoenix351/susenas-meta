@@ -62,7 +62,7 @@ const RekapRT = ({
     ]);
 
     return (
-        <tr>
+        <tr style={{backgroundColor:rincian.nomor===17?"rgb(255,255,204)":""}}>
             <td style={centerCell}>{rincian.nomor}</td>
             <td style={cellStyle}>{rincian.rincian}</td>
 

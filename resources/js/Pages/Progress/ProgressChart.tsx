@@ -16,9 +16,9 @@ import { LeftOutlined } from "@ant-design/icons";
 import CustomTooltip from "./CustomTooltip";
 const { Title } = Typography;
 
-const ProgressChart = ({ data }: { data: ProgressData[] }) => {
+const ProgressChart = () => {
     const [hoveredData, setHoveredData] = useState(null);
-    const [currentData, setCurrentData] = useState(data);
+    const [currentData, setCurrentData] = useState([]);
     const [wilayah, setWilayah] = useState({
         tipe: "kabkot",
         nama: "Sulawesi Utara",
@@ -42,7 +42,19 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
             const { data } = await axios.get(
                 route("api.monitoring.wilayah", { tipe, kode })
             );
-            setCurrentData(data);
+            let addedEmptyData = data.map((kabkot: any) => ({
+                ...kabkot,
+                empty:
+                    tipe == "kabkot"
+                        ? kabkot.target
+                        : 10 - kabkot.warning - kabkot.clean - kabkot.error,
+            }));
+            // if (tipe == "kabkot") {
+            // } else {
+            // }
+            setCurrentData(addedEmptyData);
+            // console.log({tipe});
+
             setWilayah({ tipe, nama: kode });
             messageApi.open({
                 content: "selesai memuat data",
@@ -126,7 +138,10 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
                         angle={-30}
                         textAnchor="end"
                         label={{
-                            value: "Kabupaten/Kota",
+                            value:
+                                wilayah.tipe == "kabkot"
+                                    ? "Kabupaten/Kota"
+                                    : "NKS",
                             position: "insideBottom",
                             offset: -30,
                         }}
@@ -145,11 +160,12 @@ const ProgressChart = ({ data }: { data: ProgressData[] }) => {
                         stackId="a"
                         fill="green"
                         onClick={(data, index) => {
-                            console.log({ data, index });
+                            // console.log({ data, index });
                         }}
                     />
                     <Bar dataKey="warning" stackId="a" fill="orange" />
                     <Bar dataKey="error" stackId="a" fill="red" />
+                    <Bar dataKey="empty" stackId="a" fill="rgb(184,184,184)" />
                 </BarChart>
             </ResponsiveContainer>
         </>
