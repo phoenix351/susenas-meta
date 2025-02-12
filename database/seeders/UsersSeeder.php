@@ -45,7 +45,7 @@ class UsersSeeder extends Seeder
             $value['email'] = $value['username'] . "@ssnmeta.sulut";
             User::create($value);
         }
-        $file_name = 'public/seeder/users.csv';
+        $file_name = 'public/seeders/users.csv';
         // dd(Storage::allDirectories('.'));
         if (Storage::exists($file_name)) {
             $csv_data = Storage::get($file_name);
@@ -53,17 +53,19 @@ class UsersSeeder extends Seeder
             $csv_data = file_get_contents($file_name);
         }
         $lines = preg_split("/\r\n|\n|\r/", $csv_data);
-        $rows = array_map('str_getcsv', $lines);
-        $headers = array_shift($rows);
+        $rows = array_map(fn($line) => str_getcsv($line, ";"), $lines);        $headers = array_shift($rows);
         foreach ($rows as $index => $row) {
+            if($index==0) {
+                continue;
+            }
             $row[2] = preg_replace("/[^0-9]/", "", $row[2]);
             $user = new User(
                 [
                     'kode_kabkot' => $row[0],
                     'nama_lengkap' => $row[1],
                     'nip' => $row[2],
-                    'jabatan' => $row[3],
-                    'role' => $row[4],
+                    'jabatan' => "Mitra",
+                    'role' => $row[3],
                     'email' => $row[2] . '@metassn.monitoringbps.com',
                     'username' => $row[2],
                     'password' => Hash::make('password'),

@@ -72,18 +72,18 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("users.index"),
                 label: "Kelola Petugas",
             },
-            {
-                key: "range_harga",
-                icon: <MoneyCollectOutlined />,
-                onClick: () => handleMenuClick("range_harga.index"),
-                label: "Range Harga",
-            },
-            {
-                key: "komoditas",
-                icon: <ShoppingOutlined />,
-                onClick: () => handleMenuClick("komoditas.index"),
-                label: "Komoditas",
-            },
+            // {
+            //     key: "range_harga",
+            //     icon: <MoneyCollectOutlined />,
+            //     onClick: () => handleMenuClick("range_harga.index"),
+            //     label: "Range Harga",
+            // },
+            // {
+            //     key: "komoditas",
+            //     icon: <ShoppingOutlined />,
+            //     onClick: () => handleMenuClick("komoditas.index"),
+            //     label: "Komoditas",
+            // },
         ];
     }
     if(user.role==="ADMIN"&&user.kode_kabkot==="00"){
@@ -125,18 +125,18 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("users.index"),
                 label: "Kelola Petugas",
             },
-            {
-                key: "range_harga",
-                icon: <MoneyCollectOutlined />,
-                onClick: () => handleMenuClick("range_harga.index"),
-                label: "Range Harga",
-            },
-            {
-                key: "komoditas",
-                icon: <ShoppingOutlined />,
-                onClick: () => handleMenuClick("komoditas.index"),
-                label: "Komoditas",
-            },
+            // {
+            //     key: "range_harga",
+            //     icon: <MoneyCollectOutlined />,
+            //     onClick: () => handleMenuClick("range_harga.index"),
+            //     label: "Range Harga",
+            // },
+            // {
+            //     key: "komoditas",
+            //     icon: <ShoppingOutlined />,
+            //     onClick: () => handleMenuClick("komoditas.index"),
+            //     label: "Komoditas",
+            // },
         ];
     }
     return (
