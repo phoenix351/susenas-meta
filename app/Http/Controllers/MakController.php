@@ -656,6 +656,22 @@ class MakController extends Controller
     {
         try {
             //code...
+            $ruta = SusenasMak::find($id_ruta);
+            if (is_null($ruta)) {
+                return response()->json([
+                    "status" => "ruta tidak ditemukan"
+                ], 404);
+            }
+            if ($ruta->r203 != "1") {
+                $data = [
+                    'evaluasi_rh' => [],
+                    'daftar_error' => [],
+                    'daftar_warning' => [],
+
+                ];
+                return response()->json($data, 200);
+
+            }
             $evaluasi_rh  = $this->range_harga($id_ruta);
             $evaluasi_isian = $this->cek_isian_new($id_ruta);
             $daftar_error = $evaluasi_isian['daftar_error'];
@@ -695,11 +711,12 @@ class MakController extends Controller
         }
     }
     // Helper function to create error array
-    private function createKomoditasError($rincian, $konsumsi)
+    private function createKomoditasError($rincian, $konsumsi, $blok)
     {
         return [
             'rincian' => $rincian,
             'variable' => "[{$konsumsi['id_komoditas']}] {$konsumsi['nama_komoditas']}",
+            'blok'=> $blok
         ];
     }
 
@@ -709,10 +726,10 @@ class MakController extends Controller
         if ($this->is_any_zero($konsumsi[$hargaKey], $konsumsi[$volumeKey])) {
             // dd($konsumsi);
             if ($nomor > 0) {
-                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
+                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi,"Konsumsi ART");
             } else {
 
-                $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi);
+                $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi,"Konsumsi RUTA");
             }
         }
     }
@@ -724,6 +741,9 @@ class MakController extends Controller
         $data_mak = SusenasMak::where('id', $id_ruta)->first()->toArray();
         $jumlah_art = AnggotaRuta::where('id_ruta', $id_ruta)->count();
         $daftar_art = AnggotaRuta::where('id_ruta', $id_ruta)->get();
+
+        $konsumsi_non_makanan_controller = new KonsumsiNonMakananController();
+        $sum_konsumsi_non_makanan = $konsumsi_non_makanan_controller->sum_konsumsi_by_ruta($id_ruta);
 
         if (sizeof($data_mak) > 0) {
             // loop each var
@@ -783,7 +803,7 @@ class MakController extends Controller
                     ->get();
                 foreach ($konsumsi_ruta as $key => $konsumsi) {
                     if ($konsumsi["type"] == "sub") {
-                        $daftar_warning[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                        $daftar_warning[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi,"Konsumsi RUTA");
                         continue;
                     }
 
@@ -834,7 +854,7 @@ class MakController extends Controller
                             'id_komoditas' => 159,
                             'nama_komoditas' => 'M. MAKANAN DAN MINUMAN JADI [R.160 s.d. R.191]'
                         ];
-                        $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi);
+                        $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi,"Konsumsi ART");
                     }
                     $nomor++;
                 }
@@ -901,6 +921,7 @@ class MakController extends Controller
                         $pesan = [
                             'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 15 " . $key,
                             'type' => 'warning',
+                            "blok"=>"IV.3"
 
                         ];
                         $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -912,16 +933,28 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 16",
                         'type' => 'warning',
+                        "blok"=>"IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
                     $daftar_warning[] = $pesan;
+                }
+                if (round($blok4_32_17) < round($sum_konsumsi_non_makanan)) {
+                    $pesan = [
+                        'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 17",
+                        'type' => 'error',
+                        "blok"=>"IV.3"
+
+                    ];
+                    $pesan['rincian'] = "Isian total konsumsi non makanan harus sama atau  lebih dari isian di Blok Non Makan (basket), mohon dicek kembali";
+                    $daftar_error[] = $pesan;
                 }
 
                 if (round($blok4_31_jumlah_mak_produksi) != round($rekap_art['mak_produksi'])) {
                     $pesan = [
                         'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Produksi sendiri, Pemberian, dsb)",
                         'type' => 'warning',
+                        "blok"=>"IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -932,6 +965,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Pembelian)",
                         'type' => 'warning',
+                        "blok"=>"IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -942,6 +976,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Produksi sendiri, Pemberian, dsb)",
                         'type' => 'warning',
+                        "blok"=>"IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -952,6 +987,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Pembelian)",
                         'type' => 'warning',
+                        "blok"=>"IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -962,6 +998,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 18",
                         'type' => 'warning',
+                        "blok"=>"IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -1074,6 +1111,7 @@ class MakController extends Controller
                 }
             }
         }
+        // if($data_mak[""])
         return [
             'daftar_warning' => $daftar_warning,
             'daftar_error' => $daftar_error,
@@ -1235,6 +1273,9 @@ class MakController extends Controller
                     }
 
                     $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
+                    if (is_null($range_harga)) {
+                        continue;
+                    }
                     $feedback = [
                         'id_komoditas' => $id_komoditas,
                         'nama_komoditas' => $nama_komoditas,

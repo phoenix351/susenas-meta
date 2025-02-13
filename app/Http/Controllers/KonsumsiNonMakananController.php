@@ -19,4 +19,8 @@ class KonsumsiNonMakananController extends Controller
             //throw $th;
         }
     }
+    public function sum_konsumsi_by_ruta($id_ruta)
+    {
+        return KonsumsiNonMakanan::where("id_ruta",$id_ruta)->sum("harga");
+    }
 }

@@ -34,6 +34,7 @@ import {
 import MyModal from "@/Components/Modal";
 import TextRupiah from "@/Components/TextRupiah";
 import BlokNonMakanan from "@/Forms/NonMakanan/NonMakanan";
+import TextArea from "antd/es/input/TextArea";
 
 const daftarRincian432 = [
     {
@@ -769,7 +770,7 @@ const Mak = ({
                                         kode_kabkot:
                                             form.getFieldValue("kode_kabkot"),
                                         nks: form.getFieldValue("nks"),
-                                        semester: 2,
+                                        semester: 1,
                                     })
                                 )
                             }
@@ -869,24 +870,7 @@ const Mak = ({
                             ),
                             disabled: !statusCacah,
                         },
-                        {
-                            label: "Non Makanan",
-                            key: "7",
-                            children: (
-                                <BlokNonMakanan
-                                    id_ruta={data.id}
-                                    // onFinish={blok4_1Finish}
-                                    // form={blok4_1Form}
-                                    // tabContentStyle={tabContentStyle}
-                                    // calculate={calculateSubTotalHarga}
-                                    // subTotalHarga={subTotalHarga}
-                                    // rekapMak={rekapMak}
-                                    // setRekapMak={setRekapMak}
-                                    // onFinish={blok4_1Finish}
-                                />
-                            ),
-                            disabled: !statusCacah,
-                        },
+
                         {
                             label: "Blok IV.1 ART",
                             key: "4",
@@ -908,6 +892,24 @@ const Mak = ({
                             disabled: !statusCacah,
                         },
                         {
+                            label: "Non Makanan",
+                            key: "7",
+                            children: (
+                                <BlokNonMakanan
+                                    id_ruta={data.id}
+                                    // onFinish={blok4_1Finish}
+                                    // form={blok4_1Form}
+                                    // tabContentStyle={tabContentStyle}
+                                    // calculate={calculateSubTotalHarga}
+                                    // subTotalHarga={subTotalHarga}
+                                    // rekapMak={rekapMak}
+                                    // setRekapMak={setRekapMak}
+                                    // onFinish={blok4_1Finish}
+                                />
+                            ),
+                            disabled: !statusCacah,
+                        },
+                        {
                             label: "Blok IV.3",
                             key: "5",
                             children: (
@@ -920,6 +922,23 @@ const Mak = ({
                                     daftarRincian432={daftarRincian432}
                                     setRekapMak={setRekapMak}
                                 />
+                            ),
+                            disabled: !statusCacah,
+                        },
+                        {
+                            label: "Fenomena",
+                            key: "8",
+                            children: (
+                                <>
+                                    <Form.Item name={"fenomena"} label="Fenomena Kabkot">
+                                        <TextArea
+                                            autoSize={{
+                                                minRows: 3,
+                                                maxRows: 5,
+                                            }}
+                                        />
+                                    </Form.Item>
+                                </>
                             ),
                             disabled: !statusCacah,
                         },

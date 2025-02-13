@@ -27,7 +27,7 @@ const BlokNonMakanan = ({ id_ruta }: { id_ruta: string }) => {
         fetchData(id_ruta);
     }, []);
 
-    return <NonMakananTable dataSource={dataSource} id_ruta={id_ruta} />;
+    return <NonMakananTable dataSource={dataSource} id_ruta={id_ruta} />
 };
 
 export default BlokNonMakanan;

@@ -108,7 +108,7 @@ const NonMakananTable = ({
     }
     useEffect(() => {
         loadData(id_ruta);
-    }, [dataSource]);
+    }, [dataSource])
 
     return (
         <Space direction="vertical" style={{ width: "100%" }}>
@@ -117,7 +117,7 @@ const NonMakananTable = ({
                 form={form}
                 onValuesChange={(values: any) => storeData(values, id_ruta)}
             >
-                <Table dataSource={dataSource} columns={columns}></Table>;
+                <Table pagination={{position:["topLeft"]}} dataSource={dataSource} columns={columns}></Table>
             </Form>
         </Space>
     );
