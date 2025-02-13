@@ -73,7 +73,8 @@ const Blok4_1: React.FC<{
     const blok4_1_hal2Finish = (values: any) => {};
 
     // usestate
-
+    console.log({daftarArt});
+    
     const [activeKey, setActiveKey] = useState("0");
     const [items, setItems] = useState<any[]>([]);
     const [listKomoditas, setListKomoditas] = useState<any[]>([]);
@@ -179,7 +180,7 @@ const Blok4_1: React.FC<{
                 route("api.mak.komoditas.list", { from: from, to: to })
             );
             const konten = data.map((item: any) => ({
-                nomor: item.id,
+                id: item.id,
                 kode_coicop: item.kode_coicop,
                 rincian: item.nama_komoditas,
                 satuan: item.satuan,

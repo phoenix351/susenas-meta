@@ -88,7 +88,7 @@ class MonitoringController extends Controller
         } else {
             $minutes = Carbon::parse($last_update->created_at)->diffInMinutes();
             if ($minutes < 30) {
-                return;
+                return response()->json(["status"=>"SUdah diupdate dalam waktu dekat"], 200);
             }
         }
         try {

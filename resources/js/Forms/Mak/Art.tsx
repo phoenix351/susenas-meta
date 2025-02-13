@@ -182,7 +182,7 @@ const Art: React.FC<{
                 route("api.mak.konsumsi.art", { id_art: id_art })
             );
 
-            const daftarSub: number[] = [159, 192];
+            const daftarSub: number[] = [187, 225];
             let konsumsiArt = data.map(
                 (item: {
                     id_komoditas: any;
