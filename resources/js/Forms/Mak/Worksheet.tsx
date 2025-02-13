@@ -95,7 +95,7 @@ const daftarRincian = [
         rincian:
             "Apakah ART pernah mendapat Program Makan Siang Gratis? (R618)",
         type: "multi",
-        dependencies:["wtf_3"],
+        dependencies: ["wtf_3"],
         rules: {
             ruleName: "required if",
             message:
@@ -222,6 +222,26 @@ const Worksheet: React.FC<{
                 onFinish={onFinish}
                 autoComplete="off"
                 layout="vertical"
+                onValuesChange={(changedValues, values) => {
+                    if (Object.keys(changedValues).includes("wtf_3")) {
+                        if (
+                            changedValues["wtf_3"] == null ||
+                            changedValues["wtf_3"] < 1
+                        ) {
+                            form.setFieldsValue({
+                                wtf_9: "",
+                                wtf_4: "",
+                            });
+                        }
+                    }
+                    if (Object.keys(changedValues).includes("wtf_4")) {
+                        if (changedValues["wtf_4"] == 1) return;
+                        form.setFieldsValue({
+                            wtf_9: "",
+                            // wtf_4:null,
+                        });
+                    }
+                }}
             >
                 <table style={tableStyle}>
                     <thead

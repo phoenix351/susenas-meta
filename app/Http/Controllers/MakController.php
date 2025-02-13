@@ -29,14 +29,10 @@ class MakController extends Controller
         return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("local"));
     }
     private $wtfDependecies = [
+       
         [
-            'target' => 'wtf_8',
+            'target' => 'wtf_4',
             'fields' => ['wtf_9'],
-            "dependentValues" => ['1']
-        ],
-        [
-            'target' => 'wtf_10',
-            'fields' => ['wtf_11'],
             "dependentValues" => ['1']
         ],
 
@@ -1023,6 +1019,18 @@ class MakController extends Controller
 
                     $daftar_warning[] = $pesan;
                 }
+                if ($data_mak['wtf_5'] < 2) {
+                    $pesan = [
+                        'variable' => "5. Luas Lantai Bangunan Utama (R1604)",
+                        'rincian' => "Luas lantai tidak wajar kurang dari 2 meter persegi",
+                        'blok' => "Worksheet",
+                        'type' => 'warning',
+                        'pesan' => "Luas lantai tidak wajar kurang dari 2 meter persegi",
+
+                    ];
+
+                    $daftar_warning[] = $pesan;
+                }
                 if ($data_mak['wtf_2'] >= $data_mak['wtf_1']) {
                     $pesan = [
                         'variable' => "2. Jumlah Balita",
@@ -1045,17 +1053,7 @@ class MakController extends Controller
 
                     $daftar_warning[] = $pesan;
                 }
-                if ($data_mak['wtf_11'] > $data_mak['wtf_3']) {
-                    $pesan = [
-                        'variable' => "11. Jumlah ART yang menerima PIP",
-                        'rincian' => "11. Jumlah ART yang menerima PIP",
-                        'blok' => "Worksheet",
-                        'type' => 'warning',
-                        'pesan' => "Jumlah ART yang menerima PIP tidak boleh lebih daripada Jumlah ART",
-                    ];
-
-                    $daftar_warning[] = $pesan;
-                }
+               
                 // dd($data_mak);
                 foreach ($columnsToCheck as $column) {
                     if (isset($column['fields'])) {
