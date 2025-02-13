@@ -7,6 +7,8 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
 }) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload; // Type assertion
+        console.log({data});
+        
         return (
             <Card title={`[${data.fullcode}] ${data.name}`} bordered={false} style={{ width: 300 }}>
                 <Space direction="vertical">
@@ -23,7 +25,7 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
 
                             {var_.dataKey}
                             </strong>
-                            {var_.value}
+                            {var_.value} ({Number(var_.value)*100/data.target} %)
                         </Space>
                     ))}
                 </Space>

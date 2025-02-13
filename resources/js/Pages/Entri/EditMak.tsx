@@ -34,7 +34,6 @@ import {
 import MyModal from "@/Components/Modal";
 import TextRupiah from "@/Components/TextRupiah";
 import BlokNonMakanan from "@/Forms/NonMakanan/NonMakanan";
-import TextArea from "antd/es/input/TextArea";
 
 const daftarRincian432 = [
     {
@@ -870,7 +869,7 @@ const Mak = ({
                             ),
                             disabled: !statusCacah,
                         },
-
+                        
                         {
                             label: "Blok IV.1 ART",
                             key: "4",
@@ -925,23 +924,7 @@ const Mak = ({
                             ),
                             disabled: !statusCacah,
                         },
-                        {
-                            label: "Fenomena",
-                            key: "8",
-                            children: (
-                                <>
-                                    <Form.Item name={"fenomena"} label="Fenomena Kabkot">
-                                        <TextArea
-                                            autoSize={{
-                                                minRows: 3,
-                                                maxRows: 5,
-                                            }}
-                                        />
-                                    </Form.Item>
-                                </>
-                            ),
-                            disabled: !statusCacah,
-                        },
+                       
                         {
                             label: "Blok QC",
                             key: "6",

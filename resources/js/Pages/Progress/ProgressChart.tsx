@@ -160,7 +160,6 @@ const ProgressChart = () => {
                         stackId="a"
                         fill="green"
                         onClick={(data, index) => {
-                            // console.log({ data, index });
                         }}
                     />
                     <Bar dataKey="warning" stackId="a" fill="orange" />

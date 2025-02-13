@@ -276,26 +276,7 @@ const Art: React.FC<{
                         Menyimpan... <Spin />
                     </Space>
 
-                    <Space>
-                        <Text>
-                            Jumlah komoditas bahan makanan,bahan minuman, dan
-                            rokok yang terisi pada halaman ini
-                        </Text>
-                        <Form.Item
-                            style={{ margin: "auto" }}
-                            name="id_ruta"
-                            hidden
-                        >
-                            <Input readOnly />
-                        </Form.Item>
-                        <Form.Item
-                            style={{ margin: "auto" }}
-                            name="id_art"
-                            hidden
-                        >
-                            <Input readOnly />
-                        </Form.Item>
-                    </Space>
+                    
                 </Space>
 
                 <TabelBlok
