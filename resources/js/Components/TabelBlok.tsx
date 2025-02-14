@@ -132,7 +132,6 @@ const TabelBlok: React.FC<{
 }> = ({ title, konten, rekapMak, calculate, form }) => {
     title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";
-console.log({konten});
 
     return (
         <table style={tableStyle}>

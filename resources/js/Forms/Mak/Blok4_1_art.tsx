@@ -73,7 +73,6 @@ const Blok4_1: React.FC<{
     const blok4_1_hal2Finish = (values: any) => {};
 
     // usestate
-    console.log({daftarArt});
     
     const [activeKey, setActiveKey] = useState("0");
     const [items, setItems] = useState<any[]>([]);
@@ -116,7 +115,6 @@ const Blok4_1: React.FC<{
             setActiveKey(newActiveKey);
         } catch (error) {
             console.error("Error in add function:", error);
-            console.log(id_ruta);
         } finally {
             setArtLoading(false);
         }
