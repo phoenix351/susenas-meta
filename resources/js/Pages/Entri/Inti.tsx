@@ -29,7 +29,6 @@ const Dashboard = ({
     semester: string | number;
 }) => {
     useEffect(() => {
-        console.log({ semester });
         if (nks && kode_kabkot) {
             cariForm.setFieldsValue({
                 nks: nks,
