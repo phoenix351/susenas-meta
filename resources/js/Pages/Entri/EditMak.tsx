@@ -400,6 +400,16 @@ const Mak = ({
                 form.submit(),
                 blok4_1Form.submit(),
             ]);
+            // console.log(form.getFieldsValue());
+            if (form.getFieldValue("r203") > 1) {
+                messageApi.open({
+                    content: "Data berhasil tersimpan",
+                    type: "success",
+                    key: "simpan",
+                    duration: 2,
+                });
+                return;
+            }
 
             // Now, all forms are submitted successfully
             const response = await axios.get(
@@ -408,7 +418,6 @@ const Mak = ({
                 })
             );
             const dataQc = response.data;
-            // console.log({ dataQc });
 
             const newQc = await calculateQc(
                 data.id,
@@ -443,13 +452,16 @@ const Mak = ({
                 key: "simpan",
                 duration: 2,
             });
-        } catch (error) {
-            messageApi.open({
-                content: "Data gagal tersimpan",
-                type: "error",
-                key: "simpan",
-                duration: 2,
-            });
+        } catch (error: any) {
+            if (error?.response?.data?.error) {
+                let errorMessage = error.response.data.error;
+                messageApi.open({
+                    content: errorMessage ?? "Data gagal tersimpan",
+                    type: "error",
+                    key: "simpan",
+                    duration: 2,
+                });
+            }
             // Handle error if any of the forms fails to submit
         }
     };
@@ -869,7 +881,7 @@ const Mak = ({
                             ),
                             disabled: !statusCacah,
                         },
-                        
+
                         {
                             label: "Blok IV.1 ART",
                             key: "4",
@@ -924,7 +936,7 @@ const Mak = ({
                             ),
                             disabled: !statusCacah,
                         },
-                       
+
                         {
                             label: "Blok QC",
                             key: "6",

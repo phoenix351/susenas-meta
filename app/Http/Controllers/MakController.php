@@ -29,7 +29,7 @@ class MakController extends Controller
         return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("local"));
     }
     private $wtfDependecies = [
-       
+
         [
             'target' => 'wtf_4',
             'fields' => ['wtf_9'],
@@ -514,7 +514,6 @@ class MakController extends Controller
 
 
             // Reset array keys to start from 0
-            // dd($converted);
             $converted = array_values($converted);
             $baru = [];
             foreach ($converted as $item) {
@@ -540,7 +539,7 @@ class MakController extends Controller
             return response()->json($baru, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
-
+            throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
@@ -609,6 +608,9 @@ class MakController extends Controller
             $pengeluaran_non_makanan = SusenasMak::where('id', $id_ruta)->value('blok4_32_16_total');
             $komoditas_non_makanan = SusenasMak::where('id', $id_ruta)->value('blokqc_3');
             $art = SusenasMak::find($id_ruta)->wtf_1;
+            if (!isset($art) || $art == null || $art == 0) {
+                return response()->json(["error" => "Jumlah Art pada Worksheet kosong atau 0"], 422);
+            }
             // return response()->json($konsumsi_ruta, 200);
             $pengeluaran = $pengeluaran * 30 / 7;
             $pengeluaran = $pengeluaran + $pengeluaran_non_makanan;
@@ -620,7 +622,6 @@ class MakController extends Controller
                 'blokqc_4' => $komoditas_non_makanan + sizeof($konsumsi_art) + sizeof($konsumsi_ruta),
                 'blokqc_5' => round($pengeluaran / $art),
             ];
-            // dd([$data_update,$art,$pengeluaran]);
             DB::beginTransaction();
             SusenasMak::find($id_ruta)->update($data_update);
             DB::commit();
@@ -658,22 +659,17 @@ class MakController extends Controller
                     "status" => "ruta tidak ditemukan"
                 ], 404);
             }
-            if ($ruta->r203 != "1") {
-                $data = [
-                    'evaluasi_rh' => [],
-                    'daftar_error' => [],
-                    'daftar_warning' => [],
-
-                ];
-                return response()->json($data, 200);
-
-            }
-            $evaluasi_rh  = $this->range_harga($id_ruta);
-            $evaluasi_isian = $this->cek_isian_new($id_ruta);
-            $daftar_error = $evaluasi_isian['daftar_error'];
-            $daftar_warning = $evaluasi_isian['daftar_warning'];
-
             $status_dok = 'entri';
+            $daftar_error = [];
+            $daftar_warning = [];
+            $evaluasi_rh = [];
+            if ($ruta->r203 == "1") {
+                $evaluasi_rh  = $this->range_harga($id_ruta);
+                $evaluasi_isian = $this->cek_isian_new($id_ruta);
+                $daftar_error = $evaluasi_isian['daftar_error'];
+                $daftar_warning = $evaluasi_isian['daftar_warning'];
+            }
+
             if (sizeof($daftar_error) > 0) {
                 // set dokumen error
                 $status_dok = 'error';
@@ -684,20 +680,19 @@ class MakController extends Controller
                 // set dokumen clean
                 $status_dok = 'clean';
             }
-            if (strlen($id_ruta) > 10) {
-                DB::beginTransaction();
-                SusenasMak::where('id', $id_ruta)->update([
-                    'status_dok' => $status_dok
-                ]);
-                DB::commit();
-            }
+
+            DB::beginTransaction();
+            SusenasMak::where('id', $id_ruta)->update([
+                'status_dok' => $status_dok
+            ]);
+            DB::commit();
+
             $data = [
                 'evaluasi_rh' => $evaluasi_rh,
                 'daftar_error' => $daftar_error,
                 'daftar_warning' => $daftar_warning,
 
             ];
-
 
             return response()->json($data, 200);
         } catch (\Throwable $th) {
@@ -712,7 +707,7 @@ class MakController extends Controller
         return [
             'rincian' => $rincian,
             'variable' => "[{$konsumsi['id_komoditas']}] {$konsumsi['nama_komoditas']}",
-            'blok'=> $blok
+            'blok' => $blok
         ];
     }
 
@@ -720,12 +715,11 @@ class MakController extends Controller
     private function checkConsistency(&$daftar_error, $konsumsi, $hargaKey, $volumeKey, $nomor = -1)
     {
         if ($this->is_any_zero($konsumsi[$hargaKey], $konsumsi[$volumeKey])) {
-            // dd($konsumsi);
             if ($nomor > 0) {
-                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi,"Konsumsi ART");
+                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi, "Konsumsi ART");
             } else {
 
-                $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi,"Konsumsi RUTA");
+                $daftar_error[] = $this->createKomoditasError("Isian $hargaKey, bernilai 0 tetapi $volumeKey > 0 atau sebaliknya", $konsumsi, "Konsumsi RUTA");
             }
         }
     }
@@ -799,7 +793,7 @@ class MakController extends Controller
                     ->get();
                 foreach ($konsumsi_ruta as $key => $konsumsi) {
                     if ($konsumsi["type"] == "sub") {
-                        $daftar_warning[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi,"Konsumsi RUTA");
+                        $daftar_warning[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi, "Konsumsi RUTA");
                         continue;
                     }
 
@@ -823,7 +817,6 @@ class MakController extends Controller
                                 ->orWhere('komoditas.type', 'sub');
                         })
                         ->get();
-                    // dd($konsumsi_art);
 
                     foreach ($konsumsi_art as $key => $konsumsi) {
 
@@ -847,10 +840,10 @@ class MakController extends Controller
                     }
                     if ($nilai_mak == 0) {
                         $konsumsi = [
-                            'id_komoditas' => 159,
-                            'nama_komoditas' => 'M. MAKANAN DAN MINUMAN JADI [R.160 s.d. R.191]'
+                            'id_komoditas' => 187,
+                            'nama_komoditas' => 'M. MAKANAN DAN MINUMAN JADI [R.188 s.d. R.225]'
                         ];
-                        $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi,"Konsumsi ART");
+                        $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi, "Konsumsi ART");
                     }
                     $nomor++;
                 }
@@ -917,7 +910,7 @@ class MakController extends Controller
                         $pesan = [
                             'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 15 " . $key,
                             'type' => 'warning',
-                            "blok"=>"IV.3"
+                            "blok" => "IV.3"
 
                         ];
                         $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -929,7 +922,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 16",
                         'type' => 'warning',
-                        "blok"=>"IV.3"
+                        "blok" => "IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -939,7 +932,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 17",
                         'type' => 'error',
-                        "blok"=>"IV.3"
+                        "blok" => "IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian total konsumsi non makanan harus sama atau  lebih dari isian di Blok Non Makan (basket), mohon dicek kembali";
@@ -950,7 +943,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Produksi sendiri, Pemberian, dsb)",
                         'type' => 'warning',
-                        "blok"=>"IV.3"
+                        "blok" => "IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -961,7 +954,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Pembelian)",
                         'type' => 'warning',
-                        "blok"=>"IV.3"
+                        "blok" => "IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -972,7 +965,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Produksi sendiri, Pemberian, dsb)",
                         'type' => 'warning',
-                        "blok"=>"IV.3"
+                        "blok" => "IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -983,7 +976,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Rokok dan Tembakau (Pembelian)",
                         'type' => 'warning',
-                        "blok"=>"IV.3"
+                        "blok" => "IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -994,7 +987,7 @@ class MakController extends Controller
                     $pesan = [
                         'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 18",
                         'type' => 'warning',
-                        "blok"=>"IV.3"
+                        "blok" => "IV.3"
 
                     ];
                     $pesan['rincian'] = "Isian ini berbeda dengan yang dihitung oleh sistem, mohon dicek kembali";
@@ -1053,7 +1046,7 @@ class MakController extends Controller
 
                     $daftar_warning[] = $pesan;
                 }
-               
+
                 // dd($data_mak);
                 foreach ($columnsToCheck as $column) {
                     if (isset($column['fields'])) {

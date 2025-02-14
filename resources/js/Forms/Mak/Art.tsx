@@ -48,6 +48,8 @@ const Art: React.FC<{
     // });
 
     const konsumsiArtFinish = async (values: any) => {
+        values = {...values,id_art,id_ruta}
+        
         try {
             setLoading(true);
             const url = route("entri.mak.konsumsi_art.store");
