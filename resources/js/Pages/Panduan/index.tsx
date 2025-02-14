@@ -1,5 +1,4 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { PDFViewer } from "@react-pdf/renderer";
 import { JSXElementConstructor, ReactElement, ReactPortal } from "react";
 
 const index = () => {
