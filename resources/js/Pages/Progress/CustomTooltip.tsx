@@ -24,7 +24,7 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
 
                             {var_.dataKey}
                             </strong>
-                            {var_.value} ({Number(var_.value)*100/data.target} %)
+                            {var_.value} ({Number(Number(var_.value)*100/data.target).toFixed(2)} %)
                         </Space>
                     ))}
                 </Space>
