@@ -7,6 +7,7 @@ use App\Http\Controllers\KonsumsiNonMakananController;
 use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\MonitoringController;
+use App\Http\Controllers\PanduanController;
 use App\Http\Controllers\PeriksaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenggunaController;
@@ -148,7 +149,8 @@ Route::middleware('auth')->group(function () {
     route::put('/komoditas', [KomoditasController::class, 'update'])->name('komoditas.update');
     route::delete('/komoditas/{id}', [KomoditasController::class, 'destroy'])->name('komoditas.destroy');
     route::get('/komoditas/sort', [KomoditasController::class, 'sort'])->name('komoditas.sort');
-
+    
+    route::get('/panduan', [PanduanController::class, 'index'])->name('panduan.index');
 
     Route::get('/editable', function () {
         return Inertia::render('Editable');

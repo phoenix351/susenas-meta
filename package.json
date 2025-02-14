@@ -29,6 +29,7 @@
         "vite": "^4.0.0"
     },
     "dependencies": {
+        "@react-pdf/renderer": "^4.2.1",
         "antd": "^5.6.0",
         "echarts-for-react": "^3.0.2",
         "lodash": "^4.17.21",

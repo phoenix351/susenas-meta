@@ -935,7 +935,8 @@ class MakController extends Controller
                         "blok" => "IV.3"
 
                     ];
-                    $pesan['rincian'] = "Isian total konsumsi non makanan harus sama atau  lebih dari isian di Blok Non Makan (basket), mohon dicek kembali";
+                    $nilai_konsumsi_non_makanan_string = "Rp ".number_format(round($sum_konsumsi_non_makanan),0,",",".");
+                    $pesan['rincian'] = "Isian total konsumsi non makanan harus sama atau  lebih dari isian di Blok Non Makan ( ".$nilai_konsumsi_non_makanan_string." ), mohon dicek kembali";
                     $daftar_error[] = $pesan;
                 }
 
@@ -952,7 +953,7 @@ class MakController extends Controller
 
                 if (round($blok4_31_jumlah_mak_beli) != round($rekap_art['mak_beli'])) {
                     $pesan = [
-                        'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Pembelian)",
+                        'variable' => "Blok IV.3.1 Rekapitulasi Jumlah Makanan dan Minuman Jadi (Pembelian) ",
                         'type' => 'warning',
                         "blok" => "IV.3"
 

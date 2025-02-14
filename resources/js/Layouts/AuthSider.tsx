@@ -8,6 +8,7 @@ import {
     MoneyCollectOutlined,
     ShoppingOutlined,
     DatabaseOutlined,
+    BookOutlined,
 } from "@ant-design/icons";
 import { User } from "@/types";
 type AuthSiderProps = {
@@ -38,6 +39,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
             onClick: () => handleMenuClick("entri"),
             label: "Entri",
         },
+        {
+            key: "panduan",
+            icon: <BookOutlined />,
+            onClick: () => handleMenuClick("panduan.index"),
+            label: "Panduan",
+        },
     ];
     if (user.role === "ADMIN" && user.kode_kabkot!=="00") {
         menuItems = [
@@ -54,12 +61,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("entri"),
                 label: "Entri",
             },
-            // {
-            //     key: "kelola-entri",
-            //     icon: <SettingOutlined />,
-            //     onClick: () => handleMenuClick("kelola-entri"),
-            //     label: "Kelola Entri",
-            // },
+           
             {
                 key: "periksa",
                 icon: <AuditOutlined />,
@@ -72,18 +74,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("users.index"),
                 label: "Kelola Petugas",
             },
-            // {
-            //     key: "range_harga",
-            //     icon: <MoneyCollectOutlined />,
-            //     onClick: () => handleMenuClick("range_harga.index"),
-            //     label: "Range Harga",
-            // },
-            // {
-            //     key: "komoditas",
-            //     icon: <ShoppingOutlined />,
-            //     onClick: () => handleMenuClick("komoditas.index"),
-            //     label: "Komoditas",
-            // },
+            {
+                key: "panduan",
+                icon: <BookOutlined />,
+                onClick: () => handleMenuClick("panduan.index"),
+                label: "Panduan",
+            },
         ];
     }
     if(user.role==="ADMIN"&&user.kode_kabkot==="00"){
@@ -125,18 +121,12 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("users.index"),
                 label: "Kelola Petugas",
             },
-            // {
-            //     key: "range_harga",
-            //     icon: <MoneyCollectOutlined />,
-            //     onClick: () => handleMenuClick("range_harga.index"),
-            //     label: "Range Harga",
-            // },
-            // {
-            //     key: "komoditas",
-            //     icon: <ShoppingOutlined />,
-            //     onClick: () => handleMenuClick("komoditas.index"),
-            //     label: "Komoditas",
-            // },
+            {
+                key: "panduan",
+                icon: <BookOutlined />,
+                onClick: () => handleMenuClick("panduan.index"),
+                label: "Panduan",
+            },
         ];
     }
     return (
