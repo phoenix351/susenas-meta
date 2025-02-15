@@ -1,0 +1,1 @@
+import{_ as n,e as r,f as a}from"./app-cade510b.js";var m=function(){function t(s,e){r(this,t),a(this,"name",void 0),a(this,"style",void 0),a(this,"_keyframe",!0),this.name=s,this.style=e}return n(t,[{key:"getName",value:function(){var e=arguments.length>0&&arguments[0]!==void 0?arguments[0]:"";return e?"".concat(e,"-").concat(this.name):this.name}}]),t}();export{m as K};
