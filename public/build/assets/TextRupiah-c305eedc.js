@@ -1,1 +1,0 @@
-import{a as e}from"./app-594863b6.js";import{S as i}from"./index-a6fc668a.js";import{T as p}from"./index-c4629e43.js";const{Text:o}=p,d=({value:t,color:r})=>e(i,{style:{textAlign:"right",justifyContent:"end"},children:e(o,{style:{color:r,paddingLeft:"11px",paddingRight:"11px",whiteSpace:"nowrap"},children:t>0?`Rp ${Number(t).toLocaleString("id")}`:""})});export{d as T};

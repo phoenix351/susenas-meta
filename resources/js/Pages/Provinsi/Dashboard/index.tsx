@@ -117,38 +117,7 @@ const index = () => {
     useEffect(() => {
         getKabkot();
     }, []);
-    function pollJobStatus(jobId: number) {
-        let interval = setInterval(async () => {
-            try {
-                const { data } = await axios.get(
-                    route("api.dashboard.queue-status", { jobId })
-                );
 
-                if (data.status === "completed") {
-                    clearInterval(interval);
-                    messageApi.open({
-                        content: "sinkron data sudah selesai",
-                        type: "success",
-                        key: "sync",
-                    });
-                }
-            } catch (error) {
-                clearInterval(interval);
-                messageApi.open({
-                    content: "error ketika cek status...",
-                    type: "error",
-                    key: "sync",
-                });
-                console.log(error);
-            } finally {
-                router.get(
-                    route("dashboard"),
-                    {},
-                    { preserveScroll: true, preserveState: true }
-                );
-            }
-        }, 5000);
-    }
     async function syncSummary() {
         try {
             setLoadingData(true);
@@ -160,11 +129,14 @@ const index = () => {
                 duration: 0,
             });
             const { data } = await axios.get(route("dashboard.update"));
-            if (data.job_id) {
-                pollJobStatus(data.job_id);
-            }
 
             setLoadingData(false);
+            messageApi.open({
+                content: "Update dashboard selesai",
+                type: "success",
+                key: "sync",
+                duration: 2,
+            });
         } catch (error) {
             messageApi.open({
                 content: "error ketika sinkron data...",
@@ -264,7 +236,7 @@ const index = () => {
                             <CardSkeleton />
                         ) : (
                             <Statistic
-                                title="Garis Kemisikinan Sementara"
+                                title="Garis Kemiskinan Sementara"
                                 value={
                                     kabkotSummary?.garis_kemiskinan
                                         ? kabkotSummary.garis_kemiskinan.toLocaleString(

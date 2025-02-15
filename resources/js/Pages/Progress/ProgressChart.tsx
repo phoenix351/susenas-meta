@@ -39,6 +39,7 @@ const ProgressChart = () => {
                 key: "get-data",
                 type: "loading",
             });
+            const response = await axios.get(route("progress.update"));
             const { data } = await axios.get(
                 route("api.monitoring.wilayah", { tipe, kode })
             );
@@ -46,7 +47,10 @@ const ProgressChart = () => {
                 ...kabkot,
                 empty:
                     tipe == "kabkot"
-                        ? kabkot.target
+                        ? kabkot.target -
+                          kabkot.warning -
+                          kabkot.clean -
+                          kabkot.error
                         : 10 - kabkot.warning - kabkot.clean - kabkot.error,
             }));
             // if (tipe == "kabkot") {
@@ -159,8 +163,7 @@ const ProgressChart = () => {
                         dataKey="clean"
                         stackId="a"
                         fill="green"
-                        onClick={(data, index) => {
-                        }}
+                        onClick={(data, index) => {}}
                     />
                     <Bar dataKey="warning" stackId="a" fill="orange" />
                     <Bar dataKey="error" stackId="a" fill="red" />

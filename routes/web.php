@@ -52,14 +52,14 @@ Route::middleware('auth')->group(function () {
 
     //route master barang
     //route master jabatan
-   
+
     //route master ruangan
     route::get('/api/users', function () {
         $users = User::select('id', 'nama_lengkap')->get();
         return response()->json([$users]);
     })->name('users.get');
     // route api for jabatan
-   
+
 
     route::get('/api/wilayah/kabkot', [MasterWilayahController::class, 'fetch_kabkot'])->name('api.wilayah.kabkot');
     route::get('/api/entri/semester', function () {
@@ -84,11 +84,11 @@ Route::middleware('auth')->group(function () {
     route::get('/api/mak/komoditas/list', [KomoditasController::class, 'list_komoditas'])->name('api.mak.komoditas.list');
     route::get('/api/mak/komoditas/kalori/{id}', [KomoditasController::class, 'fetch_kalori'])->name('api.mak.komoditas.kalori.fetch');
     route::get('/api/mak/calculate_qc/{id_ruta}', [MakController::class, 'calculate_qc'])->name('api.mak.calculate_qc');
-    
+
     route::get('/api/non_mak/komoditas/list', [KomoditasNonMakananController::class, 'list'])->name('api.non_mak.komoditas.list');
     route::get('/api/non_mak/komoditas/fetch/{id_ruta}', [KomoditasNonMakananController::class, 'fetch'])->name('api.non_mak.konsumsi.fetch');
     route::post('/api/non_mak/konsumsi', [KonsumsiNonMakananController::class, 'store'])->name('api.non_mak.konsumsi.store');
-    
+
     route::get('/api/mak/revalidasi/{id_ruta}', [MakController::class, 'revalidasi'])->name('api.mak.revalidasi');
 
 
@@ -112,7 +112,7 @@ Route::middleware('auth')->group(function () {
     // route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
     route::get('/progress', [MonitoringController::class, 'index'])->name('progress');
     route::get('/dashboard', [MonitoringController::class, 'dashboard'])->name('dashboard');
-    route::get('/progress/update', [MonitoringController::class, 'update'])->name('monitoring.update');
+    route::get('/progress/update', [MonitoringController::class, 'update'])->name('progress.update');
     route::get('/dashboard/update', [MonitoringController::class, 'update_dashboard'])->name('dashboard.update');
     route::get('/api/dashboard/queue-status/{jobId}', [MonitoringController::class, 'check_job_status'])->name('api.dashboard.queue-status');
 
@@ -149,7 +149,7 @@ Route::middleware('auth')->group(function () {
     route::put('/komoditas', [KomoditasController::class, 'update'])->name('komoditas.update');
     route::delete('/komoditas/{id}', [KomoditasController::class, 'destroy'])->name('komoditas.destroy');
     route::get('/komoditas/sort', [KomoditasController::class, 'sort'])->name('komoditas.sort');
-    
+
     route::get('/panduan', [PanduanController::class, 'index'])->name('panduan.index');
 
     Route::get('/editable', function () {

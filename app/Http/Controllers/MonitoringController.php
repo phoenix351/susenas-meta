@@ -88,7 +88,7 @@ class MonitoringController extends Controller
         } else {
             $minutes = Carbon::parse($last_update->created_at)->diffInMinutes();
             if ($minutes < 30) {
-                return response()->json(["status"=>"SUdah diupdate dalam waktu dekat"], 200);
+                return response()->json(["status" => "SUdah diupdate dalam waktu dekat"], 200);
             }
         }
         try {
@@ -260,6 +260,7 @@ class MonitoringController extends Controller
             ->where("kode_kabkot", $kode_kabkot)
             ->selectRaw("sum(wtf_1) as jumlah_kapita")
             ->first();
+        // dd($total_kapita->jumlah_kapita);
         return $total_kapita ? (float)$total_kapita->jumlah_kapita : (float)0;
     }
 
@@ -450,13 +451,13 @@ class MonitoringController extends Controller
                     if ($kode_kabkot != "00") {
                         $subquery->select(DB::raw(1))
                             ->from("vsusenas_mak")
-                            ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
+                            ->whereColumn("vsusenas_mak.id", "konsumsi.id_ruta")
                             ->where("vsusenas_mak.status_dok", "clean")
                             ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
                     } else {
                         $subquery->select(DB::raw(1))
                             ->from("vsusenas_mak")
-                            ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
+                            ->whereColumn("vsusenas_mak.id", "konsumsi.id_ruta")
                             ->where("vsusenas_mak.status_dok", "clean");
                     }
                 })
@@ -509,13 +510,17 @@ class MonitoringController extends Controller
 
     public function hitung_summary_kabupaten_kota($kode_kabkot)
     {
-        $jumlah_ruta = SusenasMak::selectRaw("count(id) as jumlah_ruta");
+        $jumlah_ruta = SusenasMak::selectRaw("count(id) as jumlah_ruta")->where("status_dok", "clean");
         if ($kode_kabkot != "00") {
             $jumlah_ruta = $jumlah_ruta->where("kode_kabkot", $kode_kabkot);
         }
-
-
         $jumlah_ruta = $jumlah_ruta->first()->toArray()["jumlah_ruta"];
+        // dd($jumlah_ruta);
+        if ($jumlah_ruta == 0) {
+            return;
+        }
+
+
         // dd($jumlah_ruta);
         $konsumsi_perkapita = $this->konsumsi_perkapita_total($kode_kabkot);
         $konsumsi_perkapita_total = $konsumsi_perkapita["total"];
@@ -572,20 +577,15 @@ class MonitoringController extends Controller
 
     public function update_dashboard()
     {
-        // $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
-        // foreach ($daftar_kabkot as $kabkot) {
-        //     # code...
-        //     $kode_kabkot = $kabkot->kode;
-        //     $this->hitung_summary_kabupaten_kota($kode_kabkot);
-        // }
-        // return response()->json([
-        //     "message" => "selesai menghitung summary"
-        // ], 200);
-        $job = new UpdateDashboardJob();
-        $jobId = Queue::push($job);
+        $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
+        foreach ($daftar_kabkot as $kabkot) {
+            # code...
+            $kode_kabkot = $kabkot->kode;
+            $this->hitung_summary_kabupaten_kota($kode_kabkot);
+            // continue;
+        }
         return response()->json([
-            "message" => "Summary update started",
-            "job_id" => $jobId // Return job ID for frontend tracking
+            "message" => "selesai menghitung summary"
         ], 200);
     }
     public function check_job_status($jobId)
