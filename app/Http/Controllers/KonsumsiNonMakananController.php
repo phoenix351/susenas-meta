@@ -21,6 +21,20 @@ class KonsumsiNonMakananController extends Controller
     }
     public function sum_konsumsi_by_ruta($id_ruta)
     {
-        return KonsumsiNonMakanan::where("id_ruta",$id_ruta)->sum("harga");
+        $daftar_konsumsi_tahunan = [6, 7, 12, 13, 15,];
+        $daftar_konsumsi = KonsumsiNonMakanan::where("id_ruta", $id_ruta)
+            ->get();
+        $total_harga = 0;
+        foreach ($daftar_konsumsi as  $konsumsi) {
+            # code...
+            if (in_array($konsumsi->id_komoditas, $daftar_konsumsi_tahunan) || $konsumsi->id_komoditas >= 17) {
+                $konsumsi->harga = $konsumsi->harga / 12;
+            }
+            $total_harga += $konsumsi->harga;
+        }
+        // $total_harga = number_format($total_harga, 2);
+        // dd(["before" => KonsumsiNonMakanan::where("id_ruta", $id_ruta)->sum("harga"), "after" => $total_harga]);
+        // return KonsumsiNonMakanan::where("id_ruta", $id_ruta)->sum("harga");
+        return $total_harga;
     }
 }

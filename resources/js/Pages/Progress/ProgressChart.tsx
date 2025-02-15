@@ -12,7 +12,7 @@ import {
 import { ProgressData } from "@/types";
 import { Button, message, Space, Typography } from "antd";
 import axios from "axios";
-import { LeftOutlined } from "@ant-design/icons";
+import { ExportOutlined, LeftOutlined } from "@ant-design/icons";
 import CustomTooltip from "./CustomTooltip";
 const { Title } = Typography;
 
@@ -84,6 +84,53 @@ const ProgressChart = () => {
         }
         getData("kabkot", "00");
     }
+    function convertCsv(columns: string[], data: any[]) {
+        let stringCsv = "";
+        stringCsv += columns.map((column) => `${column}`).join(",");
+        stringCsv += "\n";
+        stringCsv += data
+            .map(
+                (item) =>
+                    `${columns
+                        .map(
+                            (column) =>
+                                `${
+                                    column == "name"
+                                        ? item[column].trim()
+                                        : item[column]
+                                }`
+                        )
+                        .join(",")}\n`
+            )
+            .join("");
+        return stringCsv;
+    }
+    async function unduhCsv() {
+        const { data } = await axios.get(
+            route("api.monitoring.wilayah", {
+                tipe: "kabkot",
+                kode: "00",
+            })
+        );
+        console.log({ data });
+        if (data.length < 1) {
+            return messageApi.open({
+                content: "data summary gagal diunduh",
+                type: "error",
+                duration: 1,
+            });
+        }
+        const columnNames = Object.keys(data[0]);
+        console.log({ columnNames });
+
+        const stringCsvData = convertCsv(columnNames, data);
+        const blob = new Blob([stringCsvData], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.setAttribute("href", url);
+        a.setAttribute("download", `progress7100_${new Date()}.csv`);
+        a.click();
+    }
     useEffect(() => {
         getData("kabkot", "00");
     }, []);
@@ -93,19 +140,23 @@ const ProgressChart = () => {
             {" "}
             {contextHolder}
             <Space
-                align="center"
                 style={{
                     marginRight: 30,
                     marginLeft: 20,
                     width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
                 }}
             >
                 <Button onClick={goBack}>
                     <LeftOutlined /> Kembali
                 </Button>
-                <Space style={{ marginLeft: "26vw", textAlign: "center" }}>
+                <Space style={{ textAlign: "center" }}>
                     <Title>Progress Pendataan 71{wilayah.nama}</Title>
                 </Space>
+                <Button onClick={unduhCsv}>
+                    <ExportOutlined /> Export csv
+                </Button>
             </Space>
             <ResponsiveContainer width={"100%"} height={600}>
                 <BarChart

@@ -935,8 +935,8 @@ class MakController extends Controller
                         "blok" => "IV.3"
 
                     ];
-                    $nilai_konsumsi_non_makanan_string = "Rp ".number_format(round($sum_konsumsi_non_makanan),0,",",".");
-                    $pesan['rincian'] = "Isian total konsumsi non makanan harus sama atau  lebih dari isian di Blok Non Makan ( ".$nilai_konsumsi_non_makanan_string." ), mohon dicek kembali";
+                    $nilai_konsumsi_non_makanan_string = "Rp " . number_format(round($sum_konsumsi_non_makanan), 0, ",", ".");
+                    $pesan['rincian'] = "Isian total konsumsi non makanan harus sama atau  lebih dari isian di Blok Non Makan ( " . $nilai_konsumsi_non_makanan_string . " ), mohon dicek kembali";
                     $daftar_error[] = $pesan;
                 }
 
