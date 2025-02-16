@@ -77,7 +77,7 @@ const daftarRincian = [
     {
         id: 3,
         nomor: 3,
-        rincian: "Jumlah ART yang masih bersekolah (R1402=2)",
+        rincian: "Jumlah ART yang masih bersekolah (R611=2)",
         type: "number",
 
         rules: {
