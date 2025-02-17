@@ -213,11 +213,11 @@ const ProgressChart = () => {
                     <Bar
                         dataKey="clean"
                         stackId="a"
-                        fill="green"
+                        fill="rgba(56, 142, 60, 1)"
                         onClick={(data, index) => {}}
                     />
-                    <Bar dataKey="warning" stackId="a" fill="orange" />
-                    <Bar dataKey="error" stackId="a" fill="red" />
+                    <Bar dataKey="warning" stackId="a" fill="rgba(245, 124, 0, 1)" />
+                    <Bar dataKey="error" stackId="a" fill="rgba(211, 47, 47, 1)" />
                     <Bar dataKey="empty" stackId="a" fill="rgb(184,184,184)" />
                 </BarChart>
             </ResponsiveContainer>
