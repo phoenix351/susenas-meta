@@ -7,7 +7,6 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({
 }) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload; // Type assertion
-        console.log(data);
 
         return (
             <Card

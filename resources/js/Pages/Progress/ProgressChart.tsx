@@ -57,7 +57,6 @@ const ProgressChart = () => {
             // } else {
             // }
             setCurrentData(addedEmptyData);
-            // console.log({tipe});
 
             setWilayah({ tipe, nama: kode });
             messageApi.open({
@@ -106,13 +105,27 @@ const ProgressChart = () => {
         return stringCsv;
     }
     async function unduhCsv() {
-        const { data } = await axios.get(
-            route("api.monitoring.wilayah", {
-                tipe: "kabkot",
-                kode: "00",
+        const data = currentData.map(
+            ({
+                name,
+                error,
+                warning,
+                clean,
+                target,
+                kode,
+                fullcode,
+                empty,
+            }) => ({
+                name,
+                kode_kabkot: kode,
+                fullcode,
+                target,
+                empty,
+                error,
+                warning,
+                clean,
             })
         );
-        console.log({ data });
         if (data.length < 1) {
             return messageApi.open({
                 content: "data summary gagal diunduh",
@@ -121,14 +134,13 @@ const ProgressChart = () => {
             });
         }
         const columnNames = Object.keys(data[0]);
-        console.log({ columnNames });
 
         const stringCsvData = convertCsv(columnNames, data);
         const blob = new Blob([stringCsvData], { type: "text/csv" });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.setAttribute("href", url);
-        a.setAttribute("download", `progress7100_${new Date()}.csv`);
+        a.setAttribute("download", `progress71xx_${new Date()}.csv`);
         a.click();
     }
     useEffect(() => {
@@ -216,8 +228,16 @@ const ProgressChart = () => {
                         fill="rgba(56, 142, 60, 1)"
                         onClick={(data, index) => {}}
                     />
-                    <Bar dataKey="warning" stackId="a" fill="rgba(245, 124, 0, 1)" />
-                    <Bar dataKey="error" stackId="a" fill="rgba(211, 47, 47, 1)" />
+                    <Bar
+                        dataKey="warning"
+                        stackId="a"
+                        fill="rgba(245, 124, 0, 1)"
+                    />
+                    <Bar
+                        dataKey="error"
+                        stackId="a"
+                        fill="rgba(211, 47, 47, 1)"
+                    />
                     <Bar dataKey="empty" stackId="a" fill="rgb(184,184,184)" />
                 </BarChart>
             </ResponsiveContainer>

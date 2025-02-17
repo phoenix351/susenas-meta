@@ -34,6 +34,7 @@ class KonsumsiNonMakananController extends Controller
             // $daftar_tahunan[] = ["id"=>$konsumsi->id_komoditas,"harga"=>$konsumsi->harga];
             $total_harga += $konsumsi->harga;
         }
+        // dd($total_harga);
 
         return $total_harga;
     }
