@@ -11,6 +11,7 @@ class KonsumsiNonMakananController extends Controller
     {
         $validatedData = $request->validated();
         try {
+            // dd($validatedData);
             //code...
             KonsumsiNonMakanan::upsert($validatedData, ["id_ruta", "id_komoditas"], ["harga"]);
             return response()->json(["status" => "Berhasil menyimpan data"], 200);
@@ -30,11 +31,10 @@ class KonsumsiNonMakananController extends Controller
             if (in_array($konsumsi->id_komoditas, $daftar_konsumsi_tahunan) || $konsumsi->id_komoditas >= 17) {
                 $konsumsi->harga = $konsumsi->harga / 12;
             }
+            // $daftar_tahunan[] = ["id"=>$konsumsi->id_komoditas,"harga"=>$konsumsi->harga];
             $total_harga += $konsumsi->harga;
         }
-        // $total_harga = number_format($total_harga, 2);
-        // dd(["before" => KonsumsiNonMakanan::where("id_ruta", $id_ruta)->sum("harga"), "after" => $total_harga]);
-        // return KonsumsiNonMakanan::where("id_ruta", $id_ruta)->sum("harga");
+
         return $total_harga;
     }
 }
