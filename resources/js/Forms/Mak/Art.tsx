@@ -171,8 +171,10 @@ const Art: React.FC<{
     const handleValueChange = _debounce(() => {
         calculateRekap();
         form.submit();
+        
         calculateKalori(form.getFieldsValue()).then((totalKalori) => {
             let newDaftarArt = [...daftarArt];
+            console.log(newDaftarArt,id_art);
             newDaftarArt[nomor_art]["kalori"] = totalKalori;
         });
     }, 1000);
@@ -181,36 +183,25 @@ const Art: React.FC<{
         const fetchKonsumsiArt = async (id_art: string) => {
             setLoading(true);
             const { data } = await axios.get(
-                route("api.mak.konsumsi.art", { id_art: id_art })
+                route("api.konsumsi.art.fetch", { id_art: id_art })
             );
 
-            const daftarSub: number[] = [187, 225];
+            // const daftarSub: number[] = [187, 220];
             let konsumsiArt = data.map(
-                (item: {
-                    id_komoditas: any;
-                    id_kelompok: any;
-                    harga_beli: any;
-                    harga_produksi: any;
-                    harga_total: any;
-                    item: any;
-                    satuan: any;
-                    volume_beli: any;
-                    volume_produksi: any;
-                    volume_total: any;
-                }) => {
+                (item: any) => {
                     return {
                         [`${
-                            daftarSub.includes(item.id_komoditas)
+                            (item.komoditas.type=="sub")
                                 ? "jumlah"
                                 : ""
-                        }${item.id_komoditas}_beli_harga${item.id_kelompok}`]:
+                        }${item.id_komoditas}_beli_harga${item.komoditas.id_kelompok}`]:
                             item.harga_beli,
                         [`${
-                            daftarSub.includes(item.id_komoditas)
+                            (item.komoditas.type=="sub")
                                 ? "jumlah"
                                 : ""
                         }${item.id_komoditas}_produksi_harga${
-                            item.id_kelompok
+                            item.komoditas.id_kelompok
                         }`]: item.harga_produksi,
                         [`${item.id_komoditas}_total_harga`]: item.harga_total,
                         [`${item.id_komoditas}_item`]: item.item,
@@ -243,6 +234,8 @@ const Art: React.FC<{
             konsumsiArtValues[`blok4_31_${nomor_art}_id_art`] = id_art;
             form.setFieldsValue(konsumsiArtValues);
             // setLoading(false);
+            console.log({konsumsiArtValues});
+            
             setLoading(false);
         };
         fetchKonsumsiArt(id_art);
@@ -253,6 +246,7 @@ const Art: React.FC<{
         form.setFieldsValue({ id_ruta, id_art });
         calculateKalori(form.getFieldsValue()).then((totalKalori) => {
             let newDaftarArt = [...daftarArt];
+            
             newDaftarArt[nomor_art]["kalori"] = totalKalori;
         });
     }, [form]);

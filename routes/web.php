@@ -3,6 +3,7 @@
 use App\Http\Controllers\AnggotaRutaController;
 use App\Http\Controllers\KomoditasController;
 use App\Http\Controllers\KomoditasNonMakananController;
+use App\Http\Controllers\KonsumsiArtController;
 use App\Http\Controllers\KonsumsiNonMakananController;
 use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterWilayahController;
@@ -79,7 +80,7 @@ Route::middleware('auth')->group(function () {
 
     route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');
     route::get('/api/entri/mak', [MakController::class, 'fetch'])->name('api.entri.mak');
-    route::get('/api/mak/konsumsi/art/{id_art}', [MakController::class, 'konsumsi_art_fetch'])->name('api.mak.konsumsi.art');
+    route::get('/api/konsumsi/art/{id_art}', [KonsumsiArtController::class, 'fetch'])->name('api.konsumsi.art.fetch');
 
     route::get('/api/mak/komoditas/list', [KomoditasController::class, 'list_komoditas'])->name('api.mak.komoditas.list');
     route::get('/api/mak/komoditas/kalori/{id}', [KomoditasController::class, 'fetch_kalori'])->name('api.mak.komoditas.kalori.fetch');

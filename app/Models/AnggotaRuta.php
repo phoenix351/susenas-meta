@@ -18,7 +18,7 @@ class AnggotaRuta extends Model
 
     public function konsumsi(): HasMany
     {
-        return $this->hasMany(KonsumsiArt::class);
+        return $this->hasMany(KonsumsiArt::class,"id_art","id");
     }
     public function ruta():BelongsTo
     {

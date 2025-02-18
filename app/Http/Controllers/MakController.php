@@ -239,12 +239,7 @@ class MakController extends Controller
             'nks' => $nks
         ]);
     }
-    public function konsumsi_art_fetch($id_art)
-    {
-        // $konsumsi_ruta = KonsumsiArt::where('id_art', $id_art)->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')->select('konsumsi.*', 'komoditas.id_kelompok')->get();
-        $data = KonsumsiArt::where('id_art', $id_art)->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')->select('konsumsi_art.*', 'komoditas.id_kelompok')->get();
-        return response()->json($data, 200);
-    }
+    
     public function edit($id)
     {
         $data = $this->get_ruta('00', '00', '1', $id);

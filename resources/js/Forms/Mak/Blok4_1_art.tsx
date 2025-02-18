@@ -75,7 +75,6 @@ const Blok4_1: React.FC<{
     // usestate
     
     const [activeKey, setActiveKey] = useState("0");
-    const [items, setItems] = useState<any[]>([]);
     const [listKomoditas, setListKomoditas] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [artLoading, setArtLoading] = useState(false);
@@ -192,24 +191,24 @@ const Blok4_1: React.FC<{
         };
         fetchKomoditasList(187, 225);
         setLoading(false);
-        const items = daftarArt.map((art: any, index: number) => ({
-            label: art.nama,
-            key: String(index),
-            children: (
-                <Art
-                    onFinish={blok4_1_hal2Finish}
-                    nomor_art={art.nomor_art}
-                    daftarArt={daftarArt}
-                    setDaftarArt={setDaftarArt}
-                    id_ruta={artForm.getFieldValue("id_ruta")}
-                    art={art}
-                    id_art={art.id}
-                    calculateKalori={calculateKalori}
-                    konten={listKomoditas}
-                />
-            ),
-        }));
-        setItems([...items]);
+        // const items = daftarArt.map((art: any, index: number) => ({
+        //     label: art.nama,
+        //     key: String(index),
+        //     children: (
+        //         <Art
+        //             onFinish={blok4_1_hal2Finish}
+        //             nomor_art={index}
+        //             daftarArt={daftarArt}
+        //             setDaftarArt={setDaftarArt}
+        //             id_ruta={artForm.getFieldValue("id_ruta")}
+        //             art={art}
+        //             id_art={art.id}
+        //             calculateKalori={calculateKalori}
+        //             konten={listKomoditas}
+        //         />
+        //     ),
+        // }));
+        // setItems([...items]);
     }, []);
 
     return (
@@ -331,7 +330,7 @@ const Blok4_1: React.FC<{
                     children: (
                         <Art
                             onFinish={blok4_1_hal2Finish}
-                            nomor_art={art.nomor_art}
+                            nomor_art={index}
                             daftarArt={daftarArt}
                             setDaftarArt={setDaftarArt}
                             id_ruta={art.id_ruta}
