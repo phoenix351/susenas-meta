@@ -33,11 +33,11 @@ const KomoditasSummaryTable = ({
         // kode_komoditas
         {
             title: "Kode Komoditas",
-            dataIndex: "nomor_urut",
+            dataIndex: "id_komoditas",
             key: "nomor_urut",
             sorter: (a, b) => a.id_komoditas - b.id_komoditas,
             sortOrder:
-                sortedInfo.columnKey === "nomor_urut"
+                sortedInfo.columnKey === "id_komoditas"
                     ? sortedInfo.order
                     : null,
             ellipsis: true,

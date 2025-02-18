@@ -555,6 +555,7 @@ class MonitoringController extends Controller
         }
         $upsertData = [];
         $komoditas_summary = $this->komoditas_summary($kode_kabkot);
+        // dd($komoditas_summary);
         foreach ($komoditas_summary as $komoditas) {
             # code...
             $upsertData[] = [
@@ -568,6 +569,7 @@ class MonitoringController extends Controller
             ];
         }
         // Perform bulk upsert
+        // dd($upsertData);
         DB::table('komoditas_kabkot_summary')->upsert(
             $upsertData,
             ['kode_kabkot', 'id_komoditas'], // Unique constraints for conflict resolution
@@ -580,7 +582,9 @@ class MonitoringController extends Controller
         $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
         foreach ($daftar_kabkot as $kabkot) {
             # code...
+            
             $kode_kabkot = $kabkot->kode;
+          
             $this->hitung_summary_kabupaten_kota($kode_kabkot);
             // continue;
         }
