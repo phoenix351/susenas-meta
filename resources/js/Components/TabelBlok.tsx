@@ -32,7 +32,6 @@ const cellStyle = {
 const centerCell: React.CSSProperties = {
     borderStyle: "solid",
     border: "solid 1px black",
-    // width: "100%",
     textAlign: "center",
     padding: "5px",
 };
@@ -44,79 +43,7 @@ const darkCell: React.CSSProperties = {
     backgroundColor: "#636f83",
     padding: "5px",
 };
-// const renderRow = (data: RowData) => {
-//     let a = 1;
-//     if (data.type !== "sub")
-//         return (
-//             <tr>
-//                 <td style={centerCell}>{data.nomor}</td>
-//                 <td style={cellStyle}>{data.kode_coicop}</td>
-//                 <td style={cellStyle}>
-//                     <Text>{data.rincian}</Text>
-//                     {data.type === "lain" && (
-//                         <Form.Item name={`${data.nomor}_lainnya`}>
-//                             <Input placeholder="Sebutkan" />
-//                         </Form.Item>
-//                     )}
-//                 </td>
-//                 <td style={cellStyle}>
-//                     <Text>{data.satuan}</Text>
-//                 </td>
-//                 <td style={cellStyle}>
-//                     <Form.Item name={`${data.nomor}_beli_volume`}>
-//                         <Input />
-//                     </Form.Item>
-//                 </td>
-//                 <td style={cellStyle}>
-//                     <RupiahInput inputName={`${data.nomor}_beli_harga`} />
 
-//                 </td>
-//                 <td style={cellStyle}>
-//                     <Form.Item name={`${data.nomor}_produksi_dsb_volume`}>
-//                         <Input />
-//                     </Form.Item>
-//                 </td>
-//                 <td style={cellStyle}>
-//                     <RupiahInput inputName={`${data.nomor}_produksi_dsb_harga`} />
-
-//                 </td>
-//                 <td style={cellStyle}>
-//                     <Form.Item name={`${data.nomor}_total_volume`}>
-//                         <Input />
-//                     </Form.Item>
-//                 </td>
-//                 <td style={cellStyle}>
-//                     <RupiahInput inputName={`${data.nomor}_total_harga`} />
-
-//                     <Text>10.000.000</Text>
-//                 </td>
-//             </tr>
-//         );
-//     return (
-//         <tr>
-//             <td style={centerCell}>{data.nomor}</td>
-//             <td style={cellStyle}></td>
-//             <td colSpan={2} style={blokStyle}>
-//                 {data.rincian}
-//             </td>
-//             <td style={darkCell}></td>
-//             <td style={cellStyle}>
-//                 <RupiahInput inputName={`${data.nomor}_beli_harga`} />
-
-//             </td>
-//             <td style={darkCell}></td>
-//             <td style={cellStyle}>
-//                 <RupiahInput inputName={`${data.nomor}_produksi_harga`} />
-
-//             </td>
-//             <td style={darkCell}></td>
-//             <td style={cellStyle}>
-//                 <RupiahInput inputName={`${data.nomor}_total_harga`} />
-//                 <Text>10.000.000</Text>
-//             </td>
-//         </tr>
-//     );
-// };
 const TabelBlok: React.FC<{
     title: string;
     konten: RowData[];
@@ -132,7 +59,8 @@ const TabelBlok: React.FC<{
 }> = ({ title, konten, rekapMak, calculate, form }) => {
     title =
         "BLOK IV.1. KONSUMSI DAN PENGELUARAN BAHAN MAKANAN, BAHAN MINUMAN, DAN ROKOK SEMINGGU TERAKHIR";
-
+    const nilaiTDStyle = { ...cellStyle, width: "250px" };
+    const jumlahTDStyle = { ...cellStyle, width: "50px" };
     return (
         <table style={tableStyle}>
             <thead>
@@ -149,58 +77,59 @@ const TabelBlok: React.FC<{
                     </th>
                 </tr>
                 <tr>
-                    <th style={cellStyle} rowSpan={2}>
+                    <th style={{ ...cellStyle, width: "10px" }} rowSpan={2}>
                         Kode
                     </th>
                     {/* <th style={cellStyle} rowSpan={2}>
                         Kode COICOP
                     </th> */}
-                    <th style={cellStyle} rowSpan={2}>
+                    <th style={{ ...cellStyle, width: "200px" }} rowSpan={2}>
                         Rincian
                     </th>
-                    <th style={cellStyle} rowSpan={2}>
+                    <th style={{ ...cellStyle, width: "50px" }} rowSpan={2}>
                         Satuan standar
                     </th>
-                    <th style={cellStyle} colSpan={2}>
+                    <th style={{ ...cellStyle, width: "300px" }} colSpan={2}>
                         Berasal dari pembelian (tunai/bon)
                     </th>
-                    <th style={cellStyle} colSpan={2}>
+                    <th style={{ ...cellStyle, width: "300px" }} colSpan={2}>
                         Berasal dari produksi sendiri, pemberian, dsb
                     </th>
-                    <th style={cellStyle} colSpan={2}>
+                    <th style={{ ...cellStyle, width: "300px" }} colSpan={2}>
                         Jumlah konsumsi
                     </th>
                 </tr>
                 <tr>
-                    <th style={cellStyle}>Banyaknya (0,00)</th>
-                    <th style={cellStyle}>Nilai (Rp)</th>
-                    <th style={cellStyle}>Banyaknya (0,00)</th>
-                    <th style={cellStyle}>Nilai (Rp)</th>
-                    <th style={cellStyle}>Banyaknya (5) + (7) (0,00)</th>
-                    <th style={cellStyle}>Nilai (6) + (8) (Rp)</th>
+                    <th style={jumlahTDStyle}>Banyaknya (0,00)</th>
+                    <th style={nilaiTDStyle}>Nilai (Rp)</th>
+                    <th style={jumlahTDStyle}>Banyaknya (0,00)</th>
+                    <th style={nilaiTDStyle}>Nilai (Rp)</th>
+
+                    <th style={jumlahTDStyle}>Banyaknya (5) + (7) (0,00)</th>
+                    <th style={nilaiTDStyle}>Nilai (6) + (8) (Rp)</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td width="55px" style={centerCell}>
+                    <td  style={centerCell}>
                         (1)
                     </td>
                     {/* <td width="130px" style={centerCell}>
                         (2)
                     </td> */}
                     <td style={centerCell}>(3)</td>
-                    <td width="80px" style={centerCell}>
+                    <td width="50px" style={centerCell}>
                         (4)
                     </td>
-                    <td width="100px" style={centerCell}>
+                    <td width="50px" style={centerCell}>
                         (5)
                     </td>
                     <td style={centerCell}>(6)</td>
-                    <td width="100px" style={centerCell}>
+                    <td style={jumlahTDStyle}>
                         (7)
                     </td>
                     <td style={centerCell}>(8)</td>
-                    <td width="100px" style={centerCell}>
+                    <td width="50px" style={centerCell}>
                         (9)
                     </td>
                     <td style={centerCell}>(10)</td>

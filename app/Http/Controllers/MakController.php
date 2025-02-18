@@ -251,7 +251,7 @@ class MakController extends Controller
 
         $konsumsi_ruta = Konsumsi::where('id_ruta', $id)
             ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
-            ->select('konsumsi.*', 'komoditas.id_kelompok')
+            ->select('konsumsi.*', 'komoditas.id_kelompok','komoditas.type')
             ->get();
         $garis_kemiskinan = Kabkot::where('kode', $data->kode_kabkot)->pluck('garis_kemiskinan');
         $art = AnggotaRuta::where('id_ruta', $id)->get();

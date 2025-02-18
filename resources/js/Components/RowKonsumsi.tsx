@@ -191,7 +191,7 @@ const RowKonsumsi: React.FC<{
                 <td
                     style={{
                         ...centerCell,
-                        width: "55px",
+                        width: "10px",
                     }}
                 >
                     {data.id}
@@ -230,6 +230,7 @@ const RowKonsumsi: React.FC<{
                 <td
                     style={{
                         ...(data.type === "sub" ? darkCell : cellStyle),
+                        width:"50px"
                     }}
                 >
                     {data.type === "sub" || (
@@ -251,6 +252,7 @@ const RowKonsumsi: React.FC<{
                 <td
                     style={{
                         ...(data.type === "sub" ? darkCell : cellStyle),
+                        // width:"30px"
                     }}
                 >
                     {data.type === "sub" || (

@@ -314,6 +314,9 @@ const Mak = ({
     const blok4_1Finish = async (values: any) => {
         try {
             const url = route("entri.mak.konsumsi.store");
+            
+            console.log({values});
+            return
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
@@ -710,12 +713,12 @@ const Mak = ({
             hal2_jml_komoditas: data.hal2_jml_komoditas ?? undefined,
         });
         // console.log({ data, konsumsi_ruta });
-        const daftarSub = [1, 8, 16];
+        const daftarSub = [1, 8, 16,61,74];
         let konsumsiRutaValues = konsumsi_ruta.map((item) => ({
-            [`${daftarSub.includes(item.id_komoditas) ? "jumlah" : ""}${
+            [`${item.type=="sub" ? "jumlah" : ""}${
                 item.id_komoditas
             }_beli_harga${item.id_kelompok}`]: item.harga_beli,
-            [`${daftarSub.includes(item.id_komoditas) ? "jumlah" : ""}${
+            [`${item.type=="sub" ? "jumlah" : ""}${
                 item.id_komoditas
             }_produksi_harga${item.id_kelompok}`]: item.harga_produksi,
             [`${item.id_komoditas}_total_harga`]: item.harga_total,
@@ -736,6 +739,8 @@ const Mak = ({
             }
             return result;
         }, {});
+        console.log(singleObject);
+        
 
         blok4_1Form.setFieldsValue(singleObject);
         artForm.setFieldsValue({
