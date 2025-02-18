@@ -315,8 +315,8 @@ const Mak = ({
         try {
             const url = route("entri.mak.konsumsi.store");
             
-            console.log({values});
-            return
+            // console.log({values});
+            // return
             const { data } = await axios.patch(url, values, {
                 headers: { "Content-Type": "application/json" },
             });
@@ -713,7 +713,7 @@ const Mak = ({
             hal2_jml_komoditas: data.hal2_jml_komoditas ?? undefined,
         });
         // console.log({ data, konsumsi_ruta });
-        const daftarSub = [1, 8, 16,61,74];
+        // const daftarSub = [1, 8, 16,61,74];
         let konsumsiRutaValues = konsumsi_ruta.map((item) => ({
             [`${item.type=="sub" ? "jumlah" : ""}${
                 item.id_komoditas
