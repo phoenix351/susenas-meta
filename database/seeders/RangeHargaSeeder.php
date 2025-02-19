@@ -30,10 +30,10 @@ class RangeHargaSeeder extends Seeder
             }
             $range_harga = new RangeHarga(
                 [
-                    'kode_kabkot' => $row[1],
-                    'id_komoditas' => $row[2],
-                    'min' => $row[5],
-                    'max' => $row[6],
+                    'kode_kabkot' => $row[0],
+                    'id_komoditas' => $row[1],
+                    'min' => $row[2],
+                    'max' => $row[3],
                 ]
             );
             $range_harga->save();
