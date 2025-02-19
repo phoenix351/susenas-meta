@@ -22,7 +22,7 @@ class KonsumsiNonMakananController extends Controller
     }
     public function sum_konsumsi_by_ruta($id_ruta)
     {
-        $daftar_konsumsi_tahunan = [6, 7, 12, 13, 15,];
+        $daftar_konsumsi_tahunan = [6, 7, 9, 12, 13, 15,];
         $daftar_konsumsi = KonsumsiNonMakanan::where("id_ruta", $id_ruta)
             ->get();
         $total_harga = 0;
