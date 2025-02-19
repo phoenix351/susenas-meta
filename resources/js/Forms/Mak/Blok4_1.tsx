@@ -104,7 +104,7 @@ const Blok4_1: React.FC<{
                         children: (
                             <Blok4_1Tab
                                 from={1}
-                                to={38}
+                                to={34}
                                 hal={2}
                                 form={form}
                                 calculate={calculate}
@@ -117,9 +117,9 @@ const Blok4_1: React.FC<{
                         key: "2",
                         children: (
                             <Blok4_1Tab
-                                from={39}
+                                from={35}
+                                to={62}
                                 hal={4}
-                                to={77}
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}
@@ -131,8 +131,8 @@ const Blok4_1: React.FC<{
                         key: "3",
                         children: (
                             <Blok4_1Tab
-                                from={78}
-                                to={116}
+                                from={63}
+                                to={88}
                                 hal={6}
                                 form={form}
                                 calculate={calculate}
@@ -145,8 +145,8 @@ const Blok4_1: React.FC<{
                         key: "4",
                         children: (
                             <Blok4_1Tab
-                                from={117}
-                                to={155}
+                                from={89}
+                                to={122}
                                 hal={8}
                                 form={form}
                                 calculate={calculate}
@@ -157,6 +157,20 @@ const Blok4_1: React.FC<{
                     {
                         label: "Blok 10",
                         key: "5",
+                        children: (
+                            <Blok4_1Tab
+                                from={123}
+                                to={155}
+                                hal={10}
+                                form={form}
+                                calculate={calculate}
+                                rekapMak={rekapMak}
+                            />
+                        ),
+                    },
+                    {
+                        label: "Blok 12",
+                        key: "6",
                         children: (
                             <Blok4_1Tab
                                 from={156}
