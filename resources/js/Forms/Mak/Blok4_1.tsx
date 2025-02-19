@@ -155,7 +155,7 @@ const Blok4_1: React.FC<{
                         ),
                     },
                     {
-                        label: "Blok 10",
+                        label: "Hal 10",
                         key: "5",
                         children: (
                             <Blok4_1Tab
@@ -169,7 +169,7 @@ const Blok4_1: React.FC<{
                         ),
                     },
                     {
-                        label: "Blok 12",
+                        label: "Hal 12",
                         key: "6",
                         children: (
                             <Blok4_1Tab
