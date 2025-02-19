@@ -175,7 +175,7 @@ const Blok4_1: React.FC<{
                             <Blok4_1Tab
                                 from={156}
                                 to={186}
-                                hal={10}
+                                hal={12}
                                 form={form}
                                 calculate={calculate}
                                 rekapMak={rekapMak}

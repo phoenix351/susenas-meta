@@ -58,26 +58,6 @@ const Blok4_1Tab: React.FC<{
 
     return (
         <Space direction="vertical" style={{ width: "100%" }}>
-            <Space
-                style={{ width: "100%", justifyContent: "end" }}
-                direction="horizontal"
-            >
-                <Text>
-                    Jumlah komoditas bahan makanan dan bahan minuman terisi pada
-                    halaman ini
-                </Text>
-                {/* <Form.Item
-                    style={{ margin: "auto" }}
-                    name={`hal${hal}_jml_komoditas`}
-                >
-                    <InputNumber
-                        max={30}
-                        style={{ width: "40px" }}
-                    ></InputNumber>
-                </Form.Item> */}
-
-                <NumberInput inputName={`hal${hal}_jml_komoditas`} />
-            </Space>
 
             <TabelBlok
                 form={form}
