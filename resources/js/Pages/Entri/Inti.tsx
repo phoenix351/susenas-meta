@@ -265,7 +265,7 @@ const Dashboard = ({
                         <PlusCircleOutlined /> Tambah Ruta
                     </Button>
                 </Space>
-                <Table dataSource={daftarSampel} columns={columns} />;
+                <Table dataSource={daftarSampel} columns={columns} scroll={{x:1000}} />;
             </Space>
         </>
     );
