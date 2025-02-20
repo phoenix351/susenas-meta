@@ -38,4 +38,19 @@ class KonsumsiNonMakananController extends Controller
 
         return $total_harga;
     }
+    public function count_konsumsi_by_ruta($id_ruta)
+    {
+        $daftar_konsumsi = KonsumsiNonMakanan::where("id_ruta", $id_ruta)
+            ->get();
+        $count_konsumsi = 0;
+        foreach ($daftar_konsumsi as  $konsumsi) {
+            # code...
+            if ($konsumsi->harga > 0) {
+                $count_konsumsi++;
+            }
+        }
+        // dd($total_harga);
+
+        return $count_konsumsi;
+    }
 }

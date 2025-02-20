@@ -659,6 +659,7 @@ class MakController extends Controller
             $daftar_warning = [];
             $evaluasi_rh = [];
             if ($ruta->r203 == "1") {
+                // dd("aman");
                 $evaluasi_rh  = $this->range_harga($id_ruta);
                 $evaluasi_isian = $this->cek_isian_new($id_ruta);
                 $daftar_error = $evaluasi_isian['daftar_error'];
@@ -729,6 +730,7 @@ class MakController extends Controller
 
         $konsumsi_non_makanan_controller = new KonsumsiNonMakananController();
         $sum_konsumsi_non_makanan = $konsumsi_non_makanan_controller->sum_konsumsi_by_ruta($id_ruta);
+        $count_konsumsi_non_makanan = $konsumsi_non_makanan_controller->count_konsumsi_by_ruta($id_ruta);
 
         if (sizeof($data_mak) > 0) {
             // loop each var
@@ -912,7 +914,7 @@ class MakController extends Controller
                         $daftar_warning[] = $pesan;
                     }
                 }
-
+                // dd([$blok4_32_15,$rincian15]);
                 if (round($blok4_32_16) != round($rincian16)) {
                     $pesan = [
                         'variable' => "Blok IV.3.2 Rekapitulasi Rincian Nomor 16",
@@ -1098,7 +1100,16 @@ class MakController extends Controller
                 }
             }
         }
-        // if($data_mak[""])
+        if($data_mak["blokqc_3"] < $count_konsumsi_non_makanan){
+            $error = [
+                'rincian' => "Isian ini harus bernilai sedikitnya sama dengan jumlah item terisi > 0 pada Blok Non Makanan Basket Komoditas ",
+                'variable' => "Pertanyaan Quality Control 5. Jumlah Komoditas Non Makanan [Disalin dari dokumen KP Blok III Rincian 305 ]",
+                "blok"=>"Quality Control",
+                'type' => 'error'
+            ];
+            $daftar_error[] = $error;
+
+        }
         return [
             'daftar_warning' => $daftar_warning,
             'daftar_error' => $daftar_error,
