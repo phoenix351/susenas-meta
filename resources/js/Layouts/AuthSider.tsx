@@ -9,6 +9,9 @@ import {
     ShoppingOutlined,
     DatabaseOutlined,
     BookOutlined,
+    BuildOutlined,
+    LineChartOutlined,
+    ProjectOutlined,
 } from "@ant-design/icons";
 import { User } from "@/types";
 type AuthSiderProps = {
@@ -24,8 +27,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
     selectedKey,
     handleMenuClick,
 }) => {
-    
-    let menuItems = [
+    let menuItems: any = [
         // {
         //     key: "dashboard",
         //     icon: <DashboardOutlined />,
@@ -46,7 +48,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
             label: "Panduan",
         },
     ];
-    if (user.role === "ADMIN" && user.kode_kabkot!=="00") {
+    if (user.role === "ADMIN" && user.kode_kabkot !== "00") {
         menuItems = [
             {
                 key: "progress",
@@ -61,7 +63,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                 onClick: () => handleMenuClick("entri"),
                 label: "Entri",
             },
-           
+
             {
                 key: "periksa",
                 icon: <AuditOutlined />,
@@ -82,13 +84,33 @@ const AuthSider: React.FC<AuthSiderProps> = ({
             },
         ];
     }
-    if(user.role==="ADMIN"&&user.kode_kabkot==="00"){
+    if (user.role === "ADMIN" && user.kode_kabkot === "00") {
         menuItems = menuItems = [
             {
                 key: "progress",
                 icon: <DashboardOutlined />,
                 onClick: () => handleMenuClick("progress"),
                 label: "Progress",
+            },
+            {
+                key: "provinsi",
+                label: "Provinsi",
+                icon: <BuildOutlined />,
+                onClick: () => {},
+                children: [
+                    {
+                        key: "statistik",
+                        label: "Statistik",
+                        icon: <LineChartOutlined />,
+                        onClick: () => handleMenuClick("statistics"),
+                    },
+                    {
+                        key: "calculate",
+                        label: "Calculate",
+                        icon: <ProjectOutlined />,
+                        onClick: () => handleMenuClick("calculate"),
+                    },
+                ],
             },
             {
                 key: "dashboard",

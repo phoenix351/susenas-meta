@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnggotaRutaController;
+use App\Http\Controllers\CalculateController;
 use App\Http\Controllers\KomoditasController;
 use App\Http\Controllers\KomoditasNonMakananController;
 use App\Http\Controllers\KonsumsiArtController;
@@ -41,7 +42,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::patch('/users', [PenggunaController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [PenggunaController::class, 'destroy'])->name('users.delete');
     route::get('/entri/mak/view/{id}', [MakController::class, 'view'])->name('entri.mak.view');
-    route::get('/recalculate-qc', [MakController::class, 'recalculate_qc'])->name('recalculate_qc');
+    route::get('/calculate', [CalculateController::class, 'index'])->name('calculate');
 });
 
 
