@@ -14,6 +14,7 @@ use App\Http\Controllers\PeriksaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\RangeHargaController;
+use App\Http\Controllers\StatistikController;
 use App\Models\Konsumsi;
 use App\Models\MasterWilayah;
 
@@ -43,6 +44,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/users/{user}', [PenggunaController::class, 'destroy'])->name('users.delete');
     route::get('/entri/mak/view/{id}', [MakController::class, 'view'])->name('entri.mak.view');
     route::get('/calculate', [CalculateController::class, 'index'])->name('calculate');
+    
+    route::get('/statistik', [StatistikController::class, 'index'])->name('statistik');
+    route::get('/api/provinsi/statistik/{kode_kabkot}', [StatistikController::class, 'fetch'])->name('api.provinsi.statistik.fetch');
 });
 
 

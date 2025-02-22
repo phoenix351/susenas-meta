@@ -102,7 +102,7 @@ const AuthSider: React.FC<AuthSiderProps> = ({
                         key: "statistik",
                         label: "Statistik",
                         icon: <LineChartOutlined />,
-                        onClick: () => handleMenuClick("statistics"),
+                        onClick: () => handleMenuClick("statistik"),
                     },
                     {
                         key: "calculate",

@@ -3,6 +3,8 @@ import { KomoditasSummary } from "@/types";
 import {
     ArrowDownOutlined,
     ArrowUpOutlined,
+    LineChartOutlined,
+    OrderedListOutlined,
     ShopOutlined,
     ShoppingOutlined,
     SyncOutlined,
@@ -28,11 +30,12 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import KomoditasSummaryTable from "./KomoditasSummaryTable";
+import KomoditasSummaryTable from "./SummaryTable";
 import CardSkeleton from "./CardSkeleton";
 import Search from "antd/es/transfer/search";
 import Title from "antd/es/typography/Title";
 import { router } from "@inertiajs/react";
+import LorenzCurve from "./LorenzCurve";
 
 interface KabkotSummary {
     dok_clean: number;
@@ -53,6 +56,7 @@ const index = () => {
     const [kabkotSummary, setKabkotSummary] = useState<KabkotSummary | null>(
         null
     );
+    const [pengeluaranPerkapita, setPengeluaranPerkapita] = useState([]);
     const [komoditasSummaries, setKomoditasSummaries] = useState<
         KomoditasSummary[]
     >([]);
@@ -85,18 +89,12 @@ const index = () => {
                 type: "loading",
                 key: "show-summary",
             });
-            const response_rekap_kabkot = await axios.get(
-                route("api.monitoring.rekap_kabkot", { kode_kabkot })
-            );
-            const response_rekap_komoditas = await axios.get(
-                route("api.monitoring.rekap_komoditas", { kode_kabkot })
-            );
+            const response = await axios.get(route("api.provinsi.statistik.fetch",{kode_kabkot}));
+            
 
-            const data_rekap_kabkot = response_rekap_kabkot.data;
-            const data_rekap_komoditas = response_rekap_komoditas.data;
-
-            setKabkotSummary(data_rekap_kabkot);
-            setKomoditasSummaries(data_rekap_komoditas);
+            
+            
+            setPengeluaranPerkapita(response.data.pengeluaran_perkapita);
             messageApi.open({
                 content: "selesai memuat data.",
                 type: "info",
@@ -153,7 +151,7 @@ const index = () => {
                 align="center"
                 style={{ display: "flex", justifyContent: "space-between" }}
             >
-                <Title>Dashboard</Title>
+                <Title>Statistik</Title>
                 <Button icon={<SyncOutlined />} onClick={syncSummary}>
                     Sync Data
                 </Button>
@@ -177,32 +175,21 @@ const index = () => {
                 </Form.Item>
             </Form>
             <Divider />
-            
+
             <Space
-                direction="vertical"
-                style={{ display: "block", marginTop: 20 }}
+                direction="horizontal"
+                style={{  marginTop: 20, justifyContent:"end",display:"flex" }}
             >
-                <Search
-                    placeholder="Cari berdasarkan nama atau kelompok komoditas"
-                    onChange={(event: any) => {
-                        const newKeyword = event.target.value;
-                        setKeyword(newKeyword);
-                    }}
-                />
+                <Button>
+                    <LineChartOutlined />
+                </Button>
+                <Button>
+                    <OrderedListOutlined />
+                </Button>
             </Space>
-            <KomoditasSummaryTable
-                dataSource={komoditasSummaries.filter((data) => {
-                    let nama_kelompok = data.nama_kelompok.toLowerCase();
-                    let nama_komoditas = data.nama_komoditas.toLowerCase();
-                    const kelompok_komoditas = `${nama_kelompok} ${nama_komoditas}`;
-                    const komoditas_kelompok = `${nama_komoditas} ${nama_kelompok}`;
-                    return (
-                        komoditas_kelompok.includes(keyword) ||
-                        kelompok_komoditas.includes(keyword)
-                    );
-                })}
-                loadingData={loadingData}
-            />
+            
+                <LorenzCurve pengeluaranPerkapita={pengeluaranPerkapita}/>
+            
         </div>
     );
 };
@@ -213,7 +200,7 @@ index.layout = (
     <AuthenticatedLayout
         user={page.props.auth.user}
         header={<h2 className="">index</h2>}
-        selectedKey="statistics"
+        selectedKey="statistik"
         children={page}
     ></AuthenticatedLayout>
 );
