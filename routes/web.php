@@ -44,9 +44,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/users/{user}', [PenggunaController::class, 'destroy'])->name('users.delete');
     route::get('/entri/mak/view/{id}', [MakController::class, 'view'])->name('entri.mak.view');
     route::get('/calculate', [CalculateController::class, 'index'])->name('calculate');
-    
+
     route::get('/statistik', [StatistikController::class, 'index'])->name('statistik');
-    route::get('/api/provinsi/statistik/{kode_kabkot}', [StatistikController::class, 'fetch'])->name('api.provinsi.statistik.fetch');
+    route::get('/api/provinsi/statistik/pengeluaran_perkapita/{kode_kabkot}', [StatistikController::class, 'fetch_pengeluaran_perkapita'])->name('api.provinsi.statistik.pengeluaran_perkapita');
 });
 
 

@@ -1,43 +1,55 @@
 import {
-    LineChart,
-    Line,
     XAxis,
     YAxis,
     Tooltip,
     Legend,
     CartesianGrid,
     ResponsiveContainer,
+    Bar,
+    BarChart,
 } from "recharts";
 
-const LorenzCurve = ({
+const Persentil = ({
     pengeluaranPerkapita,
 }: {
     pengeluaranPerkapita: number[];
 }) => {
+    // console.log(typeof pengeluaranPerkapita);
+
     const sortedData = pengeluaranPerkapita.sort((a, b) => a - b);
 
-    // Calculate cumulative shares
-    const totalIncome = sortedData.reduce((sum, value) => sum + value, 0);
-    let cumulativeIncome = 0;
+    // Function to calculate percentiles
+    const getPercentile = (arr: number[], percentile: number) => {
+        let index = Math.ceil((percentile / 100) * arr.length) - 1;
+        return arr[index];
+    };
 
-    const data = sortedData.map((value, index) => {
-        cumulativeIncome += value;
-        let population = ((index + 1) / sortedData.length) * 100;
+    // Calculate decile boundaries
+    let deciles: number[] = [];
+    for (let i = 10; i <= 100; i += 10) {
+        deciles.push(getPercentile(pengeluaranPerkapita, i));
+    }
 
-        return {
-            population: Math.round(population * 100) / 100,
-            equality: Math.round(population * 100) / 100,
-            income: Math.round((cumulativeIncome * 100) / totalIncome),
-        };
+    // Calculate frequency for each decile
+    let frequencies = new Array(10).fill(0);
+
+    pengeluaranPerkapita.forEach((num) => {
+        for (let i = 0; i < deciles.length; i++) {
+            if (i === 0 && num <= deciles[i]) {
+                frequencies[i]++;
+                break;
+            } else if (num > deciles[i - 1] && num <= deciles[i]) {
+                frequencies[i]++;
+                break;
+            }
+        }
     });
-
-    // Add the origin point (0,0)
-    data.unshift({ population: 0, income: 0, equality: 0 });
+    console.log({ frequencies });
 
     return (
         <>
             <ResponsiveContainer width={"100%"} height={400}>
-                <LineChart data={data}>
+                <BarChart data={pengeluaranPerkapita}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                         dataKey="population"
@@ -56,26 +68,23 @@ const LorenzCurve = ({
                     />
                     <Tooltip />
                     <Legend />
-                    <Line
+                    <Bar
                         type="monotone"
                         dataKey="income"
-                        data={data}
-                        stroke="#8884d8"
+                        color="#8884d8"
                         name="Lorenz Curve"
-                        dot={false}
                     />
-                    <Line
+                    <Bar
                         type="monotone"
                         dataKey="equality"
                         // data={lineOfEquality}
-                        stroke="#82ca9d"
+                        color="#82ca9d"
                         name="Line of Equality"
-                        dot={false}
                     />
-                </LineChart>
+                </BarChart>
             </ResponsiveContainer>
         </>
     );
 };
 
-export default LorenzCurve;
+export default Persentil;
