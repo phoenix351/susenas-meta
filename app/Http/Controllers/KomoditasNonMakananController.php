@@ -10,7 +10,7 @@ class KomoditasNonMakananController extends Controller
 {
     public function list()
     {
-        $daftar_komoditas = KomoditasNonMakanan::all();
+        $daftar_komoditas = KomoditasNonMakanan::orderBy("nomor_urut")->get();
         return response()->json($daftar_komoditas, 200);
     }
     public function fetch($id_ruta)

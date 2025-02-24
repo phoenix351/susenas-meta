@@ -16,7 +16,7 @@ const NonMakananTable = ({
     const [save, setSave] = useState("Belum ada perubahan");
     const [form] = Form.useForm();
     const columns: TableColumnsType<any> | undefined = [
-        { title: "No.", dataIndex: "id", key: "id" },
+        { title: "No.", dataIndex: "nomor_urut", key: "nomor_urut" },
         {
             title: "Nama Komoditas",
             dataIndex: "nama_komoditas",

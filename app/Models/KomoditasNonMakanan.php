@@ -9,6 +9,7 @@ class KomoditasNonMakanan extends Model
 {
     use HasFactory;
     protected $table = 'komoditas_non_makanan';
+    public $timestamps = false;
     protected $fillable = [
         'nama_komoditas'
     ];
