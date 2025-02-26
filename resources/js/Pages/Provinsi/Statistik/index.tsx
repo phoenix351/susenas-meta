@@ -1,41 +1,24 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { KomoditasSummary } from "@/types";
 import {
-    ArrowDownOutlined,
-    ArrowUpOutlined,
     LineChartOutlined,
     OrderedListOutlined,
-    ShopOutlined,
-    ShoppingOutlined,
+    PercentageOutlined,
     SyncOutlined,
 } from "@ant-design/icons";
-import {
-    Button,
-    Card,
-    Col,
-    Divider,
-    Form,
-    message,
-    Row,
-    Select,
-    Skeleton,
-    Space,
-    Statistic,
-} from "antd";
+import { Button, Divider, Form, message, Select, Space } from "antd";
 import axios from "axios";
-import React, {
+import {
     JSXElementConstructor,
     ReactElement,
     ReactPortal,
     useEffect,
     useState,
 } from "react";
-import KomoditasSummaryTable from "./SummaryTable";
-import CardSkeleton from "./CardSkeleton";
-import Search from "antd/es/transfer/search";
 import Title from "antd/es/typography/Title";
-import { router } from "@inertiajs/react";
 import LorenzCurve from "./LorenzCurve";
+import PengeluaranTable from "./PengeluaranTable";
+import Persentil from "./Persentil";
 
 interface KabkotSummary {
     dok_clean: number;
@@ -53,17 +36,17 @@ interface KabkotSummary {
 
 const index = () => {
     const [daftarKabkot, setDaftarKabkot] = useState([]);
-    const [kabkotSummary, setKabkotSummary] = useState<KabkotSummary | null>(
-        null
-    );
+
     const [pengeluaranPerkapita, setPengeluaranPerkapita] = useState([]);
-    const [komoditasSummaries, setKomoditasSummaries] = useState<
-        KomoditasSummary[]
-    >([]);
-    const [keyword, setKeyword] = useState<string>("");
+    const [dataRuta, setDataRuta] = useState([]);
 
     const [messageApi, contextHolder] = message.useMessage();
+
     const [loadingData, setLoadingData] = useState<boolean>(false);
+    const [viewType, setViewType] = useState<"persentil" | "lorenz" | "data">(
+        "lorenz"
+    );
+
     async function getKabkot() {
         try {
             const { data } = await axios.get(route("api.wilayah.kabkot"));
@@ -89,12 +72,15 @@ const index = () => {
                 type: "loading",
                 key: "show-summary",
             });
-            const response = await axios.get(route("api.provinsi.statistik.fetch",{kode_kabkot}));
-            
+            const response = await axios.get(
+                route("api.provinsi.statistik.pengeluaran_perkapita", {
+                    kode_kabkot,
+                })
+            );
 
-            
-            
             setPengeluaranPerkapita(response.data.pengeluaran_perkapita);
+            setDataRuta(response.data.data_ruta);
+
             messageApi.open({
                 content: "selesai memuat data.",
                 type: "info",
@@ -143,6 +129,7 @@ const index = () => {
             });
         }
     }
+
     return (
         <div>
             {contextHolder}
@@ -178,18 +165,37 @@ const index = () => {
 
             <Space
                 direction="horizontal"
-                style={{  marginTop: 20, justifyContent:"end",display:"flex" }}
+                style={{
+                    marginTop: 20,
+                    justifyContent: "end",
+                    display: "flex",
+                }}
             >
-                <Button>
+                <Button onClick={() => setViewType("lorenz")}>
                     <LineChartOutlined />
                 </Button>
-                <Button>
+                <Button onClick={() => setViewType("persentil")}>
+                    <PercentageOutlined />
+                </Button>
+
+                <Button onClick={() => setViewType("data")}>
                     <OrderedListOutlined />
                 </Button>
             </Space>
-            
-                <LorenzCurve pengeluaranPerkapita={pengeluaranPerkapita}/>
-            
+
+            {viewType == "data" && (
+                <PengeluaranTable
+                    dataSource={dataRuta}
+                    loadingData={loadingData}
+                />
+            )}
+
+            {viewType == "lorenz" && (
+                <LorenzCurve pengeluaranPerkapita={pengeluaranPerkapita} />
+            )}
+            {viewType == "persentil" && (
+                <Persentil pengeluaranPerkapita={pengeluaranPerkapita} />
+            )}
         </div>
     );
 };

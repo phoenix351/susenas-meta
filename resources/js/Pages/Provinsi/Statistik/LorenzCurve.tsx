@@ -1,4 +1,3 @@
-import React from "react";
 import {
     LineChart,
     Line,
@@ -15,9 +14,6 @@ const LorenzCurve = ({
 }: {
     pengeluaranPerkapita: number[];
 }) => {
-    // console.log(typeof pengeluaranPerkapita);
-    console.log({ pengeluaranPerkapita });
-
     const sortedData = pengeluaranPerkapita.sort((a, b) => a - b);
 
     // Calculate cumulative shares
@@ -27,19 +23,16 @@ const LorenzCurve = ({
     const data = sortedData.map((value, index) => {
         cumulativeIncome += value;
         let population = ((index + 1) / sortedData.length) * 100;
-       
+
         return {
-            population: Math.round(population*100)/100,
-            equality: Math.round(population*100)/100,
-            income: Math.round(cumulativeIncome*100 / totalIncome) ,
+            population: Math.round(population * 100) / 100,
+            equality: Math.round(population * 100) / 100,
+            income: Math.round((cumulativeIncome * 100) / totalIncome),
         };
     });
 
     // Add the origin point (0,0)
-    data.unshift({ population: 0, income: 0, equality:0 });
-
-    // Add Line of Equality
-    // console.log({ data });
+    data.unshift({ population: 0, income: 0, equality: 0 });
 
     return (
         <>
@@ -69,6 +62,7 @@ const LorenzCurve = ({
                         data={data}
                         stroke="#8884d8"
                         name="Lorenz Curve"
+                        dot={false}
                     />
                     <Line
                         type="monotone"
