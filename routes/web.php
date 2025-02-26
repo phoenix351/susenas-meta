@@ -3,9 +3,7 @@
 use App\Http\Controllers\AnggotaRutaController;
 use App\Http\Controllers\CalculateController;
 use App\Http\Controllers\KomoditasController;
-use App\Http\Controllers\KomoditasNonMakananController;
-use App\Http\Controllers\KonsumsiArtController;
-use App\Http\Controllers\KonsumsiNonMakananController;
+
 use App\Http\Controllers\MakController;
 use App\Http\Controllers\MasterWilayahController;
 use App\Http\Controllers\MonitoringController;
@@ -15,12 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\RangeHargaController;
 use App\Http\Controllers\StatistikController;
-use App\Models\Konsumsi;
-use App\Models\MasterWilayah;
-
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 /*
@@ -56,15 +49,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    //route master barang
-    //route master jabatan
-
-    //route master ruangan
-    route::get('/api/users', function () {
-        $users = User::select('id', 'nama_lengkap')->get();
-        return response()->json([$users]);
-    })->name('users.get');
-    // route api for jabatan
 
 
     route::get('/api/wilayah/kabkot', [MasterWilayahController::class, 'fetch_kabkot'])->name('api.wilayah.kabkot');
@@ -84,58 +68,18 @@ Route::middleware('auth')->group(function () {
     route::delete('/entri/mak/delete/{id_ruta}', [MakController::class, 'delete'])->name('entri.mak.delete');
 
     route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');
-    route::get('/api/entri/mak', [MakController::class, 'fetch'])->name('api.entri.mak');
-    route::get('/api/konsumsi/art/{id_art}', [KonsumsiArtController::class, 'fetch'])->name('api.konsumsi.art.fetch');
-
-    route::get('/api/mak/komoditas/list', [KomoditasController::class, 'list_komoditas'])->name('api.mak.komoditas.list');
-    route::get('/api/mak/komoditas/kalori/{id}', [KomoditasController::class, 'fetch_kalori'])->name('api.mak.komoditas.kalori.fetch');
-    route::get('/api/mak/calculate_qc/{id_ruta}', [MakController::class, 'calculate_qc'])->name('api.mak.calculate_qc');
-
-    route::get('/api/non_mak/komoditas/list', [KomoditasNonMakananController::class, 'list'])->name('api.non_mak.komoditas.list');
-    route::get('/api/non_mak/komoditas/fetch/{id_ruta}', [KomoditasNonMakananController::class, 'fetch'])->name('api.non_mak.konsumsi.fetch');
-    route::post('/api/non_mak/konsumsi', [KonsumsiNonMakananController::class, 'store'])->name('api.non_mak.konsumsi.store');
-
-    route::get('/api/mak/revalidasi/{id_ruta}', [MakController::class, 'revalidasi'])->name('api.mak.revalidasi');
-
-
-    route::get('/api/entri/kecamatan', function (Request $request) {
-        $kabkot = $request->query('kodeKabkot');
-        // $semester = $request->query('semester');
-
-        $data = MasterWilayah::where('kode_kabkot', $kabkot)->distinct()->get(['kode_kec', 'kec']);
-        return response()->json($data, 200);
-    })->name('api.entri.kec');
-    route::get('/api/entri/desa', [MasterWilayahController::class, 'fetch_desa'])->name('api.entri.desa');
-    route::get('/api/entri/bs4', [MasterWilayahController::class, 'fetch_bs4'])->name('api.entri.bs4');
-    route::get('/api/entri/nks', [MasterWilayahController::class, 'fetch_nks'])->name('api.entri.nks');
-
+    
     route::get('/entri/mak/{id}', [MakController::class, 'edit'])->name('entri.mak.edit');
-
-
-    route::post('api/cek-nomor-sampel', [MakController::class, 'cek_nomor_sampel'])->name('api.cekNomorSampel');
-
-
+      
     // route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
     route::get('/progress', [MonitoringController::class, 'index'])->name('progress');
     route::get('/dashboard', [MonitoringController::class, 'dashboard'])->name('dashboard');
     route::get('/progress/update', [MonitoringController::class, 'update'])->name('progress.update');
     route::get('/dashboard/update', [MonitoringController::class, 'update_dashboard'])->name('dashboard.update');
-    route::get('/api/dashboard/queue-status/{jobId}', [MonitoringController::class, 'check_job_status'])->name('api.dashboard.queue-status');
-
-    route::get('/api/monitoring/rekap-kabkot/{kode_kabkot}', [MonitoringController::class, 'get_rekap_kabkot'])->name('api.monitoring.rekap_kabkot');
-    route::get('/api/monitoring/rekap-komoditas/{kode_kabkot}', [MonitoringController::class, 'get_rekap_komoditas'])->name('api.monitoring.rekap_komoditas');
-    route::get('/api/monitoring/rekap-nks', [MonitoringController::class, 'get_rekap_nks'])->name('api.monitoring.rekap_nks');
-    route::get('/api/monitoring/wilayah/{tipe}/{kode}', [MonitoringController::class, 'get_rekap_wilayah'])->name('api.monitoring.wilayah');
-    route::get('/api/monitoring/rekap-user', [MonitoringController::class, 'get_rekap_user'])->name('api.monitoring.rekap_user');
 
     route::get('/kelola-entri', [MakController::class, 'kelola_entri'])->name('kelola-entri');
     route::get('/periksa', [PeriksaController::class, 'index'])->name('periksa');
     route::get('/unduh-raw', [MakController::class, 'unduh_raw'])->name('unduh_raw');
-
-
-
-
-
 
     route::get('/', function () {
         return to_route('entri');
@@ -147,8 +91,6 @@ Route::middleware('auth')->group(function () {
     route::post('/range-harga/upload', [RangeHargaController::class, 'upload'])->name('range_harga.upload');
     route::put('/range-harga/update', [RangeHargaController::class, 'update'])->name('range_harga.update');
 
-
-
     //route komoditas
     route::get('/komoditas', [KomoditasController::class, 'index'])->name('komoditas.index');
     route::post('/komoditas', [KomoditasController::class, 'store'])->name('komoditas.store');
@@ -157,10 +99,9 @@ Route::middleware('auth')->group(function () {
     route::get('/komoditas/sort', [KomoditasController::class, 'sort'])->name('komoditas.sort');
 
     route::get('/panduan', [PanduanController::class, 'index'])->name('panduan.index');
-
-    Route::get('/editable', function () {
-        return Inertia::render('Editable');
-    });
+    
+    route::get('/calculate/export/{table_name}', [CalculateController::class, 'export'])->name('calculate.export');
+  
 });
 
 require __DIR__ . '/auth.php';

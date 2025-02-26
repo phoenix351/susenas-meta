@@ -4,7 +4,17 @@ import { useEffect, useState } from "react";
 import { Head } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
-import { Button, Table, Space, Typography, message, Progress } from "antd";
+import {
+    Button,
+    Table,
+    Space,
+    Typography,
+    message,
+    Progress,
+    Form,
+    Checkbox,
+    Select,
+} from "antd";
 // import { Table } from "ant-table-extensions";
 import { ExportOutlined, SyncOutlined } from "@ant-design/icons";
 import { CompareFn } from "antd/es/table/interface";
@@ -13,49 +23,7 @@ import { createNumberSorter } from "@/Functions/ColumnSorter";
 import axios from "axios";
 const { Title } = Typography;
 
-const handleExport = (columns: any[], tableData: any[]) => {
-    // Convert Ant Design table data to CSV format
-    // console.log({ tableData });
-
-    const csvContent =
-        columns.map((column) => column.title).join(";") +
-        "\n" +
-        tableData
-            .map((row) =>
-                columns
-                    .map((column) => {
-                        if (column.render) {
-                            // Use custom render function if present
-                            const renderedValue = column.render(
-                                row[column.dataIndex],
-                                row
-                            );
-                            const value =
-                                renderedValue && renderedValue.props
-                                    ? renderedValue.props.children
-                                    : renderedValue;
-                            return value;
-                        } else {
-                            return row[column.dataIndex];
-                        }
-                    })
-                    .join(";")
-            )
-            .join("\n");
-    // console.log({ csvContent });
-    // return;
-
-    // Create a blob and trigger download
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "export.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
-
-const Periksa = ({
+const index = ({
     data,
 }: PageProps & {
     data: any;
@@ -63,6 +31,18 @@ const Periksa = ({
     const [current, setCurrent] = useState(0);
     const [updateLoading, setUpdateLoading] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
+
+    const [exportForm] = Form.useForm();
+    const daftarTabel = [
+        "users",
+        "komoditas",
+        "komoditas_non_makanan",
+        "konsumsi",
+        "konsumsi_art",
+        "konsumsi_non_makanan",
+        "range_harga_komoditas",
+        "vsusenas_mak",
+    ];
 
     const calculateQc = async (id_rutas: string[]) => {
         try {
@@ -76,48 +56,17 @@ const Periksa = ({
 
             // Define the batch size and concurrency limit
             const batchSize = 5;
-            const concurrencyLimit = 5;
 
             // Helper function to process a batch of requests
-            const processBatch = async (batch: string[]) => {
-                const batchRequests = batch.map(async (id_ruta) => {
-                    const url = route("api.mak.calculate_qc", {
-                        id_ruta: id_ruta,
-                    });
-                    // const response = await axios.get(url);
-                    // return response.data;
-                    try {
-                        const response = await axios.get(url);
-                        return response.data;
-                    } catch (error) {
-                        console.error(
-                            `Error processing id_ruta ${id_ruta}:`,
-                            error
-                        );
-                        return null; // Return null or some other value to mark the error
-                    }
-                });
-                return await Promise.all(batchRequests);
-            };
 
             // Process requests in batches with concurrency control
             for (let i = 0; i < id_rutas.length; i += batchSize) {
-                const batch = id_rutas.slice(i, i + batchSize);
-                const results = await Promise.all(
-                    Array.from({ length: concurrencyLimit }, (_, index) => {
-                        const startIdx = index * (batchSize / concurrencyLimit);
-                        const endIdx =
-                            (index + 1) * (batchSize / concurrencyLimit);
-                        return processBatch(batch.slice(startIdx, endIdx));
-                    })
-                );
-
                 // Handle results if needed
                 setCurrent(i);
                 messageApi.open({
-                    content: `sedang menghitung blok QC ruta ${i} dari ${data.length} (${
-                        Math.round(((i * 100) / data.length) * 100) / 100
-                    } %)`,
+                    content: `sedang menghitung blok QC ruta ${i} dari ${
+                        data.length
+                    } (${Math.round(((i * 100) / data.length) * 100) / 100} %)`,
                     duration: 0,
                     type: "loading",
                     icon: "",
@@ -155,48 +104,17 @@ const Periksa = ({
 
             // Define the batch size and concurrency limit
             const batchSize = 5;
-            const concurrencyLimit = 5;
 
             // Helper function to process a batch of requests
-            const processBatch = async (batch: string[]) => {
-                const batchRequests = batch.map(async (id_ruta) => {
-                    const url = route("api.mak.revalidasi", {
-                        id_ruta: id_ruta,
-                    });
-                    // const response = await axios.get(url);
-                    // return response.data;
-                    try {
-                        const response = await axios.get(url);
-                        return response.data;
-                    } catch (error) {
-                        console.error(
-                            `Error processing id_ruta ${id_ruta}:`,
-                            error
-                        );
-                        return null; // Return null or some other value to mark the error
-                    }
-                });
-                return await Promise.all(batchRequests);
-            };
 
             // Process requests in batches with concurrency control
             for (let i = 0; i < id_rutas.length; i += batchSize) {
-                const batch = id_rutas.slice(i, i + batchSize);
-                const results = await Promise.all(
-                    Array.from({ length: concurrencyLimit }, (_, index) => {
-                        const startIdx = index * (batchSize / concurrencyLimit);
-                        const endIdx =
-                            (index + 1) * (batchSize / concurrencyLimit);
-                        return processBatch(batch.slice(startIdx, endIdx));
-                    })
-                );
-
                 // Handle results if needed
                 setCurrent(i);
                 messageApi.open({
-                    content: `sedang revalidasi ruta ${i} dari ${data.length} (${
-                        Math.round(((i * 100) / data.length) * 100) / 100
-                    } %)`,
+                    content: `sedang revalidasi ruta ${i} dari ${
+                        data.length
+                    } (${Math.round(((i * 100) / data.length) * 100) / 100} %)`,
 
                     duration: 0,
                     type: "loading",
@@ -206,7 +124,6 @@ const Periksa = ({
                 // break;
             }
         } catch (error) {
-            console.log("Something went wrong", { error });
             messageApi.open({
                 content: `terjadi kesalahan pada ruta ${data.length} dari ${data.length}`,
                 duration: 1,
@@ -223,18 +140,49 @@ const Periksa = ({
             });
         }
     };
-    const handleUpdateMonitoring = async () => {
+    async function handleExport(values: any) {
+        let error_table = "";
         try {
-            setUpdateLoading(true);
-            const response = await axios.post(route("monitoring.update"));
-
-            // const response = await axios.post(route('monitoring.update'));
+            const table_names = values.table_names;
+            if (table_names.length > 0) {
+                table_names.forEach(async (table_name: string) => {
+                    error_table = table_name;
+                    messageApi.open({
+                        content: `sedang export data ${table_name} dari ${table_names.length}`,
+                        duration: 0,
+                        type: "loading",
+                        key: "export",
+                    });
+                    // make request to stream current table_name
+                    // Make request to stream current table_name
+                    const downloadUrl = route("calculate.export", {
+                        table_name,
+                    });
+                    const iframe = document.getElementById(
+                        "csv-download"
+                    ) as HTMLIFrameElement;
+                    if (iframe) {
+                        iframe.src = downloadUrl;
+                    }
+                });
+            }
         } catch (error) {
-            console.log("Something went wrong", { error });
+            messageApi.open({
+                content: `terjadi kesalahan ketika export tabel ${error_table}`,
+                duration: 1,
+                type: "error",
+                key: "export",
+            });
         } finally {
             setUpdateLoading(false);
+            messageApi.open({
+                content: `selesai export table ${values.table_names.length} dari ${values.table_names.length}`,
+                duration: 1,
+                type: "success",
+                key: "export",
+            });
         }
-    };
+    }
     useEffect(() => {
         // console.log({ data });
         // Assuming data is an array of id_rutas
@@ -245,6 +193,7 @@ const Periksa = ({
         <>
             {contextHolder}
             <Head title="Periksa" />
+            <iframe id="csv-download" style={{ display: "none" }}></iframe>
 
             {/* <Title level={2}>{current}</Title> */}
             <Space
@@ -290,12 +239,51 @@ const Periksa = ({
                     padding: "10px 15px",
                 }}
                 direction="vertical"
-            ></Space>
+            >
+                <h1>Export Tabel</h1>
+                <Form onFinish={handleExport} form={exportForm}>
+                    <Form.Item name={"table_names"}>
+                        <Select
+                            mode="tags"
+                            style={{ width: "100%" }}
+                            tokenSeparators={[","]}
+                            options={daftarTabel.map((tabel) => ({
+                                label: tabel,
+                                value: tabel,
+                            }))}
+                        />
+                    </Form.Item>
+                    <Space>
+                        <Button
+                            type="dashed"
+                            onClick={() => {
+                                exportForm.setFieldValue("table_names", []);
+                            }}
+                        >
+                            clear
+                        </Button>
+                        <Button
+                            type="default"
+                            onClick={() => {
+                                exportForm.setFieldValue(
+                                    "table_names",
+                                    daftarTabel
+                                );
+                            }}
+                        >
+                            select all
+                        </Button>
+                        <Button type="primary" htmlType="submit">
+                            export
+                        </Button>
+                    </Space>
+                </Form>
+            </Space>
         </>
     );
 };
 
-Periksa.layout = (
+index.layout = (
     page: ReactElement<any, JSXElementConstructor<any>> | ReactPortal
 ) => (
     <AuthenticatedLayout
@@ -305,4 +293,4 @@ Periksa.layout = (
         children={page}
     ></AuthenticatedLayout>
 );
-export default Periksa;
+export default index;

@@ -56,4 +56,12 @@ class MasterWilayahController extends Controller
         $user = auth()->user();
         return response()->json(['data' => $data, 'kode_kabkot' => $user->kode_kabkot]);
     }
+    public function fetch_kecamatan(Request $request)
+    {
+        $kabkot = $request->query('kodeKabkot');
+        // $semester = $request->query('semester');
+
+        $data = MasterWilayah::where('kode_kabkot', $kabkot)->distinct()->get(['kode_kec', 'kec']);
+        return response()->json($data, 200);
+    }
 }
