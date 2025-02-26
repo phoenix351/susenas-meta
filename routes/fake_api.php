@@ -23,9 +23,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return response()->json();
-});
+
 Route::middleware('auth')->group(function () {
     route::get('/api/users',[RegisteredUserController::class,"fetch_users"])->name('users.get');
     route::get('/api/entri/desa', [MasterWilayahController::class, 'fetch_desa'])->name('api.entri.desa');
