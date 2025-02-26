@@ -24,19 +24,19 @@ class RangeHargaSeeder extends Seeder
         $rows = array_map('str_getcsv', $lines);
         $headers = array_shift($rows);
         // dd($lines);
+        $daftar_range_harga = [];
         foreach ($rows as $index => $row) {
             if ($index == 0) {
                 continue;
             }
-            $range_harga = new RangeHarga(
+            $daftar_range_harga[] =
                 [
                     'kode_kabkot' => $row[0],
                     'id_komoditas' => $row[1],
                     'min' => $row[2],
                     'max' => $row[3],
-                ]
-            );
-            $range_harga->save();
+                ];
         }
+        RangeHarga::upsert($daftar_range_harga, uniqueBy: ['kode_kabkot',"id_komoditas"], update: ['min','max']);
     }
 }
