@@ -143,7 +143,7 @@ const index = ({
     async function handleExport(values: any) {
         let error_table = "";
         try {
-            const table_names = values.table_names;
+            const table_names = [values.table_names];
             if (table_names.length > 0) {
                 table_names.forEach(async (table_name: string) => {
                     error_table = table_name;
@@ -244,9 +244,9 @@ const index = ({
                 <Form onFinish={handleExport} form={exportForm}>
                     <Form.Item name={"table_names"}>
                         <Select
-                            mode="tags"
+                            // mode="tags"
                             style={{ width: "100%" }}
-                            tokenSeparators={[","]}
+                            // tokenSeparators={[","]}
                             options={daftarTabel.map((tabel) => ({
                                 label: tabel,
                                 value: tabel,
