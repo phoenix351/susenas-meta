@@ -98,13 +98,13 @@ class MakController extends Controller
     {
         if ($id_ruta == '-1') {
 
-            $daftar_ruta = SusenasMak::with(["user","region"])
-            ->where('kode_kabkot', $kode_kabkot)
-            ->where('nks', $nks)
-            // ->where('semester', $semester)
-            ->get();
+            // $daftar_ruta = SusenasMak::with(["user","region"])
+            // ->where('kode_kabkot', $kode_kabkot)
+            // ->where('nks', $nks)
+            // // ->where('semester', $semester)
+            // ->get();
             // dd([$daftar_ruta,$kode_kabkot,$nks,]);
-            return $daftar_ruta;
+            // return $daftar_ruta;
             return SusenasMak::where('vsusenas_mak.kode_kabkot', $kode_kabkot)->where('vsusenas_mak.nks', $nks)->where('vsusenas_mak.semester', $semester)
                 ->join('master_wilayah', function ($join) {
                     $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
