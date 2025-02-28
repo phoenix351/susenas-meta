@@ -4,7 +4,8 @@ const cekNomorSampel = async (
     value: any,
     currentRecordId: any,
     kode_kabkot: any,
-    nks: any
+    nks: any,
+    semester : number |string
 ) => {
     try {
         const response = await axios.post(route("api.cekNomorSampel"), {
@@ -12,6 +13,7 @@ const cekNomorSampel = async (
             currentRecordId,
             kode_kabkot,
             nks,
+            semester
         });
 
         return !response.data.exists;

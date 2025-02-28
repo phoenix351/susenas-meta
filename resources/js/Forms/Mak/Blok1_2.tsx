@@ -242,8 +242,8 @@ const Blok1_2: React.FC<{
         debouncedSetDaftarArt(value);
     };
     const debounceCekNomorSampel = _debounce(
-        async (value, currentRecordId, kode_kabkot, nks) =>
-            cekNomorSampel(value, currentRecordId, kode_kabkot, nks),
+        async (value, currentRecordId, kode_kabkot, nks,semester) =>
+            cekNomorSampel(value, currentRecordId, kode_kabkot, nks,semester),
         400
     );
 
@@ -256,7 +256,8 @@ const Blok1_2: React.FC<{
             value,
             currentRecordId,
             kode_kabkot,
-            nks
+            nks, 
+            form.getFieldValue("semester")
         );
         // console.log({ isUnique, value });
 

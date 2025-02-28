@@ -58,6 +58,7 @@ class MakController extends Controller
         $value = $request->input('value');
         $kode_kabkot = $request->input('kode_kabkot');
         $nks = $request->input('nks');
+        $semester = $request->input('semester');
         $id = $request->input('currentRecordId');
         // dd($id);
 
@@ -65,6 +66,7 @@ class MakController extends Controller
             ->where('id', '<>', $id)
             ->where('kode_kabkot', $kode_kabkot)
             ->where('nks', $nks)
+            ->where("semester",$semester)
             ->exists();
         // dd($exists);
 
@@ -95,6 +97,14 @@ class MakController extends Controller
     private function get_ruta($kode_kabkot, $nks, $semester = '1', $id_ruta = '-1')
     {
         if ($id_ruta == '-1') {
+
+            $daftar_ruta = SusenasMak::with(["user","region"])
+            ->where('kode_kabkot', $kode_kabkot)
+            ->where('nks', $nks)
+            // ->where('semester', $semester)
+            ->get();
+            // dd([$daftar_ruta,$kode_kabkot,$nks,]);
+            return $daftar_ruta;
             return SusenasMak::where('vsusenas_mak.kode_kabkot', $kode_kabkot)->where('vsusenas_mak.nks', $nks)->where('vsusenas_mak.semester', $semester)
                 ->join('master_wilayah', function ($join) {
                     $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
