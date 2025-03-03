@@ -10,7 +10,6 @@ use App\Models\Konsumsi;
 use App\Models\KonsumsiArt;
 use App\Models\MasterWilayah;
 use App\Models\SusenasMak;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
@@ -18,7 +17,6 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
-use function PHPSTORM_META\type;
 
 class MakController extends Controller
 {
