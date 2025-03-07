@@ -1,8 +1,6 @@
-import { KomoditasDataType, KomoditasSummary } from "@/types";
-import { Space, Table } from "antd";
+import { KomoditasSummary } from "@/types";
+import { Table } from "antd";
 import {
-    ColumnProps,
-    ColumnType,
     TablePaginationConfig,
     TableProps,
 } from "antd/es/table";
@@ -11,8 +9,7 @@ import {
     SorterResult,
     TableCurrentDataSource,
 } from "antd/es/table/interface";
-import Search from "antd/es/transfer/search";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 
 type OnChange = NonNullable<TableProps<KomoditasSummary>["onChange"]>;
 
@@ -97,13 +94,15 @@ const GarisKemiskinanTabel = ({
     }
 
     return (
+        <>
         <Table
             style={{ marginTop: 20 }}
             dataSource={dataSource}
             columns={KomoditasColumns}
             onChange={handleChange}
             loading={loadingData}
-        />
+            />
+            </>
     );
 };
 

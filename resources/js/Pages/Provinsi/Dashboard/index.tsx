@@ -56,6 +56,9 @@ const index = () => {
     const [komoditasSummaries, setKomoditasSummaries] = useState<
         KomoditasSummary[]
     >([]);
+    const [filteredData, setFilteredData] = useState<
+        KomoditasSummary[]
+    >([]);
     const [keyword, setKeyword] = useState<string>("");
 
     const [messageApi, contextHolder] = message.useMessage();
@@ -145,6 +148,9 @@ const index = () => {
             });
         }
     }
+
+    
+
     return (
         <div>
             {contextHolder}
@@ -257,7 +263,7 @@ const index = () => {
                 </Col>
             </Row>
             <Space
-                direction="vertical"
+                direction="horizontal"
                 style={{ display: "block", marginTop: 20 }}
             >
                 <Search
@@ -268,6 +274,7 @@ const index = () => {
                     }}
                 />
             </Space>
+
             <KomoditasSummaryTable
                 dataSource={komoditasSummaries.filter((data) => {
                     let nama_kelompok = data.nama_kelompok.toLowerCase();
