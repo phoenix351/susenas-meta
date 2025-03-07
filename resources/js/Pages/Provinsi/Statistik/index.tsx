@@ -19,6 +19,7 @@ import Title from "antd/es/typography/Title";
 import LorenzCurve from "./LorenzCurve";
 import PengeluaranTable from "./PengeluaranTable";
 import Persentil from "./Persentil";
+import GarisKemiskinanTabel from "./GarisKemiskinanTabel";
 
 interface KabkotSummary {
     dok_clean: number;
@@ -39,6 +40,7 @@ const index = () => {
 
     const [pengeluaranPerkapita, setPengeluaranPerkapita] = useState([]);
     const [dataRuta, setDataRuta] = useState([]);
+    const [dataAnggotaRuta, setDataAnggotaRuta] = useState([]);
 
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -80,6 +82,8 @@ const index = () => {
 
             setPengeluaranPerkapita(response.data.pengeluaran_perkapita);
             setDataRuta(response.data.data_ruta);
+            setDataAnggotaRuta(response.data.data_anggota_ruta);
+            // console.log({ response });
 
             messageApi.open({
                 content: "selesai memuat data.",
@@ -184,10 +188,16 @@ const index = () => {
             </Space>
 
             {viewType == "data" && (
-                <PengeluaranTable
-                    dataSource={dataRuta}
-                    loadingData={loadingData}
-                />
+                <>
+                    <PengeluaranTable
+                        dataSource={dataRuta}
+                        loadingData={loadingData}
+                    />
+                    <GarisKemiskinanTabel
+                        dataSource={dataAnggotaRuta}
+                        loadingData={loadingData}
+                    />
+                </>
             )}
 
             {viewType == "lorenz" && (
