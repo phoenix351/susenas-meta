@@ -128,16 +128,22 @@ class SusenasMak extends Model
     // {
     //     return $this->attributesToArray();/
     // }
-    public function region()
+    public function region():BelongsTo
     {
-        return $this->belongsTo(MasterWilayah::class, 'nks', 'nks')
-        ->where("kode_kabkot",$this->kode_kab)
-        ->where("kode_kec",$this->kode_kec)
-        ->where("kode_desa",$this->kode_desa);
+        return $this->belongsTo(MasterWilayah::class, 'nks', 'nks');
+        // ->where("kode_kabkot","master_wilayah.kode_kabkot");
     }
     public function konsumsi_ruta(): HasMany
     {
         return $this->hasMany(Konsumsi::class);
+    }
+    public function anggota_ruta():HasMany
+    {
+        return $this->hasMany(AnggotaRuta::class,"id_ruta");
+    }
+    public function konsumsi_non_makanan(): HasMany
+    {
+        return $this->hasMany(KonsumsiNonMakanan::class,"id_ruta","id");
     }
     public function user():BelongsTo
     {

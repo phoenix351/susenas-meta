@@ -1324,6 +1324,15 @@ class MakController extends Controller
             //code...
             DB::beginTransaction();
             $mak = SusenasMak::where('id', $id_ruta);
+            $mak->konsumsi()->delete();
+            // $mak->konsumsi_art()->delete();
+            $daftar_art = $mak->anggota_ruta();
+            foreach ($daftar_art as  $art) {
+                # code...
+                $art->konsumsi()->delete();
+                $art->delete();
+            }
+            $mak->konsumsi_non_makanan()->delete();            
             $mak->delete();
             DB::commit();
             return response()->json([
