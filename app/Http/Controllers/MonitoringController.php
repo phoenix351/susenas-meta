@@ -579,22 +579,20 @@ class MonitoringController extends Controller
 
     public function update_dashboard()
     {
+        // Disable the execution time limit for this request
+        set_time_limit(0);
+
         $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
         foreach ($daftar_kabkot as $kabkot) {
             # code...
-            
+
             $kode_kabkot = $kabkot->kode;
-          
+
             $this->hitung_summary_kabupaten_kota($kode_kabkot);
             // continue;
         }
         return response()->json([
             "message" => "selesai menghitung summary"
         ], 200);
-    }
-    public function check_job_status($jobId)
-    {
-        $jobExists = DB::table("jobs")->where("id", $jobId)->exists();
-        return response()->json(["status" => $jobExists ? "processing" : "completed"], 200);
     }
 }

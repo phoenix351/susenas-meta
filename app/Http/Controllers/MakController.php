@@ -23,7 +23,7 @@ class MakController extends Controller
     private function eligileToUpdate()
     {
         // dd(App::environment());
-        // return false;
+        return false;
         return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("local"));
     }
     private $wtfDependecies = [
@@ -64,7 +64,7 @@ class MakController extends Controller
             ->where('id', '<>', $id)
             ->where('kode_kabkot', $kode_kabkot)
             ->where('nks', $nks)
-            ->where("semester",$semester)
+            ->where("semester", $semester)
             ->exists();
         // dd($exists);
 
@@ -247,14 +247,14 @@ class MakController extends Controller
             'nks' => $nks
         ]);
     }
-    
+
     public function edit($id)
     {
         $data = $this->get_ruta('00', '00', '1', $id);
 
         $konsumsi_ruta = Konsumsi::where('id_ruta', $id)
             ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
-            ->select('konsumsi.*', 'komoditas.id_kelompok','komoditas.type')
+            ->select('konsumsi.*', 'komoditas.id_kelompok', 'komoditas.type')
             ->get();
         $garis_kemiskinan = Kabkot::where('kode', $data->kode_kabkot)->pluck('garis_kemiskinan');
         $art = AnggotaRuta::where('id_ruta', $id)->get();
@@ -646,7 +646,7 @@ class MakController extends Controller
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
-   
+
     public function revalidasi($id_ruta)
     {
         try {
@@ -792,10 +792,10 @@ class MakController extends Controller
                     ->where('komoditas.type', '<>', 'sub')
                     ->get();
                 foreach ($konsumsi_ruta as $key => $konsumsi) {
-                    if ($konsumsi["type"] == "sub") {
-                        $daftar_warning[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi, "Konsumsi RUTA");
-                        continue;
-                    }
+                    // if ($konsumsi["type"] == "sub") {
+                    //     $daftar_warning[] = $this->createKomoditasError("Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi, "Konsumsi RUTA");
+                    //     continue;
+                    // }
 
                     // Check for consistency between price and volume
                     $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi');
@@ -838,13 +838,13 @@ class MakController extends Controller
 
                         // kesesuaian total 
                     }
-                    if ($nilai_mak == 0) {
-                        $konsumsi = [
-                            'id_komoditas' => 187,
-                            'nama_komoditas' => 'M. MAKANAN DAN MINUMAN JADI [R.188 s.d. R.225]'
-                        ];
-                        $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi, "Konsumsi ART");
-                    }
+                    // if ($nilai_mak == 0) {
+                    //     $konsumsi = [
+                    //         'id_komoditas' => 187,
+                    //         'nama_komoditas' => 'M. MAKANAN DAN MINUMAN JADI [R.188 s.d. R.225]'
+                    //     ];
+                    //     $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi, "Konsumsi ART");
+                    // }
                     $nomor++;
                 }
                 // cek kesesuaian rekap dengan isian
@@ -1103,15 +1103,14 @@ class MakController extends Controller
                 }
             }
         }
-        if($data_mak["blokqc_3"] < $count_konsumsi_non_makanan){
+        if ($data_mak["blokqc_3"] < $count_konsumsi_non_makanan) {
             $error = [
                 'rincian' => "Isian ini harus bernilai sedikitnya sama dengan jumlah item terisi > 0 pada Blok Non Makanan Basket Komoditas ",
                 'variable' => "Pertanyaan Quality Control 5. Jumlah Komoditas Non Makanan [Disalin dari dokumen KP Blok III Rincian 305 ]",
-                "blok"=>"Quality Control",
+                "blok" => "Quality Control",
                 'type' => 'error'
             ];
             $daftar_error[] = $error;
-
         }
         return [
             'daftar_warning' => $daftar_warning,

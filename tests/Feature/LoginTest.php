@@ -20,10 +20,21 @@ class LoginTest extends TestCase
     public function test_user_can_login_with_valid_credentials(): void
     {
         $id = "9e30f90f-b765-4d0a-99c2-c9a27d817c00";
+        // $id = "9e30f90f-9eea-4236-badd-7e5b67730a0f";
         $user = User::find($id);
         $response = $this->postJson('/login?preserveState=1', ["username" => "ponim", "password" => "123"]);
 
         $response->assertStatus(302);
         $this->assertAuthenticatedAs($user);
+    }
+    public function test_user_cant_login_with_invalid_credentials(): void
+    {
+        $id = "9e30f90f-b765-4d0a-99c2-c9a27d817c00";
+        // $id = "9e30f90f-9eea-4236-badd-7e5b67730a0f";
+        $user = User::find($id);
+        $response = $this->postJson('/login?preserveState=1', ["username" => "ponimx", "password" => "123"]);
+
+        $response->assertStatus(422);
+        // $response->assertRedirect('/login');
     }
 }
