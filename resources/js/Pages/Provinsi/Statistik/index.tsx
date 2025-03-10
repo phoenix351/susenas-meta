@@ -72,6 +72,7 @@ const index = () => {
             messageApi.open({
                 content: "memuat data...",
                 type: "loading",
+                duration: 0,
                 key: "show-summary",
             });
             const response = await axios.get(
@@ -82,11 +83,30 @@ const index = () => {
 
             setPengeluaranPerkapita(response.data.pengeluaran_perkapita);
             setDataRuta(response.data.data_ruta);
-            setDataAnggotaRuta(response.data.data_anggota_ruta);
-            // console.log({ response });
+
+            const garis_kemiskinan_sementara =
+                response.data.garis_kemiskinan_sementara;
+            const dataAnggotaRutaTidakMiskin =
+                response.data.data_anggota_ruta.filter((anggotaRuta: any) => {
+                    const apakahDiatasKemiskinan =
+                        anggotaRuta.pengeluaran_perkapita >=
+                        garis_kemiskinan_sementara;
+                    return apakahDiatasKemiskinan;
+                });
+            console.log({
+                dataAnggotaRutaTidakMiskin,
+                garis_kemiskinan_sementara,
+            });
+
+            const sePerLimaPopulasi = Math.ceil(
+                response.data.data_anggota_ruta.length / 5
+            );
+            const dataAnggotaRutaTidakMiskinSeperLimaPopulasi =
+                dataAnggotaRutaTidakMiskin.slice(0, sePerLimaPopulasi);
+            setDataAnggotaRuta(dataAnggotaRutaTidakMiskinSeperLimaPopulasi);
 
             messageApi.open({
-                content: "selesai memuat data.",
+                content: "selesai memuat data!",
                 type: "info",
                 key: "show-summary",
             });
@@ -110,8 +130,7 @@ const index = () => {
         try {
             setLoadingData(true);
             messageApi.open({
-                content:
-                    "sedang sinkron data, anda bisa lanjut eksplorasi data",
+                content: "sedang sinkron data harap sabar...",
                 type: "loading",
                 key: "sync",
                 duration: 0,
@@ -120,7 +139,7 @@ const index = () => {
 
             setLoadingData(false);
             messageApi.open({
-                content: "Update dashboard selesai",
+                content: "sinkron data selesai",
                 type: "success",
                 key: "sync",
                 duration: 2,
@@ -188,7 +207,7 @@ const index = () => {
             </Space>
 
             {viewType == "data" && (
-                <>
+                <Space direction="vertical">
                     <PengeluaranTable
                         dataSource={dataRuta}
                         loadingData={loadingData}
@@ -197,7 +216,7 @@ const index = () => {
                         dataSource={dataAnggotaRuta}
                         loadingData={loadingData}
                     />
-                </>
+                </Space>
             )}
 
             {viewType == "lorenz" && (

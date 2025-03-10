@@ -1,9 +1,7 @@
+import exportTableAsCsv from "@/Functions/ExportTable";
 import { KomoditasSummary } from "@/types";
-import { Table } from "antd";
-import {
-    TablePaginationConfig,
-    TableProps,
-} from "antd/es/table";
+import { Button, Space, Table } from "antd";
+import { TablePaginationConfig, TableProps } from "antd/es/table";
 import {
     FilterValue,
     SorterResult,
@@ -30,7 +28,7 @@ const GarisKemiskinanTabel = ({
         // kode_komoditas
 
         // average harga
-        
+
         {
             title: "Kode Kabkot",
             dataIndex: "kode_kabkot",
@@ -94,15 +92,28 @@ const GarisKemiskinanTabel = ({
     }
 
     return (
-        <>
-        <Table
-            style={{ marginTop: 20 }}
-            dataSource={dataSource}
-            columns={KomoditasColumns}
-            onChange={handleChange}
-            loading={loadingData}
+        <div style={{ marginTop: "20px" }}>
+            <Space style={{ display: "flex", justifyContent: "space-between" }}>
+                <h2>
+                    Daftar Anggota Rumah Tangga Diatas Garis Kemiskinan
+                    Sementara dan 20% dari populasi (clean dan warning)
+                </h2>
+                <Button
+                    onClick={() =>
+                        exportTableAsCsv(KomoditasColumns, dataSource)
+                    }
+                >
+                    Export CSV
+                </Button>
+            </Space>
+            <Table
+                style={{ marginTop: 20 }}
+                dataSource={dataSource}
+                columns={KomoditasColumns}
+                onChange={handleChange}
+                loading={loadingData}
             />
-            </>
+        </div>
     );
 };
 

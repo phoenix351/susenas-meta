@@ -14,6 +14,7 @@ import {
 import Search from "antd/es/transfer/search";
 import React, { useEffect, useState } from "react";
 
+import exportTableAsCsv from "@/Functions/ExportTable";
 type OnChange = NonNullable<TableProps<KomoditasSummary>["onChange"]>;
 
 type GetSingle<T> = T extends (infer U)[] ? U : never;
@@ -75,7 +76,7 @@ const KomoditasSummaryTable = ({
         //                     // .replace(/\./g, "#") // Temporarily replace '.' with '#'
         //                     // .replace(/,/g, ".") // Replace ',' with '.'
         //                     // .replace(/#/g, ",")
-        //                 } 
+        //                 }
         //                     ${record.satuan}`, // Replace '#' with ','
         //         },
         //         // kalori
@@ -102,9 +103,7 @@ const KomoditasSummaryTable = ({
             key: "sum_volume",
             sorter: (a, b) => a.sum_volume - b.sum_volume,
             sortOrder:
-                sortedInfo.columnKey === "sum_volume"
-                    ? sortedInfo.order
-                    : null,
+                sortedInfo.columnKey === "sum_volume" ? sortedInfo.order : null,
             ellipsis: true,
             render: (value: number, record: KomoditasSummary) =>
                 `${
@@ -122,9 +121,7 @@ const KomoditasSummaryTable = ({
             key: "sum_kalori",
             sorter: (a, b) => a.sum_kalori - b.sum_kalori,
             sortOrder:
-                sortedInfo.columnKey === "sum_kalori"
-                    ? sortedInfo.order
-                    : null,
+                sortedInfo.columnKey === "sum_kalori" ? sortedInfo.order : null,
             ellipsis: true,
             render: (value: number) => value.toLocaleString("id-ID"),
             // .replace(/\./g, "#") // Temporarily replace '.' with '#'
@@ -161,33 +158,12 @@ const KomoditasSummaryTable = ({
     ): void {
         setSortedInfo(sorter as Sorts);
     }
-    const handleExport = (columns: any[], tableData: any[]) => {
-        // Convert Ant Design table data to CSV format
-        // console.log({ tableData });
 
-        const csvContent =
-            columns.map((column) => column.title).join(";") +
-            "\n" +
-            tableData
-                .map((row) =>
-                    columns.map((column) => row[column.dataIndex]).join(";")
-                )
-                .join("\n");
-        // console.log({ csvContent });
-        // return;
-
-        // Create a blob and trigger download
-        const blob = new Blob([csvContent], { type: "text/csv" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "export.csv";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
     return (
         <>
-            <Button onClick={() => handleExport(KomoditasColumns, dataSource)}>
+            <Button
+                onClick={() => exportTableAsCsv(KomoditasColumns, dataSource)}
+            >
                 Export CSV
             </Button>
 

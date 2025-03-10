@@ -1,5 +1,6 @@
+import exportTableAsCsv from "@/Functions/ExportTable";
 import { KomoditasDataType, KomoditasSummary } from "@/types";
-import { Space, Table } from "antd";
+import { Button, Space, Table } from "antd";
 import {
     ColumnProps,
     ColumnType,
@@ -88,13 +89,28 @@ const PengeluaranTable = ({
     }
 
     return (
-        <Table
-            style={{ marginTop: 20 }}
-            dataSource={dataSource}
-            columns={KomoditasColumns}
-            onChange={handleChange}
-            loading={loadingData}
-        />
+        <div style={{ marginTop: "20px" }}>
+            <Space style={{ display: "flex", justifyContent: "space-between" }}>
+                <h2>
+                    Daftar Anggota Rumah Tangga Diatas Garis Kemiskinan
+                    Sementara dan 20% dari populasi (clean dan warning)
+                </h2>
+                <Button
+                    onClick={() =>
+                        exportTableAsCsv(KomoditasColumns, dataSource)
+                    }
+                >
+                    Export CSV
+                </Button>
+            </Space>
+            <Table
+                style={{ marginTop: 20 }}
+                dataSource={dataSource}
+                columns={KomoditasColumns}
+                onChange={handleChange}
+                loading={loadingData}
+            />
+        </div>
     );
 };
 
