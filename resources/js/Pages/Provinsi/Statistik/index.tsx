@@ -41,6 +41,7 @@ const index = () => {
     const [pengeluaranPerkapita, setPengeluaranPerkapita] = useState([]);
     const [dataRuta, setDataRuta] = useState([]);
     const [dataAnggotaRuta, setDataAnggotaRuta] = useState([]);
+    const [garisKemiskinanSementara, setGarisKemiskinanSementara] = useState(0);
 
     const [messageApi, contextHolder] = message.useMessage();
 
@@ -93,10 +94,7 @@ const index = () => {
                         garis_kemiskinan_sementara;
                     return apakahDiatasKemiskinan;
                 });
-            console.log({
-                dataAnggotaRutaTidakMiskin,
-                garis_kemiskinan_sementara,
-            });
+            setGarisKemiskinanSementara(garis_kemiskinan_sementara);
 
             const sePerLimaPopulasi = Math.ceil(
                 response.data.data_anggota_ruta.length / 5
@@ -211,6 +209,7 @@ const index = () => {
                     <PengeluaranTable
                         dataSource={dataRuta}
                         loadingData={loadingData}
+                        garisKemiskinanSementara={garisKemiskinanSementara}
                     />
                     <GarisKemiskinanTabel
                         dataSource={dataAnggotaRuta}

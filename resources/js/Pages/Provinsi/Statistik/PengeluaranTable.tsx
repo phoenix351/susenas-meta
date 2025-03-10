@@ -23,9 +23,11 @@ type Sorts = GetSingle<Parameters<OnChange>[2]>;
 const PengeluaranTable = ({
     dataSource,
     loadingData,
+    garisKemiskinanSementara,
 }: {
     dataSource: KomoditasSummary[];
     loadingData: boolean;
+    garisKemiskinanSementara: number;
 }) => {
     const [sortedInfo, setSortedInfo] = useState<Sorts>({});
     const [keyword, setKeyword] = useState<string>("");
@@ -76,6 +78,16 @@ const PengeluaranTable = ({
             render: (value: number, record) =>
                 `Rp ${value.toLocaleString("id-ID")}`,
         },
+        {
+            title: "Flag Kemiskinan",
+            dataIndex: "flag_kemiskinan",
+            key: "flag_kemiskinan",
+
+            render: (value: number, record) =>
+                record.pengeluaran_perkapita < garisKemiskinanSementara
+                    ? "miskin"
+                    : "tidak miskin",
+        },
     ];
     function handleChange(
         pagination: TablePaginationConfig,
@@ -91,10 +103,7 @@ const PengeluaranTable = ({
     return (
         <div style={{ marginTop: "20px" }}>
             <Space style={{ display: "flex", justifyContent: "space-between" }}>
-                <h2>
-                    Daftar Anggota Rumah Tangga Diatas Garis Kemiskinan
-                    Sementara dan 20% dari populasi (clean dan warning)
-                </h2>
+                <h2>Daftar Rumah Tangga kondisi clean dan warning</h2>
                 <Button
                     onClick={() =>
                         exportTableAsCsv(KomoditasColumns, dataSource)

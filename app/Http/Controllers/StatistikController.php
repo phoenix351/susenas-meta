@@ -27,18 +27,21 @@ class StatistikController extends Controller
             $data_ruta = SusenasMak::select("id", "wtf_1 as jumlah_art", "blokqc_5 as pengeluaran_perkapita", "kode_kabkot", "nks", "r109 as nomor_sampel", "r110 as nama_krt")
                 ->whereIn("status_dok", ["clean", "warning"])
                 ->where("r203", "1")
+                ->where("blokqc_5", ">", 0)
                 ->orderBy("blokqc_5", "asc")
                 ->get();
         } else {
             $daftar_pengeluaran_perkapita = SusenasMak::where("kode_kabkot", $kode_kabkot)
                 ->whereIn("status_dok", ["clean", "warning"])
                 ->where("r203", "1")
+                ->where("blokqc_5", ">", 0)
                 ->orderBy("blokqc_5", "asc")
                 ->pluck("blokqc_5");
             $data_ruta = SusenasMak::select("id", "wtf_1 as jumlah_art", "blokqc_5 as pengeluaran_perkapita", "kode_kabkot", "nks", "r109 as nomor_sampel", "r110 as nama_krt")
                 ->where("kode_kabkot", $kode_kabkot)
                 ->whereIn("status_dok", ["clean", "warning"])
                 ->where("r203", "1")
+                ->where("blokqc_5", ">", 0)
                 ->orderBy("blokqc_5", "asc")
                 ->get();
         }
