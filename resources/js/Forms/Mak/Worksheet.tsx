@@ -92,104 +92,44 @@ const daftarRincian = [
     {
         id: 4,
         nomor: 4,
-        rincian:
-            "Apakah ART pernah mendapat Program Makan Siang Gratis? (R618)",
-        type: "multi",
-        dependencies: ["wtf_3"],
+        rincian: "Jumlah ART Penerima Program MBG  (Blok XI.A Rincian 1106=1)",
+        type: "number",
+
         rules: {
-            ruleName: "required if",
+            ruleName: "less equal",
             message:
-                "Isian ini diisi apabila Jumlah ART Bersekolah lebih dari 0",
+                "Jumlah ART yang penerima Program MBG tidak bisa melebihi jumlah ART yang bersekolah",
             status: "error",
             dependentName: "wtf_3",
-            dependentValue: 1,
         },
-        options: [
-            { label: "Ya, Program MBG", value: 1 },
-            { label: "Ya, Program selain MBG", value: 2 },
-            { label: "tidak mendapatkan", value: 3 },
-        ],
-        children: [
-            {
-                id: 9,
-                nomor: 9,
-                rincian:
-                    "Menu Makan Siang Gratis yang paling disukai RT? (Blok Catatan)",
-                type: "multi",
-                dependentValues: [1],
-                options: [
-                    { label: "A", value: 1 },
-                    { label: "B", value: 2 },
-                    { label: "C", value: 3 },
-                    { label: "D", value: 4 },
-                    { label: "E", value: 5 },
-                    { label: "F", value: 6 },
-                    { label: "G", value: 7 },
-                ],
-            },
-        ],
     },
+
     {
         id: 5,
         nomor: 5,
-        rincian: (
-            <span>
-                Luas Lantai Bangunan Utama (m<sup>2</sup>) (R1604)
-            </span>
-        ),
-        type: "number",
+        rincian:
+            "Apakah tercatat sebagai penerima PKH? (Blok XVII Rincian 1701)",
+        type: "binary",
     },
     {
         id: 6,
         nomor: 6,
-        rincian: "Sumber air minum (R1610)",
-        type: "multi",
-        options: [
-            { label: "Air kemasan bermerk/isi ulang", value: 1 },
-            { label: "Leding", value: 2 },
-            { label: "Sumur bor/pompa/mata air", value: 3 },
-            { label: "Air sungai/danau/kolam/air hujan/lainnya", value: 4 },
-        ],
+        rincian:
+            "Apakah tercatat sebagai penerima Program BPNT/Program Sembako?  (Blok XVII Rincian 1703)",
+        type: "binary",
     },
     {
         id: 7,
         nomor: 7,
-        rincian: "Sumber air mandi/cuci/dll (R1614A)",
-        type: "multi",
-        options: [
-            { label: "Air kemasan bermerk/isi ulang", value: 1 },
-            { label: "Leding", value: 2 },
-            { label: "Sumur bor/pompa/mata air", value: 3 },
-            { label: "Air sungai/danau/kolam/air hujan/lainnya", value: 4 },
-        ],
-    },
-
-    {
-        id: 8,
-        nomor: 8,
-        rincian: "Apakah tercatat sebagai menerima PKH? (R2003a)",
+        rincian:
+            "Apakah pernah menerima bantuan dari Pemerintah selain PKH dan BPNT? (Blok XVII Rincian 1704)",
         type: "binary",
-        // children: [
-        //     {
-        //         id: 9,
-        //         nomor: 9,
-        //         rincian: "Penggunaan PKH (R2003b)",
-        //         type: "multi",
-        //         dependentValues: [1],
-        //         options: [
-        //             { label: "Belanja Pangan", value: 1 },
-        //             { label: "Biaya Sekolah", value: 2 },
-        //             { label: "Pembayaran Utang/Kredit", value: 3 },
-        //             { label: "Lainnya", value: 99 },
-        //         ],
-        //     },
-        // ],
     },
 
     {
         id: 26,
         nomor: "10",
-        rincian: "Garis Kemiskinan Maret 2024",
+        rincian: "Garis Kemiskinan Maret 2025",
         type: "rupiah",
     },
 ];

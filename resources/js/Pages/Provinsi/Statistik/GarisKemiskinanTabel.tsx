@@ -1,5 +1,6 @@
 import exportTableAsCsv from "@/Functions/ExportTable";
 import { KomoditasSummary } from "@/types";
+import { ExportOutlined } from "@ant-design/icons";
 import { Button, Space, Table } from "antd";
 import { TablePaginationConfig, TableProps } from "antd/es/table";
 import {
@@ -99,6 +100,7 @@ const GarisKemiskinanTabel = ({
                     Sementara dan 20% dari populasi (clean dan warning)
                 </h2>
                 <Button
+                    icon={<ExportOutlined />}
                     onClick={() =>
                         exportTableAsCsv(KomoditasColumns, dataSource)
                     }

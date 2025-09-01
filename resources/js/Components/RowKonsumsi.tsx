@@ -124,9 +124,9 @@ const RowKonsumsi: React.FC<{
     function beliHargaCalculate(value: number | undefined): void {
         // Manually trigger the useEffect
         let hargaProduksi = form.getFieldValue(
-            `${data.type === "sub" ? "jumlah" : ""}${
-                data.id
-            }_produksi_harga${data.subKey}`
+            `${data.type === "sub" ? "jumlah" : ""}${data.id}_produksi_harga${
+                data.subKey
+            }`
         );
         let total = value + hargaProduksi;
 
@@ -148,9 +148,8 @@ const RowKonsumsi: React.FC<{
         const value = form.getFieldValue(`${data.id}_total_harga`);
 
         const total =
-            Number(form.getFieldValue(hargaBeliName)) ??
-            0 + Number(form.getFieldValue(hargaProduksiName)) ??
-            0;
+            (Number(form.getFieldValue(hargaBeliName)) ?? 0) +
+            (Number(form.getFieldValue(hargaProduksiName)) ?? 0);
 
         setIsTotalEqual(value == total);
         if (data.type == "sub") {
@@ -160,9 +159,9 @@ const RowKonsumsi: React.FC<{
                 }_produksi_harga${data.subKey}`
             );
             const hargaBeli = form.getFieldValue(
-                `${data.type === "sub" ? "jumlah" : ""}${
-                    data.id
-                }_beli_harga${data.subKey}`
+                `${data.type === "sub" ? "jumlah" : ""}${data.id}_beli_harga${
+                    data.subKey
+                }`
             );
             setIsBeliEqual(hargaBeli == rekapMak[data.subKey]["beli"]);
             setIsProduksiEqual(
@@ -230,7 +229,7 @@ const RowKonsumsi: React.FC<{
                 <td
                     style={{
                         ...(data.type === "sub" ? darkCell : cellStyle),
-                        width:"50px"
+                        width: "50px",
                     }}
                 >
                     {data.type === "sub" || (

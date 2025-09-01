@@ -98,6 +98,7 @@ const Mak = ({
             r202_nama: user.nama_lengkap,
             r202_jabatan: user.jabatan,
         });
+        identitas_wilayah["semester"] = semester;
     }, []);
 
     return (

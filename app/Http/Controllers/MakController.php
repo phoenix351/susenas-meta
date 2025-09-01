@@ -23,18 +23,10 @@ class MakController extends Controller
     private function eligileToUpdate()
     {
         // dd(App::environment());
-        return false;
-        return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("local"));
+        return true;
+        return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("localx"));
     }
-    private $wtfDependecies = [
-
-        [
-            'target' => 'wtf_4',
-            'fields' => ['wtf_9'],
-            "dependentValues" => ['1']
-        ],
-
-    ];
+    private $wtfDependecies = [];
     public function is_any_zero($a, $b)
     {
         if (!isset($a)) {
@@ -96,13 +88,6 @@ class MakController extends Controller
     {
         if ($id_ruta == '-1') {
 
-            // $daftar_ruta = SusenasMak::with(["user","region"])
-            // ->where('kode_kabkot', $kode_kabkot)
-            // ->where('nks', $nks)
-            // // ->where('semester', $semester)
-            // ->get();
-            // dd([$daftar_ruta,$kode_kabkot,$nks,]);
-            // return $daftar_ruta;
             return SusenasMak::where('vsusenas_mak.kode_kabkot', $kode_kabkot)->where('vsusenas_mak.nks', $nks)->where('vsusenas_mak.semester', $semester)
                 ->join('master_wilayah', function ($join) {
                     $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
@@ -132,13 +117,12 @@ class MakController extends Controller
             $kode_kabkot = $request->kode_kabkot;
             $nks = $request->nks;
             $semester = $request->semester;
-            // dd($semester);
+
             if (!isset($semester)) {
                 $semester = '1';
             }
             $data = $this->get_ruta($kode_kabkot, $nks, $semester);
-            // dd([$data, $kode_kabkot, $nks, $semester]);
-            //  return response()->json($data, 200);
+
             return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks, 'semester' => $semester]);
         } catch (\Throwable $th) {
             throw $th;
@@ -303,6 +287,7 @@ class MakController extends Controller
     }
     public function update(Request $request)
     {
+        // dd("asdaads");
         if (!$this->eligileToUpdate()) {
             // return Inertia::render('Error/Error_403');
             return abort(403);
@@ -313,33 +298,33 @@ class MakController extends Controller
             $data = $request->all();
             // dd($data);
             // Columns to check and their corresponding form fields
-            $columnsToCheck = $this->wtfDependecies;
-            $fields_check = [];
-            foreach ($columnsToCheck as $column) {
-                if (isset($column['fields'])) {
-                    $fields_check = array_merge($fields_check, $column['fields']);
-                }
-            }
-            if (isset($data['id'])) {
-                $currentWtf = SusenasMak::where('id', $data['id'])->first($fields_check);
-                // dd($currentWtf);
+            // $columnsToCheck = $this->wtfDependecies;
+            // $fields_check = [];
+            // foreach ($columnsToCheck as $column) {
+            //     if (isset($column['fields'])) {
+            //         $fields_check = array_merge($fields_check, $column['fields']);
+            //     }
+            // }
+            // if (isset($data['id'])) {
+            //     $currentWtf = SusenasMak::where('id', $data['id'])->first($fields_check);
+            //     // dd($currentWtf);
 
-                foreach ($columnsToCheck as $dependency) {
+            //     foreach ($columnsToCheck as $dependency) {
 
-                    foreach ($dependency['fields'] as $dependentField) {
-                        // Check if the field exists in $currentWtf and condition is met
-                        if (isset($currentWtf[$dependentField]) && (isset($data[$dependency['target']]) && !in_array($data[$dependency['target']], $dependency['dependentValues']))) {
-                            $data[$dependentField] = null;
-                        }
-                    }
-                }
-            }            // second check 
+            //         foreach ($dependency['fields'] as $dependentField) {
+            //             // Check if the field exists in $currentWtf and condition is met
+            //             if (isset($currentWtf[$dependentField]) && (isset($data[$dependency['target']]) && !in_array($data[$dependency['target']], $dependency['dependentValues']))) {
+            //                 $data[$dependentField] = null;
+            //             }
+            //         }
+            //     }
+            // }            // second check 
 
 
             // Continue with the rest of your code...
 
-
             $data_update = SusenasMak::findOrFail($data['id']);
+
 
             $data_update->update($data);
             // dd($data);
@@ -548,17 +533,25 @@ class MakController extends Controller
     }
     public function create(Request $request)
     {
-        // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
 
         $user = auth()->user();
         if (!$this->eligileToUpdate()) {
-            // return Inertia::render('Error/Error_403');
             return abort(403);
         }
 
         $identitas_wilayah = $request->all();
-        $master_wilayah = MasterWilayah::where('kode_kabkot', $identitas_wilayah['kode_kabkot'])->where('nks', $identitas_wilayah['nks'])->first();
-        return Inertia::render("Entri/CreateMak", ['identitas_wilayah' => $master_wilayah, 'semester' => $request->semester, 'user' => $user]);
+        $master_wilayah = MasterWilayah::where('kode_kabkot', $identitas_wilayah['kode_kabkot'])
+            ->where('nks', $identitas_wilayah['nks'])
+            ->first();
+
+        return Inertia::render(
+            "Entri/CreateMak",
+            [
+                'identitas_wilayah' => $master_wilayah,
+                'semester' => $request->semester,
+                'user' => $user
+            ]
+        );
     }
     public function calculate_qc($id_ruta)
     {
@@ -695,7 +688,7 @@ class MakController extends Controller
 
             return response()->json($data, 200);
         } catch (\Throwable $th) {
-            throw $th;
+            // throw $th;
             DB::rollBack();
             return response()->json(['error' => 'Error processing data'], 500);
         }
@@ -1004,7 +997,7 @@ class MakController extends Controller
                 if ($data_mak['wtf_1'] < 1) {
                     $pesan = [
                         'variable' => "1. Jumlah ART",
-                        'rincian' => "1. Jumlah ART",
+                        'rincian' => "Jumlah ART (Blok III Rincian 301)",
                         'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah ART minimal satu",
@@ -1013,22 +1006,11 @@ class MakController extends Controller
 
                     $daftar_warning[] = $pesan;
                 }
-                if ($data_mak['wtf_5'] < 2) {
-                    $pesan = [
-                        'variable' => "5. Luas Lantai Bangunan Utama (R1604)",
-                        'rincian' => "Luas lantai tidak wajar kurang dari 2 meter persegi",
-                        'blok' => "Worksheet",
-                        'type' => 'warning',
-                        'pesan' => "Luas lantai tidak wajar kurang dari 2 meter persegi",
 
-                    ];
-
-                    $daftar_warning[] = $pesan;
-                }
                 if ($data_mak['wtf_2'] >= $data_mak['wtf_1']) {
                     $pesan = [
                         'variable' => "2. Jumlah Balita",
-                        'rincian' => "2. Jumlah Balita",
+                        'rincian' => "Jumlah Balita (R302)",
                         'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah Balita tidak boleh sama atau lebih daripada Jumlah ART",
@@ -1039,10 +1021,21 @@ class MakController extends Controller
                 if ($data_mak['wtf_3'] >= $data_mak['wtf_1']) {
                     $pesan = [
                         'variable' => "3. Jumlah ART yang masih bersekolah",
-                        'rincian' => "3. Jumlah ART yang masih bersekolah",
+                        'rincian' => "Jumlah ART yang masih bersekolah (R611=2)",
                         'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah ART bersekolah tidak boleh lebih daripada Jumlah ART",
+                    ];
+
+                    $daftar_warning[] = $pesan;
+                }
+                if ($data_mak['wtf_4'] >= $data_mak['wtf_3']) {
+                    $pesan = [
+                        'variable' => "3. Jumlah ART yang Penerima Program MBG",
+                        'rincian' => "Jumlah ART Penerima Program MBG (Blok XI.A Rincian 1106=1)",
+                        'blok' => "Worksheet",
+                        'type' => 'warning',
+                        'pesan' => "Jumlah ART Penerima Program MBG tidak boleh lebih daripada Jumlah ART bersekolah",
                     ];
 
                     $daftar_warning[] = $pesan;
@@ -1065,7 +1058,7 @@ class MakController extends Controller
                 if ($jumlah_art != $data_mak['wtf_1']) {
                     $warning = [
                         'rincian' => "Jumlah Art pada Blok IV.1 tidak sama dengan Rincian Worksheet",
-                        'variable' => "Pertanyaan worksheet Nomor 2",
+                        'variable' => "Jumlah ART (Blok III Rincian 301)",
                         'blok' => 'Worksheet',
                         'type' => 'warning'
                     ];
@@ -1320,8 +1313,14 @@ class MakController extends Controller
     }
     public function delete($id_ruta)
     {
+
         try {
+
             //code...
+            if (!$this->eligileToUpdate()) {
+                // return Inertia::render('Error/Error_403');
+                return response()->json(['error' => 'Anda tidak memiliki cukup hak akses'], 403);
+            }
             DB::beginTransaction();
             $mak = SusenasMak::where('id', $id_ruta);
             $mak->konsumsi()->delete();
@@ -1332,7 +1331,7 @@ class MakController extends Controller
                 $art->konsumsi()->delete();
                 $art->delete();
             }
-            $mak->konsumsi_non_makanan()->delete();            
+            $mak->konsumsi_non_makanan()->delete();
             $mak->delete();
             DB::commit();
             return response()->json([

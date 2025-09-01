@@ -67,7 +67,10 @@ const EntriIntiForm: React.FC<{
             fetchKabkot();
             // fetchNks();
             form.setFieldValue("kode_prov", "71");
-            form.setFieldValue("semester", "1");
+            form.setFieldValue(
+                "semester",
+                new Date().getMonth() < 6 ? "1" : "2"
+            );
 
             // fetchSemester();
         } catch (error) {

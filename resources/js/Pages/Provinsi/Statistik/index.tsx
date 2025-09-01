@@ -82,6 +82,12 @@ const index = () => {
                 })
             );
 
+            messageApi.open({
+                content: "mengolah data...",
+                type: "loading",
+                duration: 0,
+                key: "show-summary",
+            });
             setPengeluaranPerkapita(response.data.pengeluaran_perkapita);
             setDataRuta(response.data.data_ruta);
 

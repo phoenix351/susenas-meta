@@ -7,7 +7,6 @@ import axios from "axios";
 
 const { Text, Title } = Typography;
 
-
 const Blok4_1_hal2: React.FC<{
     form: any;
     rekapMak: SubTotal[];
@@ -73,7 +72,6 @@ const Blok4_1_hal2: React.FC<{
 
     return (
         <Space direction="vertical" style={{ width: "100%" }}>
-            
             <TabelBlok
                 form={form}
                 konten={listKomoditas}

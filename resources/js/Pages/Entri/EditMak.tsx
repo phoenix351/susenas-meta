@@ -314,7 +314,7 @@ const Mak = ({
     const blok4_1Finish = async (values: any) => {
         try {
             const url = route("entri.mak.konsumsi.store");
-            
+
             // console.log({values});
             // return
             const { data } = await axios.patch(url, values, {
@@ -420,7 +420,6 @@ const Mak = ({
                     id_ruta: daftarArt[0].id_ruta,
                 })
             );
-            const dataQc = response.data;
 
             const newQc = await calculateQc(
                 data.id,
@@ -603,7 +602,6 @@ const Mak = ({
         setRekapMak(newrekapMak);
     }, [daftarArt]);
 
-    const isEffectSetUp = useRef(false);
     const handleKeyPress = (event: {
         ctrlKey: any;
         key: string;
@@ -715,10 +713,10 @@ const Mak = ({
         // console.log({ data, konsumsi_ruta });
         // const daftarSub = [1, 8, 16,61,74];
         let konsumsiRutaValues = konsumsi_ruta.map((item) => ({
-            [`${item.type=="sub" ? "jumlah" : ""}${
+            [`${item.type == "sub" ? "jumlah" : ""}${
                 item.id_komoditas
             }_beli_harga${item.id_kelompok}`]: item.harga_beli,
-            [`${item.type=="sub" ? "jumlah" : ""}${
+            [`${item.type == "sub" ? "jumlah" : ""}${
                 item.id_komoditas
             }_produksi_harga${item.id_kelompok}`]: item.harga_produksi,
             [`${item.id_komoditas}_total_harga`]: item.harga_total,
@@ -739,8 +737,7 @@ const Mak = ({
             }
             return result;
         }, {});
-        console.log(singleObject);
-        
+        // console.log(singleObject);
 
         blok4_1Form.setFieldsValue(singleObject);
         artForm.setFieldsValue({
@@ -786,7 +783,8 @@ const Mak = ({
                                         kode_kabkot:
                                             form.getFieldValue("kode_kabkot"),
                                         nks: form.getFieldValue("nks"),
-                                        semester: 1,
+                                        semester:
+                                            form.getFieldValue("semester"),
                                     })
                                 )
                             }
@@ -853,6 +851,7 @@ const Mak = ({
                                         kode_desa: data.kode_desa,
                                         kec: data.kec,
                                         kode_kec: data.kode_kec,
+                                        semester: data["semester"],
                                     }}
                                 />
                             ),

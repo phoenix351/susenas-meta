@@ -111,9 +111,7 @@ const TabelBlok: React.FC<{
             </thead>
             <tbody>
                 <tr>
-                    <td  style={centerCell}>
-                        (1)
-                    </td>
+                    <td style={centerCell}>(1)</td>
                     {/* <td width="130px" style={centerCell}>
                         (2)
                     </td> */}
@@ -125,9 +123,7 @@ const TabelBlok: React.FC<{
                         (5)
                     </td>
                     <td style={centerCell}>(6)</td>
-                    <td style={jumlahTDStyle}>
-                        (7)
-                    </td>
+                    <td style={jumlahTDStyle}>(7)</td>
                     <td style={centerCell}>(8)</td>
                     <td width="50px" style={centerCell}>
                         (9)

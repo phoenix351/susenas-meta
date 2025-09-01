@@ -52,10 +52,6 @@ Route::middleware('auth')->group(function () {
 
 
     route::get('/api/wilayah/kabkot', [MasterWilayahController::class, 'fetch_kabkot'])->name('api.wilayah.kabkot');
-    route::get('/api/entri/semester', function () {
-        $data = [];
-        return response()->json(['data' => $data]);
-    })->name('api.entri.semester');
 
     route::get('/entri/mak/create', [MakController::class, 'create'])->name("entri.mak.create");
     route::post('/entri/mak', [MakController::class, 'store'])->name('entri.mak.store');
@@ -68,9 +64,9 @@ Route::middleware('auth')->group(function () {
     route::delete('/entri/mak/delete/{id_ruta}', [MakController::class, 'delete'])->name('entri.mak.delete');
 
     route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');
-    
+
     route::get('/entri/mak/{id}', [MakController::class, 'edit'])->name('entri.mak.edit');
-      
+
     // route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
     route::get('/progress', [MonitoringController::class, 'index'])->name('progress');
     route::get('/dashboard', [MonitoringController::class, 'dashboard'])->name('dashboard');
@@ -99,9 +95,8 @@ Route::middleware('auth')->group(function () {
     route::get('/komoditas/sort', [KomoditasController::class, 'sort'])->name('komoditas.sort');
 
     route::get('/panduan', [PanduanController::class, 'index'])->name('panduan.index');
-    
+
     route::get('/calculate/export/{table_name}', [CalculateController::class, 'export'])->name('calculate.export');
-  
 });
 
 require __DIR__ . '/auth.php';
