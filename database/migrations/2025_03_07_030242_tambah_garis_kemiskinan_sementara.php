@@ -13,6 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // return;
         // Schema::table('kabkot', function (Blueprint $table) {
         //     $table->integer("garis_kemiskinan_sementara")->default(0)->change();
         // });
