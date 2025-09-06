@@ -794,6 +794,93 @@ const Blok1_2: React.FC<{
                                 />
                             </td>
                         </tr>
+                        <tr>
+                            <td style={cellStyle}>500.</td>
+                            <td style={cellStyle}>Catatan</td>
+
+                            {/* <td>Sulawesi Utara</td> */}
+                            <td style={cellStyle} colSpan={4}>
+                                <Form.Item
+                                    noStyle
+                                    shouldUpdate={(prev, cur) =>
+                                        prev.r203 !== cur.r203
+                                    }
+                                >
+                                    {({ getFieldValue }) => {
+                                        const r203 = getFieldValue("r203");
+
+                                        if (r203 > 1) {
+                                            return (
+                                                <Form.Item
+                                                    name="catatan"
+                                                    label={null}
+                                                    preserve={false} // <- drop state & errors when unmounted
+                                                    dependencies={["r203"]} // revalidate if r203 flips while mounted
+                                                    validateFirst
+                                                    rules={[
+                                                        ({
+                                                            getFieldValue,
+                                                        }) => ({
+                                                            validator(
+                                                                _,
+                                                                value
+                                                            ) {
+                                                                const r =
+                                                                    getFieldValue(
+                                                                        "r203"
+                                                                    );
+                                                                if (r > 1) {
+                                                                    const len =
+                                                                        (
+                                                                            value ||
+                                                                            ""
+                                                                        ).trim()
+                                                                            .length;
+                                                                    if (
+                                                                        len < 25
+                                                                    ) {
+                                                                        return Promise.reject(
+                                                                            new Error(
+                                                                                "Catatan wajib diisi (≥ 25 karakter) saat r203 > 1"
+                                                                            )
+                                                                        );
+                                                                    }
+                                                                }
+                                                                return Promise.resolve();
+                                                            },
+                                                        }),
+                                                    ]}
+                                                    validateTrigger={[
+                                                        "onChange",
+                                                        "onBlur",
+                                                    ]}
+                                                >
+                                                    <Input.TextArea
+                                                        rows={3}
+                                                        placeholder="Masukkan catatan jika ada status pencacahan selain [1]"
+                                                        allowClear
+                                                        autoSize={{
+                                                            minRows: 3,
+                                                            maxRows: 6,
+                                                        }}
+                                                    />
+                                                </Form.Item>
+                                            );
+                                        }
+
+                                        // r203 ≤ 1 → show read-only UI, not registered to the form (no name)
+                                        return (
+                                            <Input.TextArea
+                                                rows={3}
+                                                placeholder="Tidak perlu catatan saat r203 = 1"
+                                                disabled
+                                                value={""}
+                                            />
+                                        );
+                                    }}
+                                </Form.Item>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 

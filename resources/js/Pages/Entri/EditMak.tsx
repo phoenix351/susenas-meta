@@ -14,6 +14,7 @@ import {
     Form,
     Space,
     Spin,
+    Table,
     Tabs,
     Typography,
     message,
@@ -578,9 +579,12 @@ const Mak = ({
                                             <Space>
                                                 Jumlah error: {errorList.length}
                                             </Space>
-                                            <div style={{ width: "100%" }}>
-                                                {/* antd Table requires in-file import; keep simple here */}
-                                            </div>
+                                            <Table
+                                                bordered
+                                                columns={errorColumns}
+                                                dataSource={errorList}
+                                                style={{ width: "100%" }}
+                                            />
                                         </>
                                     ),
                                 },
@@ -600,6 +604,12 @@ const Mak = ({
                                                 Jumlah warning:{" "}
                                                 {warningList.length}
                                             </Space>
+                                            <Table
+                                                bordered
+                                                columns={errorColumns}
+                                                dataSource={warningList}
+                                                style={{ width: "100%" }}
+                                            />
                                         </>
                                     ),
                                 },
@@ -619,6 +629,12 @@ const Mak = ({
                                                 Jumlah warning range harga:{" "}
                                                 {warningRHList.length}
                                             </Space>
+                                            <Table
+                                                bordered
+                                                columns={rangeHargaColumns}
+                                                dataSource={warningRHList}
+                                                style={{ width: "100%" }}
+                                            />
                                         </>
                                     ),
                                 },

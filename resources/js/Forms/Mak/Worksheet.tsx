@@ -96,28 +96,6 @@ const daftarRincian = [
             "Apakah ada ART Penerima Program MBG  (Blok XI.A Rincian 1106=1)?",
         type: "binary",
     },
-
-    {
-        id: 5,
-        nomor: 5,
-        rincian:
-            "Apakah tercatat sebagai penerima PKH? (Blok XVII Rincian 1701)",
-        type: "binary",
-    },
-    {
-        id: 6,
-        nomor: 6,
-        rincian:
-            "Apakah tercatat sebagai penerima Program BPNT/Program Sembako?  (Blok XVII Rincian 1703)",
-        type: "binary",
-    },
-    {
-        id: 7,
-        nomor: 7,
-        rincian:
-            "Apakah pernah menerima bantuan dari Pemerintah selain PKH dan BPNT? (Blok XVII Rincian 1704)",
-        type: "binary",
-    },
 ];
 const Worksheet: React.FC<{
     form: FormInstance;

@@ -120,7 +120,8 @@ class SusenasMak extends Model
         'wtf_23c1',
         'wtf_24c1',
         'users_id',
-        'status_dok'
+        'status_dok',
+        'catatan'
 
     ];
 
