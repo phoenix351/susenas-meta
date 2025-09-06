@@ -77,7 +77,7 @@ const daftarRincian = [
     {
         id: 3,
         nomor: 3,
-        rincian: "Jumlah ART yang masih bersekolah (R611=2)",
+        rincian: "Jumlah ART yang masih bersekolah (R503=2)",
         type: "number",
 
         rules: {
@@ -92,16 +92,9 @@ const daftarRincian = [
     {
         id: 4,
         nomor: 4,
-        rincian: "Jumlah ART Penerima Program MBG  (Blok XI.A Rincian 1106=1)",
-        type: "number",
-
-        rules: {
-            ruleName: "less equal",
-            message:
-                "Jumlah ART yang penerima Program MBG tidak bisa melebihi jumlah ART yang bersekolah",
-            status: "error",
-            dependentName: "wtf_3",
-        },
+        rincian:
+            "Apakah ada ART Penerima Program MBG  (Blok XI.A Rincian 1106=1)?",
+        type: "binary",
     },
 
     {
@@ -124,13 +117,6 @@ const daftarRincian = [
         rincian:
             "Apakah pernah menerima bantuan dari Pemerintah selain PKH dan BPNT? (Blok XVII Rincian 1704)",
         type: "binary",
-    },
-
-    {
-        id: 26,
-        nomor: "10",
-        rincian: "Garis Kemiskinan Maret 2025",
-        type: "rupiah",
     },
 ];
 const Worksheet: React.FC<{
@@ -199,9 +185,7 @@ const Worksheet: React.FC<{
                                     >
                                         Isian Worksheet Template{" "}
                                     </Title>
-                                    <Text>
-                                        RINCIAN (Lihat Dokumen VSEN24.K)
-                                    </Text>
+                                    <Text>RINCIAN (Lihat Dokumen VSEN25M)</Text>
                                 </Space>
                             </td>
                         </tr>

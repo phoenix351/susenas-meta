@@ -1,7 +1,7 @@
 import { Form, Space, Typography, Input, FormInstance } from "antd";
 import React from "react";
 import RupiahInput from "./RupiahInput";
-import RowKonsumsi from "./RowKonsumsi";
+import RowKonsumsi from "./RowKonsumsiold";
 import { SubTotal } from "@/types";
 
 interface RowData {

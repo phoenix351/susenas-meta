@@ -249,6 +249,9 @@ const Blok1_2: React.FC<{
             form.getFieldValue("semester")
         );
         // console.log({ isUnique, value });
+        if (value > 10) {
+            return Promise.reject("Nomor Sampel maksimal 10");
+        }
 
         return isUnique
             ? Promise.resolve()
@@ -312,8 +315,8 @@ const Blok1_2: React.FC<{
                                         BLOK I. KETERANGAN TEMPAT
                                     </Title>
                                     <Text>
-                                        [ disalin dari Blok I kuesioner Seruti
-                                        Inti (VSUSENAS.INTI) ]
+                                        [ disalin dari Blok I kuesioner Susenas
+                                        Modul (VSUSENAS25.M) ]
                                     </Text>
                                 </Space>
                             </td>
@@ -645,8 +648,8 @@ const Blok1_2: React.FC<{
                                         BLOK II. KETERANGAN PENCACAH
                                     </Title>
                                     <Text>
-                                        [ disalin dari Blok II kuesioner Seruti
-                                        Inti (VSUSENAS.INTI) ]
+                                        [ disalin dari Blok II kuesioner Susenas
+                                        Modul (VSUSENAS25.M) ]
                                     </Text>
                                 </Space>
                             </td>

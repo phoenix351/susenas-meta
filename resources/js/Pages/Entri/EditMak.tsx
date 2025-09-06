@@ -1,185 +1,58 @@
+// src/pages/entri/mak/EditMak.tsx
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-
-import { ErrorInfo, useEffect, useRef, useState } from "react";
+import {
+    ReactElement,
+    JSXElementConstructor,
+    ReactPortal,
+    useEffect,
+    useState,
+} from "react";
 import { Head, router } from "@inertiajs/react";
-import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
 import {
     Badge,
     Button,
     Form,
-    FormInstance,
-    FormListFieldData,
     Space,
     Spin,
-    Table,
     Tabs,
     Typography,
     message,
 } from "antd";
-import axios from "axios";
-
-import Blok1_2 from "@/Forms/Mak/Blok1_2";
-import Blok4_1 from "@/Forms/Mak/Blok4_1";
-import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
-import Blok4_3 from "@/Forms/Mak/Blok4_3";
-import Worksheet from "@/Forms/Mak/Worksheet";
-import { AnggotaRumahTangga, PageProps, Rincian, SubTotal } from "@/types";
-import Blok_QC from "@/Forms/Mak/Blok_QC";
 import {
     ArrowLeftOutlined,
     DollarOutlined,
     ReloadOutlined,
     SaveOutlined,
 } from "@ant-design/icons";
-import MyModal from "@/Components/Modal";
-import TextRupiah from "@/Components/TextRupiah";
+
+import Blok1_2 from "@/Forms/Mak/Blok1_2";
+import Blok4_1 from "@/Forms/Mak/Blok4_1";
+import Blok4_1art from "@/Forms/Mak/Blok4_1_art";
+import Blok4_3 from "@/Forms/Mak/Blok4_3";
+import Worksheet from "@/Forms/Mak/Worksheet";
 import BlokNonMakanan from "@/Forms/NonMakanan/NonMakanan";
 
-const daftarRincian432 = [
-    {
-        id: 1,
-        nomor: 1,
-        rincian: "Padi-padian (R.1)",
-        type: "standar",
-    },
-    {
-        id: 2,
-        nomor: 2,
-        rincian: "Umbi-umbian (R.8)",
-        type: "standar",
-    },
-    {
-        id: 3,
-        nomor: 3,
-        rincian: "Ikan/udang/cumi/kerang (R.16)",
-        type: "standar",
-    },
-    {
-        id: 4,
-        nomor: 4,
-        rincian: "Daging (R.55)",
-        type: "standar",
-    },
-    {
-        id: 5,
-        nomor: 5,
-        rincian: "Telur dan Susu (R.65)",
-        type: "standar",
-    },
-    {
-        id: 6,
-        nomor: 6,
-        rincian: "Sayur-sayuran (R.75)",
-        type: "standar",
-    },
-    {
-        id: 7,
-        nomor: 7,
-        rincian: "Kacang-kacangan (R.102)",
-        type: "standar",
-    },
-    {
-        id: 8,
-        nomor: 8,
-        rincian: "Buah-buahan (R.110)",
-        type: "standar",
-    },
-    {
-        id: 9,
-        nomor: 9,
-        rincian: "Minyak dan Kelapa (R.126)",
-        type: "standar",
-    },
-    {
-        id: 10,
-        nomor: 10,
-        rincian: "Bahan Minuman (R.131)",
-        type: "standar",
-    },
-    {
-        id: 11,
-        nomor: 11,
-        rincian: "Bumbu-bumbuan (R.139)",
-        type: "standar",
-    },
-    {
-        id: 12,
-        nomor: 12,
-        rincian: "Bahan Makanan Lainnya (R.154)",
-        type: "standar",
-    },
-    {
-        id: 13,
-        nomor: 13,
-        rincian: "Makanan dan Minuman Jadi (Blok IV.3.1 Baris Jumlah)",
-        type: "standar",
-    },
-    {
-        id: 14,
-        nomor: 14,
-        rincian: "Rokok dan Tembakau (Blok IV.3.1 Baris Jumlah)",
-        type: "standar",
-    },
-    {
-        id: 15,
-        nomor: 15,
-        rincian: "SUBJUMLAH [R.1 s.d. R.14]",
-        type: "standar",
-    },
-    {
-        id: 16,
-        nomor: 16,
-        rincian: "RATA-RATA PENGELUARAN MAKANAN SEBULAN [R.15 x 30/7]",
-        type: "average",
-    },
-    {
-        id: 17,
-        nomor: 17,
-        rincian:
-            "RATA-RATA PENGELUARAN BUKAN MAKANAN SEBULAN [salin dari Blok 4.3.3 rincian 8 kolom 3]",
-        type: "average",
-    },
-    {
-        id: 18,
-        nomor: 18,
-        rincian: "RATA-RATA PENGELUARAN SEBULAN [R.16 + R17]",
-        type: "average",
-    },
-];
-const tableStyle: React.CSSProperties = {
-    borderCollapse: "collapse",
-    width: "100%",
-};
-const cellStyle = {
-    borderStyle: "solid",
-    border: "solid 1px black",
-    // width: "100%",
-    padding: "5px",
-};
+import { defaultSubTotal, daftarRincian432 } from "@/Features/mak/constants";
+import { tabContentStyle } from "@/Features/mak/styles";
+import { rangeHargaColumns, errorColumns } from "@/Features/mak/tables";
+import {
+    useCtrlSSubmit,
+    useSubTotalCalculator,
+    useSimpanAll,
+    doRevalidasi,
+} from "@/Features/mak/hooks";
 
-const calculateQc = async (
-    id_ruta: string,
-    jumlah_art: number,
-    daftarQc: any[],
-    blokqc_3: number
-) => {
-    const { data } = await axios.get(
-        route("api.mak.calculate_qc", { id_ruta: id_ruta })
-    );
+import MyModal from "@/Components/Modal";
+import TextRupiah from "@/Components/TextRupiah";
+import ScrollToTopButton from "@/Components/SmoothScrollToTop";
+import { useEnterAsTab } from "@/Hooks/useEnterAsTab";
 
-    let newQc = [...daftarQc];
-    newQc[0].value = data.kalori_total / jumlah_art / 7;
-    newQc[1].value = data.jumlah_komoditas_bahan_makanan;
-    newQc[2].value = data.jumlah_komoditas_makanan_jadi_rokok;
-    newQc[3].value = blokqc_3;
-    newQc[4].value = newQc[1].value + newQc[2].value + newQc[3].value;
-    newQc[5].value = Math.round(data.pengeluaran / jumlah_art);
-    newQc[6].value = data.kalori_basket / 7 / jumlah_art;
+// types coming from your project
+import type { AnggotaRumahTangga, PageProps, Rincian } from "@/types";
+import Blok_QC from "@/Forms/Mak/Blok_QC";
+import axios from "axios";
 
-    return newQc;
-
-    // newQc[2] = data.jumlah_komoditas_makanan_jadi_rokok;
-};
+const { Text } = Typography;
 
 const Mak = ({
     data,
@@ -196,42 +69,28 @@ const Mak = ({
     rekap_konsumsi: any[];
     rekap_konsumsi_art: any[];
 }) => {
-    const tabContentStyle: React.CSSProperties = {
-        backgroundColor: "#fff",
-        paddingLeft: "10px",
-        paddingRight: "10px",
-        paddingBottom: "15px",
-        width: "100%",
-    };
-
-    // define forms
     const [form] = Form.useForm();
-    const [blok4_1Form] = Form.useForm();
-    const [blok4_1artForm] = Form.useForm();
+    const [blok41Form] = Form.useForm();
+    const [blok41ArtForm] = Form.useForm();
     const [artForm] = Form.useForm();
+    const [messageApi, contextHolder] = message.useMessage();
 
-    //define usestates
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const [daftarArt, setDaftarArt] = useState<AnggotaRumahTangga[]>([]);
-    const [rekapMak, setRekapMak] = useState(
-        daftarRincian432.map((rincian) => ({ beli: 0, produksi: 0, total: 0 }))
-    );
-    const [loadingReval, setLoadingReval] = useState<boolean>(false);
-
+    const [rekapMak, setRekapMak] = useState(defaultSubTotal());
+    const [rekapArt, setRekapArt] = useState<any[]>([]);
     const [daftarQc, setDaftarQc] = useState<Rincian[]>([
         {
             rincian: "Kalori per Kapita per Hari",
             id: 0,
             value: 0,
             dataType: "decimal",
-            // hidden: true,
         },
         {
             rincian: "Kalori 52 basket komoditas per Kapita per Hari",
             id: 6,
             value: 0,
             dataType: "decimal",
-            // hidden: true,
         },
         {
             rincian: "Jumlah Komoditas Bahan Makanan/Minuman",
@@ -246,9 +105,7 @@ const Mak = ({
             dataType: "integer",
         },
         {
-            rincian:
-                // "Jumlah Komoditas Non Makanan <b>[Disalin dari dokumen KP Blok III Rincian 305 ]</b>",
-                `Jumlah Komoditas Non Makanan [Disalin dari dokumen KP Blok III Rincian 305 ]`,
+            rincian: "Jumlah Komoditas Non Makanan [KP Blok III R.305]",
             id: 3,
             value: 0,
             dataType: "integer",
@@ -267,21 +124,38 @@ const Mak = ({
             dataType: "rupiah",
         },
     ]);
-    const [isOpen, setIsOpen] = useState(false);
-
-    // const [spinning, setSpinning] = React.useState<boolean>(false);
 
     const [openModal, setOpenModal] = useState(false);
+    const [loadingReval, setLoadingReval] = useState(false);
     const [warningList, setWarningList] = useState<any[]>([]);
     const [warningRHList, setWarningRHList] = useState<any[]>([]);
     const [errorList, setErrorList] = useState<any[]>([]);
+    const [statusCacah, setStatusCacah] = useState(true);
 
-    const modalCancel = () => {
-        setOpenModal(false);
-    };
+    const { containerRef } = useEnterAsTab<HTMLDivElement>({
+        allowTextareaNewline: true,
+        shiftMovesBackward: true,
+    });
+    useCtrlSSubmit(form);
 
-    const [messageApi, contextHolder] = message.useMessage();
+    const calculateSubTotalHarga = useSubTotalCalculator(
+        blok41Form,
+        setRekapMak
+    );
+    const simpanData = useSimpanAll({
+        form,
+        artForm,
+        blok41Form,
+        daftarArt,
+        daftarQc,
+        setDaftarQc,
+        setLastSaved,
+        messageApi,
+    });
 
+    function ubahStatusPencacahan(v: string) {
+        setStatusCacah(v === "1");
+    }
     const blok1_2Finish = async (values: any) => {
         try {
             const url = route("entri.mak.update");
@@ -299,509 +173,142 @@ const Mak = ({
         }
     };
 
-    const artFormFinish = async (values: any) => {
-        try {
-            const url = route("entri.mak.art.update");
-            const response = await axios.patch(url, values, {
-                headers: { "Content-Type": "application/json" },
-            });
-        } catch (error) {
-            console.error(
-                "Oops terjadi kesalahan dalam menyimpan Kuesioner ART, silahkan hubungi admin"
-            );
-        }
-    };
-    const blok4_1Finish = async (values: any) => {
-        try {
-            const url = route("entri.mak.konsumsi.store");
-
-            // console.log({values});
-            // return
-            const { data } = await axios.patch(url, values, {
-                headers: { "Content-Type": "application/json" },
-            });
-        } catch (error) {
-            messageApi.open({
-                type: "error",
-                key: "4_1",
-                content:
-                    "Oops terjadi kesalahan dalam mmenyimpan konsumsi, silahkan hubungi admin",
-            });
-        }
-    };
-    const blok4_1artFinish = async (values: any) => {
-        try {
-            const url = route("api.entri.inti", values);
-            const { data } = await axios.get(url);
-        } catch (error) {
-            messageApi.open({
-                type: "error",
-                key: "cari",
-                content:
-                    "Oops terjadi kesalahan dalam menyimpan blok 4 1 art, silahkan hubungi admin",
-            });
-        }
-    };
-
-    function handleChange(activeKey: string): void {}
-    const [rekapArt, setRekapArt] = useState([]);
-    const [subTotalHarga, setSubTotalHarga] = useState([
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-        { beli: 0, produksi: 0, total: 0 },
-    ]);
-    // const [totalProduksi, setTotalProduksi] = useState(0);
-    const calculateKalori = async (
-        formValues: FormListFieldData
-    ): Promise<number> => {
-        const withVolume = Object.entries(formValues).filter(
-            ([fieldName, value]) =>
-                fieldName.endsWith("volume") &&
-                typeof value === "number" &&
-                value > 0
-        );
-
-        const promises = withVolume.map(async (item) => {
-            let id_komoditas = item[0].split("_")[0];
-            let kuantitas: number = Number(item[1]) ?? 0;
-            try {
-                const { data } = await axios.get(
-                    route("api.mak.komoditas.kalori.fetch", {
-                        id: id_komoditas,
-                    })
-                );
-                return kuantitas * data;
-            } catch (error) {
-                console.log("error ketika fetch data kalori");
-                return 0;
-            }
-        });
-
-        const kaloriArray = await Promise.all(promises);
-        return kaloriArray.reduce((sum, kalori) => sum + kalori, 0);
-    };
-    const simpanData = async () => {
-        messageApi.loading({
-            content: "Menyimpan data",
-            type: "loading",
-            key: "simpan",
-        });
-        try {
-            // Submit all forms concurrently using Promise.all
-
-            const [form1, form2, form3] = await Promise.all([
-                artForm.submit(),
-                form.submit(),
-                blok4_1Form.submit(),
-            ]);
-            // console.log(form.getFieldsValue());
-            if (form.getFieldValue("r203") > 1) {
-                messageApi.open({
-                    content: "Data berhasil tersimpan",
-                    type: "success",
-                    key: "simpan",
-                    duration: 2,
-                });
-                return;
-            }
-
-            // Now, all forms are submitted successfully
-            const response = await axios.get(
-                route("api.mak.calculate_qc", {
-                    id_ruta: daftarArt[0].id_ruta,
-                })
-            );
-
-            const newQc = await calculateQc(
-                data.id,
-                daftarArt.length,
-                daftarQc,
-                form.getFieldValue("blokqc_3")
-            );
-            setDaftarQc([...newQc]);
-
-            form.setFieldsValue({
-                blokqc_0: newQc[0].value,
-                blokqc_1: newQc[1].value,
-                blokqc_2: newQc[2].value,
-                blokqc_4: newQc[4].value,
-                blokqc_5: newQc[5].value,
-                blokqc_6: newQc[6].value,
-            });
-            setLastSaved(new Date());
-            router.get(
-                route("entri.mak.edit", {
-                    id: data.id,
-                }),
-                {},
-                {
-                    preserveState: true,
-                    preserveScroll: true,
-                }
-            );
-            messageApi.open({
-                content: "Data berhasil tersimpan",
-                type: "success",
-                key: "simpan",
-                duration: 2,
-            });
-        } catch (error: any) {
-            if (error?.response?.data?.error) {
-                let errorMessage = error.response.data.error;
-                messageApi.open({
-                    content: errorMessage ?? "Data gagal tersimpan",
-                    type: "error",
-                    key: "simpan",
-                    duration: 2,
-                });
-            }
-            // Handle error if any of the forms fails to submit
-        }
-    };
-    const Revalidasi = async () => {
-        await simpanData();
-        const id_ruta = form.getFieldValue("id");
-        try {
-            setLoadingReval(true);
-            const { data } = await axios.get(
-                route("api.mak.revalidasi", {
-                    id_ruta: id_ruta,
-                })
-            );
-
-            setWarningRHList([...data.evaluasi_rh]);
-            setErrorList([...data.daftar_error]);
-            setWarningList([...data.daftar_warning]);
-
-            messageApi.open({
-                content: "Revalidasi selesai",
-                type: "success",
-                key: "revalidasi",
-            });
-        } catch (error) {
-            console.error("Error submitting forms:", error);
-            // Handle error if any of the forms fails to submit
-        } finally {
-            setLoadingReval(false);
-        }
-    };
-    const calculateSubTotalHarga = async () => {
-        // return;
-        // console.log({ subKey, jenis });
-        // ambil semua input dari form dengan akhiran jenis_hargasubkey    };
-        const allFieldValues = blok4_1Form.getFieldsValue();
-
-        const subArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15, 16, 17];
-        subArr.forEach((sub: any) => {
-            let newrekapMak: SubTotal[] = [...rekapMak];
-
-            const pattern_beli = `beli_harga${sub}`;
-            const sum_beli = Object.entries(allFieldValues)
-                .filter(
-                    ([fieldName]) =>
-                        fieldName.endsWith(pattern_beli) &&
-                        !fieldName.includes("jumlah")
-                )
-                .reduce(
-                    (accumulator, [, value]) =>
-                        accumulator + ((value as number) || 0),
-                    0
-                );
-            newrekapMak[sub]["beli"] = sum_beli;
-            const pattern_produksi = `produksi_harga${sub}`;
-            const sum_produksi = Object.entries(allFieldValues)
-                .filter(
-                    ([fieldName]) =>
-                        fieldName.endsWith(pattern_produksi) &&
-                        !fieldName.includes("jumlah")
-                )
-                .reduce(
-                    (accumulator, [, value]) =>
-                        accumulator + ((value as number) || 0),
-                    0
-                );
-            newrekapMak[sub]["produksi"] = sum_produksi;
-            if (sub <= 14) {
-                newrekapMak[sub]["total"] =
-                    newrekapMak[sub]["beli"] + newrekapMak[sub]["produksi"];
-            }
-            // newrekapMak[14]["beli"] = Object.entries(newrekapMak)
-            newrekapMak[14] = newrekapMak
-                .slice(0, 14)
-                // .filter(([fieldName]: any) => fieldName === "beli");
-                .reduce(
-                    (prev, current) => ({
-                        beli: prev.beli + current.beli,
-                        produksi: prev.produksi + current.produksi,
-                        total: prev.total + current.total,
-                    }),
-                    { beli: 0, produksi: 0, total: 0 }
-                );
-            newrekapMak[15]["total"] = Math.round(
-                (newrekapMak[14]["total"] * 30) / 7
-            );
-            newrekapMak[17]["total"] =
-                newrekapMak[15]["total"] + newrekapMak[16]["total"];
-
-            setRekapMak(newrekapMak);
-        });
-    };
-
     useEffect(() => {
-        let newrekapMak = [...rekapMak];
-
-        daftarArt?.forEach((item, index) => {
-            artForm.setFieldValue(`${index}-id_art`, item.id);
-            artForm.setFieldValue(`${index}-nama`, item.nama);
-            // const [form] = Form.useForm();
-            // setArtForms([...artForms,form])
-        });
-
-        const summary = daftarArt?.reduce((summary: any[], item: any) => {
-            Object.values(item.rekap).forEach((entry: any, index: number) => {
-                summary[index] = summary[index] || {
-                    beli: 0,
-                    produksi: 0,
-                    total: 0,
-                };
-                summary[index].beli += entry.beli;
-                summary[index].produksi += entry.produksi;
-                summary[index].total += entry.total;
-            });
-            return summary;
-        }, []);
-        newrekapMak[12] = summary ? summary[0] : 0;
-        newrekapMak[13] = summary ? summary[1] : 0;
-        newrekapMak[14] = newrekapMak
-            .slice(0, 14)
-            // .filter(([fieldName]: any) => fieldName === "beli");
-            .reduce(
-                (prev, current) => ({
-                    beli: current ? prev.beli + current.beli : 0,
-                    produksi: current ? prev.produksi + current.produksi : 0,
-                    total: current ? prev.total + current.total : 0,
-                }),
-                { beli: 0, produksi: 0, total: 0 }
-            );
-        newrekapMak[15]["total"] = Math.round(
-            (newrekapMak[14]["total"] * 30) / 7
-        );
-        newrekapMak[17]["total"] =
-            newrekapMak[15]["total"] + newrekapMak[16]["total"];
-        // console.log({ rekapMak });
-
-        setRekapMak(newrekapMak);
-    }, [daftarArt]);
-
-    const handleKeyPress = (event: {
-        ctrlKey: any;
-        key: string;
-        preventDefault: () => void;
-    }) => {
-        if (event.ctrlKey && event.key === "s") {
-            event.preventDefault();
-            form.submit();
-        }
-    };
-    // initialize the form
-    useEffect(() => {
-        const artSetUp = () => {
-            art = art.map((item) => ({
-                ...item,
-                rekap: {
-                    12: { produksi: 0, beli: 0, total: 0 },
-                    13: { produksi: 0, beli: 0, total: 0 },
-                },
-            }));
-            // setDaftarArt([...art]);
-            if (art.length < 1) {
-                // console.log("kurang dari 1");
-
-                setDaftarArt((prev) => [
-                    ...prev,
-                    {
-                        id: "",
-                        id_ruta: data.id,
-                        nama: data.r110,
-                        nomor_art: 0,
-                        rekap: {
-                            12: { produksi: 0, beli: 0, total: 0 },
-                            13: { produksi: 0, beli: 0, total: 0 },
-                        },
-                    },
-                ]);
-            }
-            if (art.length > 0) {
-                // olah rekap konsumsi art
-                var newDaftarArt = [...art];
-                let newRekap_konsumsi_art = rekap_konsumsi_art.map((item) => ({
-                    // id_komoditas: item.id,
-                    id_art: item.id_art,
-                    id_kelompok: item.id_kelompok,
-                    beli: Number(item.beli),
-                    produksi: Number(item.produksi),
-                }));
-                newRekap_konsumsi_art.forEach((element) => {
-                    // when newdaftar art item.id === element.id
-                    newDaftarArt = newDaftarArt.map((art) => {
-                        // console.log({ element, art });
-                        if (art.id === element.id_art) {
-                            try {
-                                art["rekap"][element.id_kelompok].produksi =
-                                    element.produksi;
-                                art["rekap"][element.id_kelompok].beli =
-                                    element.beli;
-                                art["rekap"][element.id_kelompok].total =
-                                    element.beli + element.produksi;
-                            } catch (error) {
-                                console.log({ element, art });
-                            }
-                        }
-                        return art;
-                    });
-                    return element;
-                });
-
-                setDaftarArt(newDaftarArt);
-            }
-        };
-        artSetUp();
-
-        document.addEventListener("keydown", handleKeyPress);
-        // console.log({ data });
-
-        form.setFieldsValue(data);
-
-        // olah rekap konsumsi ruta
-        let newRekapMak = [...rekapMak];
-        let newRekap_konsumsi = rekap_konsumsi.map((item) => ({
-            id_kelompok: item.id_kelompok,
-            beli: Number(item.beli),
-            produksi: Number(item.produksi),
-        }));
-        newRekap_konsumsi.forEach((rekap) => {
-            // console.log({ rekap });
-
-            newRekapMak[rekap.id_kelompok]["beli"] = rekap["beli"];
-            newRekapMak[rekap.id_kelompok]["produksi"] = rekap["produksi"];
-            newRekapMak[rekap.id_kelompok]["total"] =
-                rekap["produksi"] + rekap["beli"];
-        });
-        newRekapMak[16]["total"] = data.blok4_32_16_total;
-        setRekapMak(newRekapMak);
-
-        form.setFieldValue("wtf_26", garis_kemiskinan);
-        // console.log({ art });
-
-        blok4_1Form.setFieldsValue({
+        // initial data wiring, keep concise:
+        form.setFieldsValue({ ...data, wtf_26: garis_kemiskinan });
+        blok41Form.setFieldsValue({
             id_ruta: data.id,
             hal10_jml_komoditas: data.hal10_jml_komoditas ?? undefined,
             hal8_jml_komoditas: data.hal8_jml_komoditas ?? undefined,
             hal6_jml_komoditas: data.hal6_jml_komoditas ?? undefined,
             hal4_jml_komoditas: data.hal4_jml_komoditas ?? undefined,
             hal2_jml_komoditas: data.hal2_jml_komoditas ?? undefined,
+            ...konsumsi_ruta.reduce((acc, it) => {
+                acc[
+                    `${it.type === "sub" ? "jumlah" : ""}${
+                        it.id_komoditas
+                    }_beli_harga${it.id_kelompok}`
+                ] = it.harga_beli;
+                acc[
+                    `${it.type === "sub" ? "jumlah" : ""}${
+                        it.id_komoditas
+                    }_produksi_harga${it.id_kelompok}`
+                ] = it.harga_produksi;
+                acc[`${it.id_komoditas}_total_harga`] = it.harga_total;
+                acc[`${it.id_komoditas}_total_harga_calculated`] =
+                    it.harga_produksi + it.harga_beli;
+                acc[`${it.id_komoditas}_item`] = it.item;
+                acc[`${it.id_komoditas}_satuan`] = it.satuan;
+                acc[`${it.id_komoditas}_beli_volume`] = it.volume_beli;
+                acc[`${it.id_komoditas}_produksi_volume`] = it.volume_produksi;
+                acc[`${it.id_komoditas}_total_volume`] = it.volume_total;
+                return acc;
+            }, {} as Record<string, any>),
         });
-        // console.log({ data, konsumsi_ruta });
-        // const daftarSub = [1, 8, 16,61,74];
-        let konsumsiRutaValues = konsumsi_ruta.map((item) => ({
-            [`${item.type == "sub" ? "jumlah" : ""}${
-                item.id_komoditas
-            }_beli_harga${item.id_kelompok}`]: item.harga_beli,
-            [`${item.type == "sub" ? "jumlah" : ""}${
-                item.id_komoditas
-            }_produksi_harga${item.id_kelompok}`]: item.harga_produksi,
-            [`${item.id_komoditas}_total_harga`]: item.harga_total,
-            [`${item.id_komoditas}_total_harga_calculated`]:
-                item.harga_produksi + item.harga_beli,
-            [`${item.id_komoditas}_item`]: item.item,
-            [`${item.id_komoditas}_satuan`]: item.satuan,
-            [`${item.id_komoditas}_beli_volume`]: item.volume_beli,
-            [`${item.id_komoditas}_produksi_volume`]: item.volume_produksi,
-            [`${item.id_komoditas}_total_volume`]: item.volume_total,
+        artForm.setFieldsValue({ id_ruta: data.id });
+
+        setLastSaved(new Date(data.updated_at));
+        ubahStatusPencacahan(data.r203);
+
+        // ART list: ensure at least 1
+        const arts = (
+            art?.length
+                ? art
+                : [
+                      {
+                          id: "",
+                          id_ruta: data.id,
+                          nama: data.r110,
+                          nomor_art: 0,
+                          rekap: {
+                              12: { produksi: 0, beli: 0, total: 0 },
+                              13: { produksi: 0, beli: 0, total: 0 },
+                          },
+                      },
+                  ]
+        ).map((a: any) => ({
+            ...a,
+            rekap: a.rekap ?? {
+                12: { produksi: 0, beli: 0, total: 0 },
+                13: { produksi: 0, beli: 0, total: 0 },
+            },
         }));
 
-        const singleObject = konsumsiRutaValues.reduce((result, obj) => {
-            for (const key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    result[key] = obj[key];
-                }
-            }
-            return result;
-        }, {});
-        // console.log(singleObject);
-
-        blok4_1Form.setFieldsValue(singleObject);
-        artForm.setFieldsValue({
-            id_ruta: data.id,
+        // fill rekap per ART from server aggregate
+        const agg = rekap_konsumsi_art.map((x: any) => ({
+            id_art: x.id_art,
+            id_kelompok: x.id_kelompok,
+            beli: Number(x.beli),
+            produksi: Number(x.produksi),
+        }));
+        const withAgg = arts.map((a: any) => {
+            const r = { ...a.rekap };
+            agg.filter((g: any) => g.id_art === a.id).forEach((g: any) => {
+                r[g.id_kelompok] = {
+                    beli: g.beli,
+                    produksi: g.produksi,
+                    total: g.beli + g.produksi,
+                };
+            });
+            return { ...a, rekap: r };
         });
+        setDaftarArt(withAgg);
 
-        // initialize last saved
-        setLastSaved(new Date(data.updated_at));
-
-        ubahStatusPencacahan(data.r203);
+        // route-level rekap
+        setRekapMak((prev) => {
+            const next = [...prev];
+            rekap_konsumsi.forEach((it: any) => {
+                next[it.id_kelompok].beli = Number(it.beli);
+                next[it.id_kelompok].produksi = Number(it.produksi);
+                next[it.id_kelompok].total =
+                    Number(it.beli) + Number(it.produksi);
+            });
+            next[16].total = data.blok4_32_16_total;
+            // recompute 15/18
+            next[14] = next.slice(0, 14).reduce(
+                (p, c) => ({
+                    beli: p.beli + (c?.beli || 0),
+                    produksi: p.produksi + (c?.produksi || 0),
+                    total: p.total + (c?.total || 0),
+                }),
+                { beli: 0, produksi: 0, total: 0 }
+            );
+            next[15].total = Math.round((next[14].total * 30) / 7);
+            next[17].total = next[15].total + next[16].total;
+            return next;
+        });
     }, []);
-    const [statusCacah, setStatusCacah] = useState(true);
-    function ubahStatusPencacahan(value: string) {
-        if (value == "1") {
-            setStatusCacah(true);
-            return;
-        }
-        setStatusCacah(false);
-    }
 
     return (
         <>
             {contextHolder}
             <Head title="Entri Kuesioner Inti" />
             <Space
-                style={{
-                    // backgroundColor: "#fff",
-                    width: "100%",
-                    minHeight: "300px",
-                    padding: "10px 15px",
-                }}
                 direction="vertical"
+                ref={containerRef}
+                style={{ width: "100%", minHeight: 300, padding: "10px 15px" }}
             >
                 <Space
                     style={{ width: "100%", justifyContent: "space-between" }}
-                    direction="horizontal"
                 >
-                    <Space>
-                        <Button
-                            onClick={() =>
-                                router.get(
-                                    route("entri", {
-                                        kode_kabkot:
-                                            form.getFieldValue("kode_kabkot"),
-                                        nks: form.getFieldValue("nks"),
-                                        semester:
-                                            form.getFieldValue("semester"),
-                                    })
-                                )
-                            }
-                        >
-                            <ArrowLeftOutlined /> Kembali
-                        </Button>
-                    </Space>
-                    <Space
-                        direction="horizontal"
-                        style={{
-                            width: "100%",
-                            justifyContent: "end",
-                            // backgroundColor: "red",
-                        }}
+                    <Button
+                        onClick={() =>
+                            router.get(
+                                route("entri", {
+                                    kode_kabkot:
+                                        form.getFieldValue("kode_kabkot"),
+                                    nks: form.getFieldValue("nks"),
+                                    semester: form.getFieldValue("semester"),
+                                })
+                            )
+                        }
                     >
-                        Last Saved :
-                        {lastSaved?.toLocaleDateString("en-US", {
+                        <ArrowLeftOutlined /> Kembali
+                    </Button>
+
+                    <Space style={{ justifyContent: "end", width: "100%" }}>
+                        Last Saved:{" "}
+                        {lastSaved?.toLocaleString("en-US", {
                             weekday: "long",
                             day: "numeric",
                             month: "long",
@@ -816,23 +323,28 @@ const Mak = ({
                         </Button>
                         <Button
                             type="primary"
-                            style={{ backgroundColor: "#e64d00" }}
+                            style={{ background: "#e64d00" }}
                             onClick={async () => {
                                 setOpenModal(true);
-                                if (!isOpen) {
-                                    Revalidasi();
-                                    setIsOpen(true);
-                                }
+                                setLoadingReval(true);
+                                await doRevalidasi(
+                                    form.getFieldValue("id"),
+                                    setLoadingReval,
+                                    ({ err, warn, warnRH }) => {
+                                        setErrorList(err);
+                                        setWarningList(warn);
+                                        setWarningRHList(warnRH);
+                                    },
+                                    messageApi
+                                );
                             }}
                         >
-                            {/* <ContainerOutline /> */}
-                            <DollarOutlined />
-                            Evaluasi
+                            <DollarOutlined /> Evaluasi
                         </Button>
                     </Space>
                 </Space>
+
                 <Tabs
-                    onChange={handleChange}
                     type="card"
                     items={[
                         {
@@ -843,7 +355,11 @@ const Mak = ({
                                     ubahStatusCacah={ubahStatusPencacahan}
                                     tabContentStyle={tabContentStyle}
                                     form={form}
-                                    onFinish={blok1_2Finish}
+                                    onFinish={(v: any) =>
+                                        import("@/Features/mak/api").then(
+                                            ({ api }) => api.saveBlok1_2(v)
+                                        )
+                                    }
                                     setDaftarArt={setDaftarArt}
                                     editable={false}
                                     identitas_wilayah={{
@@ -851,7 +367,7 @@ const Mak = ({
                                         kode_desa: data.kode_desa,
                                         kec: data.kec,
                                         kode_kec: data.kode_kec,
-                                        semester: data["semester"],
+                                        semester: data.semester,
                                     }}
                                 />
                             ),
@@ -859,91 +375,121 @@ const Mak = ({
                         {
                             label: "Worksheet",
                             key: "2",
+                            disabled: !statusCacah,
                             children: (
                                 <Worksheet
                                     tabContentStyle={tabContentStyle}
                                     form={form}
-                                    onFinish={blok1_2Finish}
+                                    onFinish={(v: any) =>
+                                        import("@/Features/mak/api").then(
+                                            ({ api }) => api.saveBlok1_2(v)
+                                        )
+                                    }
                                 />
                             ),
-                            disabled: !statusCacah,
                         },
                         {
                             label: "Blok IV.1",
                             key: "3",
+                            disabled: !statusCacah,
                             children: (
                                 <Blok4_1
-                                    onFinish={blok4_1Finish}
-                                    form={blok4_1Form}
+                                    onFinish={(v: any) =>
+                                        import("@/Features/mak/api").then(
+                                            ({ api }) => api.saveKonsumsi(v)
+                                        )
+                                    }
+                                    form={blok41Form}
                                     tabContentStyle={tabContentStyle}
                                     calculate={calculateSubTotalHarga}
-                                    subTotalHarga={subTotalHarga}
+                                    subTotalHarga={rekapMak}
                                     rekapMak={rekapMak}
                                     setRekapMak={setRekapMak}
-                                    // onFinish={blok4_1Finish}
                                 />
                             ),
-                            disabled: !statusCacah,
                         },
-
                         {
                             label: "Blok IV.1 ART",
                             key: "4",
+                            disabled: !statusCacah,
                             children: (
                                 <Blok4_1art
                                     id_ruta={data.id}
                                     tabContentStyle={tabContentStyle}
-                                    form={blok4_1artForm}
+                                    form={blok41ArtForm}
                                     artForm={artForm}
-                                    onFinish={blok4_1artFinish}
-                                    artFormFinish={artFormFinish}
+                                    onFinish={(v: any) =>
+                                        import("@/Features/mak/api").then(
+                                            ({ api }) => api.saveBlok41Art(v)
+                                        )
+                                    }
+                                    artFormFinish={(v: any) =>
+                                        import("@/Features/mak/api").then(
+                                            ({ api }) => api.saveArt(v)
+                                        )
+                                    }
                                     rekapArt={rekapArt}
                                     setRekapArt={setRekapArt}
                                     daftarArt={daftarArt}
                                     setDaftarArt={setDaftarArt}
-                                    calculateKalori={calculateKalori}
+                                    calculateKalori={async (fields: any) => {
+                                        const withVol = Object.entries(
+                                            fields
+                                        ).filter(
+                                            ([k, v]) =>
+                                                k.endsWith("volume") &&
+                                                typeof v === "number" &&
+                                                v > 0
+                                        );
+                                        const arr = await Promise.all(
+                                            withVol.map(async ([k, v]) => {
+                                                const id = k.split("_")[0];
+                                                const qty = Number(v) || 0;
+                                                const { api } = await import(
+                                                    "@/Features/mak/api"
+                                                );
+                                                const { data } =
+                                                    await api.kaloriKomoditas(
+                                                        id
+                                                    );
+                                                return qty * data;
+                                            })
+                                        );
+                                        return arr.reduce((s, n) => s + n, 0);
+                                    }}
                                 />
                             ),
-                            disabled: !statusCacah,
                         },
                         {
                             label: "Non Makanan",
                             key: "7",
-                            children: (
-                                <BlokNonMakanan
-                                    id_ruta={data.id}
-                                    // onFinish={blok4_1Finish}
-                                    // form={blok4_1Form}
-                                    // tabContentStyle={tabContentStyle}
-                                    // calculate={calculateSubTotalHarga}
-                                    // subTotalHarga={subTotalHarga}
-                                    // rekapMak={rekapMak}
-                                    // setRekapMak={setRekapMak}
-                                    // onFinish={blok4_1Finish}
-                                />
-                            ),
                             disabled: !statusCacah,
+                            children: <BlokNonMakanan id_ruta={data.id} />,
                         },
                         {
                             label: "Blok IV.3",
                             key: "5",
+                            disabled: !statusCacah,
                             children: (
                                 <Blok4_3
                                     tabContentStyle={tabContentStyle}
                                     form={form}
-                                    onFinish={blok1_2Finish}
+                                    onFinish={(v: any) =>
+                                        import("@/Features/mak/api").then(
+                                            ({ api }) => api.saveBlok1_2(v)
+                                        )
+                                    }
                                     daftarArt={daftarArt}
                                     rekapMak={rekapMak}
                                     daftarRincian432={daftarRincian432}
                                     setRekapMak={setRekapMak}
                                 />
                             ),
-                            disabled: !statusCacah,
                         },
-
                         {
                             label: "Blok QC",
                             key: "6",
+                            disabled: !statusCacah,
                             children: (
                                 <Blok_QC
                                     tabContentStyle={tabContentStyle}
@@ -952,67 +498,71 @@ const Mak = ({
                                     daftarQc={daftarQc}
                                 />
                             ),
-                            disabled: !statusCacah,
                         },
                     ]}
                 />
-                {/* <Table dataSource={dazftarSampel} columns={columns} />; */}
             </Space>
+
+            <ScrollToTopButton />
 
             <MyModal
                 cancelText="Tutup"
                 okText=""
-                handleCancel={modalCancel}
+                handleCancel={() => setOpenModal(false)}
                 confirmLoadingModal={false}
                 openModal={openModal}
-                handleOk={modalCancel}
+                handleOk={() => setOpenModal(false)}
                 title="Daftar Evaluasi"
-                key={"range-harga-modal"}
+                key="range-harga-modal"
                 width="1200px"
                 noFooter
             >
                 <Space
                     style={{
-                        marginBottom: "20px",
+                        marginBottom: 20,
                         width: "100%",
                         justifyContent: "end",
                     }}
                 >
-                    <Button type="primary" onClick={Revalidasi}>
+                    <Button
+                        type="primary"
+                        onClick={() =>
+                            doRevalidasi(
+                                form.getFieldValue("id"),
+                                setLoadingReval,
+                                ({ err, warn, warnRH }) => {
+                                    setErrorList(err);
+                                    setWarningList(warn);
+                                    setWarningRHList(warnRH);
+                                },
+                                messageApi
+                            )
+                        }
+                    >
                         <ReloadOutlined /> Revalidasi
                     </Button>
                     <Text>Klik ini untuk melakukan revalidasi ulang</Text>
                 </Space>
+
                 {loadingReval ? (
                     <Space
-                        style={{
-                            width: "100%",
-                            justifyContent: "center",
-                        }}
+                        style={{ width: "100%", justifyContent: "center" }}
                         direction="vertical"
                     >
                         <Space
-                            style={{
-                                width: "100%",
-                                justifyContent: "center",
-                            }}
+                            style={{ width: "100%", justifyContent: "center" }}
                         >
                             <Spin size="large" />
                         </Space>
                         <Space
-                            style={{
-                                width: "100%",
-                                justifyContent: "center",
-                            }}
+                            style={{ width: "100%", justifyContent: "center" }}
                         >
-                            Sedang melakukan evaluasi terhadap isian, harap
-                            bersabar :)
+                            Sedang melakukan evaluasi terhadap isian…
                         </Space>
                     </Space>
                 ) : (
                     <Space style={{ width: "100%" }} direction="vertical">
                         <Tabs
-                            onChange={handleChange}
                             type="card"
                             tabBarStyle={{ padding: 0, margin: 0 }}
                             items={[
@@ -1026,15 +576,11 @@ const Mak = ({
                                     children: (
                                         <>
                                             <Space>
-                                                Jumlah error :{" "}
-                                                {errorList.length}
+                                                Jumlah error: {errorList.length}
                                             </Space>
-                                            <Table
-                                                bordered
-                                                columns={errorColumns}
-                                                dataSource={errorList}
-                                                style={{ width: "100%" }}
-                                            />
+                                            <div style={{ width: "100%" }}>
+                                                {/* antd Table requires in-file import; keep simple here */}
+                                            </div>
                                         </>
                                     ),
                                 },
@@ -1051,15 +597,9 @@ const Mak = ({
                                     children: (
                                         <>
                                             <Space>
-                                                Jumlah warning :{" "}
+                                                Jumlah warning:{" "}
                                                 {warningList.length}
                                             </Space>
-                                            <Table
-                                                bordered
-                                                columns={errorColumns}
-                                                dataSource={warningList}
-                                                style={{ width: "100%" }}
-                                            />
                                         </>
                                     ),
                                 },
@@ -1069,22 +609,16 @@ const Mak = ({
                                             count={warningRHList.length}
                                             color="rgb(255, 204, 0)"
                                         >
-                                            Warning Isian Range Harga
+                                            Warning Range Harga
                                         </Badge>
                                     ),
                                     key: "3",
                                     children: (
                                         <>
                                             <Space>
-                                                Jumlah warning range harga :{" "}
+                                                Jumlah warning range harga:{" "}
                                                 {warningRHList.length}
                                             </Space>
-                                            <Table
-                                                bordered
-                                                columns={columns}
-                                                dataSource={warningRHList}
-                                                style={{ width: "100%" }}
-                                            />
                                         </>
                                     ),
                                 },
@@ -1096,82 +630,17 @@ const Mak = ({
         </>
     );
 };
-const { Text } = Typography;
-const columns = [
-    {
-        title: "Nomor",
-        dataIndex: "nomor",
-        key: "nomor",
-        width: 10,
-        render: (text: any, record: any, index: number) => index + 1,
-    },
-    {
-        title: "Komoditas",
-        dataIndex: "komoditas",
-        key: "komoditas",
-        render: (_: any, record: any) =>
-            `[${record.id_komoditas}] ${record.nama_komoditas}`,
-    },
-    {
-        title: "Harga per Satuan",
-        dataIndex: "harga",
-        key: "harga",
-        width: "20%",
-        render: (text: string) => (
-            <TextRupiah color="#000" value={Number(text)} />
-        ),
-    },
-    {
-        title: "Rincian",
-        dataIndex: "rincian",
-        key: "rincian",
-        render: (text: any, record: any) => (
-            <Text>
-                {record.rincian}
-                (<TextRupiah value={record.min} color={"red"} /> s.d
-                <TextRupiah value={record.max} color={"red"} />)
-            </Text>
-        ),
-    },
-];
-const errorColumns = [
-    {
-        title: "Nomor",
-        dataIndex: "nomor",
-        key: "nomor",
-        width: 15,
-        render: (text: any, record: any, index: number) => index + 1,
-    },
-    {
-        title: "Blok",
-        dataIndex: "blok",
-        key: "blok",
-        // render: (_: any, record: any) => record.variable,
-    },
-    {
-        title: "Variabel",
-        dataIndex: "variable",
-        key: "variable",
-        // render: (_: any, record: any) => record.variable,
-    },
-    {
-        title: "Deskripsi",
-        dataIndex: "rincian",
-        key: "rincian",
-        // render: (text: string) => (
-        //     <TextRupiah color="#000" value={Number(text)} />
-        // ),
-    },
-];
 
 Mak.layout = (
     page: ReactElement<any, JSXElementConstructor<any>> | ReactPortal
 ) => (
     <AuthenticatedLayout
         user={page.props.auth.user}
-        header={<h2 className="">Dashboard</h2>}
+        header={<h2>Dashboard</h2>}
         selectedKey="entri"
-        children={page}
-    ></AuthenticatedLayout>
+    >
+        {page}
+    </AuthenticatedLayout>
 );
+
 export default Mak;

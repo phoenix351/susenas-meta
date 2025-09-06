@@ -1,1 +1,0 @@
-import{_ as n,f as r,h as a}from"./app-d413edc3.js";var m=function(){function t(s,e){r(this,t),a(this,"name",void 0),a(this,"style",void 0),a(this,"_keyframe",!0),this.name=s,this.style=e}return n(t,[{key:"getName",value:function(){var e=arguments.length>0&&arguments[0]!==void 0?arguments[0]:"";return e?"".concat(e,"-").concat(this.name):this.name}}]),t}();export{m as K};

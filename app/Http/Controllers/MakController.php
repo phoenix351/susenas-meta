@@ -1322,13 +1322,13 @@ class MakController extends Controller
                 return response()->json(['error' => 'Anda tidak memiliki cukup hak akses'], 403);
             }
             DB::beginTransaction();
-            $mak = SusenasMak::where('id', $id_ruta);
-            $mak->konsumsi()->delete();
+            $mak = SusenasMak::findOrFail($id_ruta);
+            $mak->konsumsi_ruta()->delete();
             // $mak->konsumsi_art()->delete();
             $daftar_art = $mak->anggota_ruta();
             foreach ($daftar_art as  $art) {
                 # code...
-                $art->konsumsi()->delete();
+                $art->konsumsi_ruta()->delete();
                 $art->delete();
             }
             $mak->konsumsi_non_makanan()->delete();
@@ -1340,6 +1340,7 @@ class MakController extends Controller
             ], 204);
         } catch (\Throwable $th) {
             DB::rollBack();
+            throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }

@@ -17,34 +17,34 @@ class UsersSeeder extends Seeder
     public function run(): void
     {
 
-        $users = array(
-            array(
-                'nama_lengkap' => 'Abdul Aziz Makhrus, S.Tr.Stat',
-                'nip' => '1997',
-                'role' => 'ADMIN',
-                'jabatan' => 'Staf BPS Provinsi',
-                'kode_kabkot' => '00',
-                'username' => 'aziz',
-                'password' => 'oke.lah',
-            ),
-            array(
-                'nama_lengkap' => 'Ponimin, S.Tr.Stat.',
-                'username' => 'ponim',
-                'jabatan' => 'Staf BPS Provinsi',
-                'role' => 'ADMIN',
-                'nip' => '199810132021041001',
-                'kode_kabkot' => '00',
-                'password' => '123',
-            ),
-        );
+        // $users = array(
+        //     array(
+        //         'nama_lengkap' => 'Abdul Aziz Makhrus, S.Tr.Stat',
+        //         'nip' => '1997',
+        //         'role' => 'ADMIN',
+        //         'jabatan' => 'Staf BPS Provinsi',
+        //         'kode_kabkot' => '00',
+        //         'username' => 'aziz',
+        //         'password' => 'oke.lah',
+        //     ),
+        //     array(
+        //         'nama_lengkap' => 'Ponimin, S.Tr.Stat.',
+        //         'username' => 'ponim',
+        //         'jabatan' => 'Staf BPS Provinsi',
+        //         'role' => 'ADMIN',
+        //         'nip' => '199810132021041001',
+        //         'kode_kabkot' => '00',
+        //         'password' => '123',
+        //     ),
+        // );
 
 
 
-        foreach ($users as $key => $value) {
-            $value['password'] = Hash::make($value['password']);
-            $value['email'] = $value['username'] . "@ssnmeta.sulut";
-            User::create($value);
-        }
+        // foreach ($users as $key => $value) {
+        //     $value['password'] = Hash::make($value['password']);
+        //     $value['email'] = $value['username'] . "@ssnmeta.sulut";
+        //     User::create($value);
+        // }
         $file_name = 'public/seeders/users.csv';
         // dd(Storage::allDirectories('.'));
         if (Storage::exists($file_name)) {
@@ -53,9 +53,10 @@ class UsersSeeder extends Seeder
             $csv_data = file_get_contents($file_name);
         }
         $lines = preg_split("/\r\n|\n|\r/", $csv_data);
-        $rows = array_map(fn($line) => str_getcsv($line, ";"), $lines);        $headers = array_shift($rows);
+        $rows = array_map(fn($line) => str_getcsv($line, ";"), $lines);
+        $headers = array_shift($rows);
         foreach ($rows as $index => $row) {
-            if($index==0) {
+            if ($index == 0) {
                 continue;
             }
             $row[2] = preg_replace("/[^0-9]/", "", $row[2]);
