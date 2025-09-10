@@ -105,15 +105,11 @@ const Blok4_3: React.FC<{
 
     const [messageApi, contextHolder] = message.useMessage();
 
-
     const [rekapArt, setRekapArt] = useState({
         12: { beli: 0, produksi: 0, total: 0 },
         13: { beli: 0, produksi: 0, total: 0 },
     });
-    // const [rekapArt, setRekapArt] = useState([
-    //     { beli: 0, produksi: 0, total: 0 },
-    //     { beli: 0, produksi: 0, total: 0 },
-    // ]);
+
     const calculateSummary = (data: any) => {
         // console.log("call calculate");
         let calculate = data.reduce((summary: any[], item: any) => {
@@ -214,7 +210,6 @@ const Blok4_3: React.FC<{
                             form={form}
                             tipe="jumlah"
                         />
-                       
                     )}
                 </Blok>
                 {/* blok 4.3.2  */}
