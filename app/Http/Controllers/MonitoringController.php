@@ -491,9 +491,18 @@ class MonitoringController extends Controller
 
         // 2) Per-kapita metrics
         $konsumsi            = $this->konsumsi_perkapita_total($kode_kabkot);
+
+        // dd($konsumsi);
         $konsumsi_total      = round((float)($konsumsi['total']  ?? 0), 3);
         $konsumsi_basket     = round((float)($konsumsi['basket'] ?? 0), 3);
         $jumlah_individu     = (int)  ($konsumsi['jumlah_individu'] ?? 0);
+        // dd([
+        //     $kode_kabkot,
+        //     $jumlah_ruta,
+        //     $jumlah_individu,
+        //     $konsumsi_total,
+        //     $konsumsi_basket
+        // ]);
 
         // 3) Aggregate row (id_komoditas = 0 sentinel)
         $aggRow = [
@@ -502,16 +511,13 @@ class MonitoringController extends Controller
             'sum_volume'                            => 0,  // keep numeric defaults; optional
             'sum_kalori'                            => 0,
             'average_harga'                         => 0,
-            'konsumsi_perkapita_total'              => $konsumsi_total,
-            'konsumsi_perkapita_basket_komoditas'   => $konsumsi_basket,
-            'jumlah_individu'                       => $jumlah_individu,
-            'jumlah_ruta'                           => $jumlah_ruta,
             'created_at'                            => now(),
             'updated_at'                            => now(),
         ];
 
         // 4) Per-komoditas rows
         $komoditas_summary = $this->komoditas_summary($kode_kabkot);
+        // dd($komoditas_summary);
         $now = now();
         $detailRows = [];
         foreach ($komoditas_summary as $k) {
@@ -532,7 +538,6 @@ class MonitoringController extends Controller
             'konsumsi_perkapita_basket_komoditas' => $konsumsi_basket,
             'jumlah_individu'                     => $jumlah_individu,
             'jumlah_ruta'                         => $jumlah_ruta,
-            'updated_at'                          => $now,
         ];
 
         // 6) Atomic save
@@ -545,10 +550,6 @@ class MonitoringController extends Controller
                     'sum_volume',
                     'sum_kalori',
                     'average_harga',
-                    'konsumsi_perkapita_total',
-                    'konsumsi_perkapita_basket_komoditas',
-                    'jumlah_individu',
-                    'jumlah_ruta',
                     'updated_at'
                 ]
             );
@@ -566,6 +567,7 @@ class MonitoringController extends Controller
 
             // Mirror to kabkot_summary (optional, only if kab/kot != "00")
             if ($kode_kabkot !== '00') {
+                // dd($kabkotRow);
                 DB::table('kabkot_summary')
                     ->where('kode_kabkot', $kode_kabkot)
                     ->update($kabkotRow);
@@ -579,17 +581,27 @@ class MonitoringController extends Controller
         // Disable the execution time limit for this request
         set_time_limit(0);
 
-        $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
+        // $this->hitung_summary_kabupaten_kota("06");
+        $daftar_kabkot = DB::table('kabkot')
+            ->selectRaw("LPAD(kode, 2, '0') as kode")
+            ->where('kode', '!=', '00') // exclude "00" (Provinsi)
+            ->get();
+        // dd($daftar_kabkot[0]->kode);
+        $up = [];
         foreach ($daftar_kabkot as $kabkot) {
             # code...
+            // if (!$kabkot->kode == "06") {
+            //     continue;
+            // }
 
-            $kode_kabkot = $kabkot->kode;
 
-            $this->hitung_summary_kabupaten_kota($kode_kabkot);
+            $this->hitung_summary_kabupaten_kota($kabkot->kode);
+            $up[] = $kabkot->kode;
             // continue;
         }
         return response()->json([
-            "message" => "selesai menghitung summary"
+            "message" => "selesai menghitung summary",
+            "updated" => $up
         ], 200);
     }
 }

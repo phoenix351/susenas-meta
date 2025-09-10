@@ -258,6 +258,24 @@ const Mak = ({
         // route-level rekap
         setRekapMak((prev) => {
             const next = [...prev];
+            next[12] = withAgg.reduce(
+                (acc: any, curr: any) => {
+                    acc.beli += curr.rekap[12]?.beli || 0;
+                    acc.produksi += curr.rekap[12]?.produksi || 0;
+                    acc.total += curr.rekap[12]?.total || 0;
+                    return acc;
+                },
+                { beli: 0, produksi: 0, total: 0 }
+            );
+            next[13] = withAgg.reduce(
+                (acc: any, curr: any) => {
+                    acc.beli += curr.rekap[13]?.beli || 0;
+                    acc.produksi += curr.rekap[13]?.produksi || 0;
+                    acc.total += curr.rekap[13]?.total || 0;
+                    return acc;
+                },
+                { beli: 0, produksi: 0, total: 0 }
+            );
             rekap_konsumsi.forEach((it: any) => {
                 next[it.id_kelompok].beli = Number(it.beli);
                 next[it.id_kelompok].produksi = Number(it.produksi);
@@ -265,6 +283,7 @@ const Mak = ({
                     Number(it.beli) + Number(it.produksi);
             });
             next[16].total = data.blok4_32_16_total;
+
             // recompute 15/18
             next[14] = next.slice(0, 14).reduce(
                 (p, c) => ({
@@ -274,6 +293,8 @@ const Mak = ({
                 }),
                 { beli: 0, produksi: 0, total: 0 }
             );
+            console.log({ next });
+
             next[15].total = Math.round((next[14].total * 30) / 7);
             next[17].total = next[15].total + next[16].total;
             return next;
