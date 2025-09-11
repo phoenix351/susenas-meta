@@ -575,6 +575,54 @@ class MonitoringController extends Controller
         });
     }
 
+    public function calculate_ruta_summary($kode_kabkot)
+    {
+        DB::connection()->disableQueryLog();
+
+        // Restrict to the current kab/kota routes
+        $rutaBase = DB::table('vsusenas_mak')
+            ->select('id')
+            ->where('status_dok', 'clean')
+            ->when($kode_kabkot !== '00', fn($q) => $q->where('kode_kabkot', $kode_kabkot));
+
+        // Aggregate kalori from ruta-level konsumsi
+        $kaloriRuta = DB::table('konsumsi as kr')
+            ->join('komoditas as k', 'k.id', '=', 'kr.id_komoditas')
+            ->select('kr.id_ruta as id_ruta', DB::raw('SUM(kr.volume_total * k.kalori) as kalori_ruta'))
+            ->whereIn('kr.id_ruta', $rutaBase)
+            ->groupBy('kr.id_ruta');
+
+        // Aggregate kalori from anggota-level konsumsi
+        $kaloriArt = DB::table('konsumsi_art as ka')
+            ->join('komoditas as k', 'k.id', '=', 'ka.id_komoditas')
+            ->join('anggota_ruta as ar', 'ar.id', '=', 'ka.id_art')
+            ->select('ar.id_ruta as id_ruta', DB::raw('SUM(ka.volume_total * k.kalori) as kalori_art'))
+            ->whereIn('ar.id_ruta', $rutaBase)
+            ->groupBy('ar.id_ruta');
+
+        // Count anggota per ruta
+        $jumlahArt = DB::table('anggota_ruta as ar')
+            ->select('ar.id_ruta as id_ruta', DB::raw('COUNT(*) as jumlah_art'))
+            ->whereIn('ar.id_ruta', $rutaBase)
+            ->groupBy('ar.id_ruta');
+
+        // Merge the aggregates and upsert
+        $rows = DB::query()
+            ->fromSub($rutaBase, 'r')
+            ->leftJoinSub($kaloriRuta, 'kr', 'kr.id_ruta', '=', 'r.id')
+            ->leftJoinSub($kaloriArt, 'ka', 'ka.id_ruta', '=', 'r.id')
+            ->leftJoinSub($jumlahArt, 'ja', 'ja.id_ruta', '=', 'r.id')
+            ->selectRaw('r.id as id_ruta, COALESCE(kr.kalori_ruta,0)+COALESCE(ka.kalori_art,0) as kalori, COALESCE(ja.jumlah_art,0) as jumlah_art')
+            ->get()
+            ->map(fn($x) => (array)$x)
+            ->all();
+
+        if (!empty($rows)) {
+            DB::table('temp_ruta_summary')->upsert($rows, ['id_ruta'], ['kalori', 'jumlah_art']);
+        }
+    }
+
+
 
     public function update_dashboard()
     {
@@ -595,7 +643,8 @@ class MonitoringController extends Controller
             // }
 
 
-            $this->hitung_summary_kabupaten_kota($kabkot->kode);
+            // $this->hitung_summary_kabupaten_kota($kabkot->kode);
+            $this->calculate_ruta_summary($kabkot->kode);
             $up[] = $kabkot->kode;
             // continue;
         }
