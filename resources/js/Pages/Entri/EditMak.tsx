@@ -206,6 +206,8 @@ const Mak = ({
                 return acc;
             }, {} as Record<string, any>),
         });
+        // console.log({ art });
+
         artForm.setFieldsValue({ id_ruta: data.id });
 
         setLastSaved(new Date(data.updated_at));
@@ -293,7 +295,7 @@ const Mak = ({
                 }),
                 { beli: 0, produksi: 0, total: 0 }
             );
-            console.log({ next });
+            // console.log({ next });
 
             next[15].total = Math.round((next[14].total * 30) / 7);
             next[17].total = next[15].total + next[16].total;

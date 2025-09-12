@@ -73,7 +73,7 @@ const Blok4_1: React.FC<{
     const blok4_1_hal2Finish = (values: any) => {};
 
     // usestate
-    
+
     const [activeKey, setActiveKey] = useState("0");
     const [listKomoditas, setListKomoditas] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -191,24 +191,11 @@ const Blok4_1: React.FC<{
         };
         fetchKomoditasList(187, 225);
         setLoading(false);
-        // const items = daftarArt.map((art: any, index: number) => ({
-        //     label: art.nama,
-        //     key: String(index),
-        //     children: (
-        //         <Art
-        //             onFinish={blok4_1_hal2Finish}
-        //             nomor_art={index}
-        //             daftarArt={daftarArt}
-        //             setDaftarArt={setDaftarArt}
-        //             id_ruta={artForm.getFieldValue("id_ruta")}
-        //             art={art}
-        //             id_art={art.id}
-        //             calculateKalori={calculateKalori}
-        //             konten={listKomoditas}
-        //         />
-        //     ),
-        // }));
-        // setItems([...items]);
+        daftarArt.forEach((art: any, index: number) => {
+            artForm.setFieldValue(`${index}-id_art`, art.id);
+            artForm.setFieldValue(`${index}-nama`, art.nama);
+        });
+        // console.log({ daftarArt });
     }, []);
 
     return (

@@ -37,6 +37,7 @@ class AnggotaRutaController extends Controller
         try {
             //code...
             $data_received = $request->all();
+            // dd($data_received);
             $converted = [];
             foreach ($data_received as $key => $value) {
                 $splitted = explode('-', $key);
@@ -59,8 +60,10 @@ class AnggotaRutaController extends Controller
                 }
             }
             $converted = array_values($converted);
+            // dd($converted, $data_received);
             $baru = [];
             DB::beginTransaction();
+
             foreach ($converted as $item) {
                 if (!isset($item['id_art'])) {
                     continue;
@@ -77,6 +80,7 @@ class AnggotaRutaController extends Controller
                 unset($new_item['id_art']);
                 $art->update($new_item);
             }
+
             DB::commit();
 
             return response()->json($baru, 201);
