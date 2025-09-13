@@ -1,0 +1,1 @@
+import{a as t}from"./app-8777bc2e.js";import{S as e}from"./Skeleton-8d0aa0f9.js";import"./Keyframes-bc51cb6f.js";import"./AntdIcon-34673d7b.js";const m=()=>t(e.Button,{active:!0,block:!0,style:{height:"70px"}});export{m as default};

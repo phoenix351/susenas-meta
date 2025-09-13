@@ -181,6 +181,7 @@ const Art: React.FC<{
     // kumpulan useeffect
     useEffect(() => {
         const fetchKonsumsiArt = async (id_art: string) => {
+            if (!id_art) return;
             setLoading(true);
             const { data } = await axios.get(
                 route("api.konsumsi.art.fetch", { id_art: id_art })

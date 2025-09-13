@@ -118,6 +118,22 @@ const Blok4_1: React.FC<{
             setArtLoading(false);
         }
     };
+    const autosaveName = _debounce(
+        async (id_art: string, nama: string) => {
+            if (!id_art) return; // don't try to save if not created yet
+            try {
+                await axios.put(route("entri.mak.art.update", { id_art }), {
+                    nama,
+                });
+                // optionally: messageApi.success("Tersimpan otomatis");
+            } catch (err) {
+                console.error("Autosave (nama) failed:", err);
+                // optionally: messageApi.error("Gagal menyimpan otomatis");
+            }
+        },
+        800 // debounce delay; tweak as you like
+    );
+
     const remove = async (index: number) => {
         const id_art = artForm.getFieldValue(`${index}-id_art`);
         if (index === 0) {
@@ -160,9 +176,15 @@ const Blok4_1: React.FC<{
 
     const handleCellEdit = (index: number, key: string, value: any) => {
         const updatedArts = [...daftarArt];
+        const trimmed = typeof value === "string" ? value.trim() : value;
 
-        updatedArts[index][key] = value.trim();
+        updatedArts[index][key] = trimmed;
         setDaftarArt(updatedArts);
+
+        if (key === "nama") {
+            const id_art = updatedArts[index]?.id;
+            autosaveName(id_art, trimmed);
+        }
     };
 
     const debounceCellEdit = _debounce(handleCellEdit, 1000);
@@ -170,9 +192,9 @@ const Blok4_1: React.FC<{
 
     // generate art components
 
+    // generate art components
     useEffect(() => {
         const fetchKomoditasList = async (from: number, to: number) => {
-            // setLoading(true);
             const { data } = await axios.get(
                 route("api.mak.komoditas.list", { from: from, to: to })
             );
@@ -183,19 +205,64 @@ const Blok4_1: React.FC<{
                 satuan: item.satuan,
                 type: item.type,
                 subKey: item.id_kelompok,
-                // subKey: item.id_kelompok == 13 ? 1 : 0,
                 flagBasket: item.flag_basket,
             }));
-            // console.log({ konten });
             setListKomoditas([...konten]);
         };
+
         fetchKomoditasList(187, 225);
         setLoading(false);
-        daftarArt.forEach((art: any, index: number) => {
-            artForm.setFieldValue(`${index}-id_art`, art.id);
-            artForm.setFieldValue(`${index}-nama`, art.nama);
-        });
-        // console.log({ daftarArt });
+
+        (async () => {
+            // ✅ If only 1 ART and its id is empty, create it and set the returned id
+            if (
+                Array.isArray(daftarArt) &&
+                daftarArt.length === 1 &&
+                (!daftarArt[0]?.id || daftarArt[0].id === "")
+            ) {
+                setArtLoading(true);
+                try {
+                    const payload = {
+                        id_ruta,
+                        nama: daftarArt[0]?.nama || "Art-0",
+                        nomor_art: 0,
+                        rekap: daftarArt[0]?.rekap ?? {
+                            12: { produksi: 0, beli: 0, total: 0 },
+                            13: { produksi: 0, beli: 0, total: 0 },
+                        },
+                    };
+
+                    const { data } = await axios.post(
+                        route("entri.mak.art.store"),
+                        payload
+                    );
+
+                    const first = {
+                        ...daftarArt[0],
+                        id: data.id, // ← set id from response
+                        id_ruta,
+                        nomor_art: 0,
+                        rekap: payload.rekap,
+                    };
+
+                    setDaftarArt([first]);
+                    // also reflect in the form immediately
+                    artForm.setFieldValue(`0-id_art`, data.id);
+                    artForm.setFieldValue(`0-nama`, first.nama);
+                } catch (err) {
+                    console.error("Error creating first ART:", err);
+                } finally {
+                    setArtLoading(false);
+                }
+                return; // stop here; we already set form values above
+            }
+
+            // Normal path: preload form fields from existing daftarArt
+            daftarArt.forEach((art: any, index: number) => {
+                artForm.setFieldValue(`${index}-id_art`, art.id);
+                artForm.setFieldValue(`${index}-nama`, art.nama);
+            });
+        })();
     }, []);
 
     return (

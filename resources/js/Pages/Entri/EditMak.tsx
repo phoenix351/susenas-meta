@@ -214,6 +214,7 @@ const Mak = ({
         ubahStatusPencacahan(data.r203);
 
         // ART list: ensure at least 1
+
         const arts = (
             art?.length
                 ? art
