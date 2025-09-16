@@ -249,9 +249,9 @@ const Blok1_2: React.FC<{
             form.getFieldValue("semester")
         );
         // console.log({ isUnique, value });
-        if (value > 10) {
-            return Promise.reject("Nomor Sampel maksimal 10");
-        }
+        // if (value > 10) {
+        //     return Promise.reject("Nomor Sampel maksimal 10");
+        // }
 
         return isUnique
             ? Promise.resolve()
