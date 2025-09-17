@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnggotaRutaController;
 use App\Http\Controllers\CalculateController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\KomoditasController;
 
 use App\Http\Controllers\MakController;
@@ -98,6 +99,7 @@ Route::middleware('auth')->group(function () {
     route::get('/panduan', [PanduanController::class, 'index'])->name('panduan.index');
 
     route::get('/calculate/export/{table_name}', [CalculateController::class, 'export'])->name('calculate.export');
+    route::get('/export/konsumsi-art', [ExportController::class, 'konsumsi_art'])->name('export.konsumsi_art');
 });
 
 require __DIR__ . '/auth.php';

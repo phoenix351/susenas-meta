@@ -20,13 +20,14 @@ use Inertia\Inertia;
 
 class MakController extends Controller
 {
+    private $wtfDependecies = [];
+    private $semester = '2';
     private function eligileToUpdate()
     {
         // dd(App::environment());
         return true;
         return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("localx"));
     }
-    private $wtfDependecies = [];
     public function is_any_zero($a, $b)
     {
         if (!isset($a)) {
@@ -77,7 +78,7 @@ class MakController extends Controller
         $value = $request->input('value');
         $kode_kabkot = $request->input('kode_kabkot');
         $nks = $request->input('nks');
-        $semester = $request->input('semester');
+
         $id = $request->input('currentRecordId');
         // dd($id);
 
@@ -85,7 +86,7 @@ class MakController extends Controller
             ->where('id', '<>', $id)
             ->where('kode_kabkot', $kode_kabkot)
             ->where('nks', $nks)
-            ->where("semester", $semester)
+            ->where("semester", $this->semester)
             ->exists();
         // dd($exists);
 
@@ -127,7 +128,7 @@ class MakController extends Controller
             ->get();
     }
     //* @param Type var Description
-    private function get_ruta($kode_kabkot, $nks, $semester = '1', $id_ruta = '-1')
+    private function get_ruta($kode_kabkot, $nks, $semester, $id_ruta = '-1')
     {
         if ($id_ruta == '-1') {
 
@@ -159,14 +160,10 @@ class MakController extends Controller
             //code...
             $kode_kabkot = $request->kode_kabkot;
             $nks = $request->nks;
-            $semester = $request->semester;
 
-            if (!isset($semester)) {
-                $semester = '1';
-            }
-            $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+            $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
 
-            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks, 'semester' => $semester]);
+            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks, 'semester' => $this->semester]);
         } catch (\Throwable $th) {
             // throw $th;
             return response()->json(['error' => 'Error during fetching data'], 500);
@@ -181,11 +178,8 @@ class MakController extends Controller
             //code...
             $kode_kabkot = $request->kode_kabkot;
             $nks = $request->nks;
-            $semester = $request->semester;
-            if (isset($semester)) {
-                $semester = '1';
-            }
-            $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+
+            $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
 
             //  return response()->json($data, 200);
             return Inertia::render('Kelola Entri/Main', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks]);
@@ -260,16 +254,15 @@ class MakController extends Controller
     public function fetch(Request $request)
     {
         $kode_kabkot = $request->query('kode_kabkot');
-        $semester = $request->query('semester');
         $provinsi = $request->query('kode_prov');
         $nks = $request->query('nks');
 
-        $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+        $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
 
         // $data = $query->get();
         return response()->json([
             'data' => $data,
-            'semester' => $semester,
+            'semester' => $this->semester,
             'kabkot' => $kode_kabkot,
             'provinsi' => $provinsi,
             'nks' => $nks
@@ -592,7 +585,7 @@ class MakController extends Controller
             "Entri/CreateMak",
             [
                 'identitas_wilayah' => $master_wilayah,
-                'semester' => $request->semester,
+                'semester' => $this->semester,
                 'user' => $user
             ]
         );
