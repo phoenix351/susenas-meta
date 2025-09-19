@@ -20,13 +20,14 @@ use Inertia\Inertia;
 
 class MakController extends Controller
 {
+    private $wtfDependecies = [];
+    private $semester = '2';
     private function eligileToUpdate()
     {
         // dd(App::environment());
         return true;
         return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("localx"));
     }
-    private $wtfDependecies = [];
     public function is_any_zero($a, $b)
     {
         if (!isset($a)) {
@@ -43,12 +44,41 @@ class MakController extends Controller
 
         return ($a != 0 && $b == 0) || ($b != 0 && $a == 0);
     }
+    public function is_variable_filled($vars, $mode = 'all')
+    {
+        // normalize single values into an array
+        if (!is_array($vars)) {
+            $vars = [$vars];
+        }
+
+        $check = function ($v) {
+            return isset($v) && $v !== null && $v !== '';
+        };
+
+        if ($mode === 'any') {
+            foreach ($vars as $v) {
+                if ($check($v)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // default: require all
+        foreach ($vars as $v) {
+            if (!$check($v)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function cek_nomor_sampel(Request $request)
     {
         $value = $request->input('value');
         $kode_kabkot = $request->input('kode_kabkot');
         $nks = $request->input('nks');
-        $semester = $request->input('semester');
+
         $id = $request->input('currentRecordId');
         // dd($id);
 
@@ -56,12 +86,26 @@ class MakController extends Controller
             ->where('id', '<>', $id)
             ->where('kode_kabkot', $kode_kabkot)
             ->where('nks', $nks)
-            ->where("semester", $semester)
+            ->where("semester", $this->semester)
             ->exists();
         // dd($exists);
 
         return response()->json(['exists' => $exists]);
     }
+    public function has_target_konsumsi($daftarArt, $targetIds = [189, 194, 196, 200, 211])
+    {
+        foreach ($daftarArt as $art) {
+            if (!empty($art->konsumsi)) {
+                foreach ($art->konsumsi as $k) {
+                    if (in_array($k->id_komoditas, $targetIds)) {
+                        return true; // found match → no need to continue
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private function get_konsumsi_ruta($id_ruta)
     {
         return Konsumsi::where('id_ruta', $id_ruta)
@@ -84,7 +128,7 @@ class MakController extends Controller
             ->get();
     }
     //* @param Type var Description
-    private function get_ruta($kode_kabkot, $nks, $semester = '1', $id_ruta = '-1')
+    private function get_ruta($kode_kabkot, $nks, $semester, $id_ruta = '-1')
     {
         if ($id_ruta == '-1') {
 
@@ -116,16 +160,13 @@ class MakController extends Controller
             //code...
             $kode_kabkot = $request->kode_kabkot;
             $nks = $request->nks;
-            $semester = $request->semester;
 
-            if (!isset($semester)) {
-                $semester = '1';
-            }
-            $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+            $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
 
-            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks, 'semester' => $semester]);
+            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks, 'semester' => $this->semester]);
         } catch (\Throwable $th) {
-            throw $th;
+            // throw $th;
+            return response()->json(['error' => 'Error during fetching data'], 500);
         }
 
         return Inertia::render('Entri/Inti');
@@ -137,11 +178,8 @@ class MakController extends Controller
             //code...
             $kode_kabkot = $request->kode_kabkot;
             $nks = $request->nks;
-            $semester = $request->semester;
-            if (isset($semester)) {
-                $semester = '1';
-            }
-            $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+
+            $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
 
             //  return response()->json($data, 200);
             return Inertia::render('Kelola Entri/Main', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks]);
@@ -198,34 +236,33 @@ class MakController extends Controller
             DB::beginTransaction();
             $created_mak = SusenasMak::create($input);
             // create default art
-            $art = AnggotaRuta::create([
-                'id_ruta' => $created_mak->id,
-                'nama' => 'art default',
-                'nomor_art' => 0,
-            ]);
+            // $art = AnggotaRuta::create([
+            //     'id_ruta' => $created_mak->id,
+            //     'nama' => 'art default',
+            //     'nomor_art' => 0,
+            // ]);
             DB::commit();
 
             return response()->json($created_mak, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
-            return response()->json(['error' => 'Error processing data'], 500);
+            // throw $th;
+            return response()->json(['error' => 'Error during saving data'], 500);
         }
     }
 
     public function fetch(Request $request)
     {
         $kode_kabkot = $request->query('kode_kabkot');
-        $semester = $request->query('semester');
         $provinsi = $request->query('kode_prov');
         $nks = $request->query('nks');
 
-        $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+        $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
 
         // $data = $query->get();
         return response()->json([
             'data' => $data,
-            'semester' => $semester,
+            'semester' => $this->semester,
             'kabkot' => $kode_kabkot,
             'provinsi' => $provinsi,
             'nks' => $nks
@@ -374,7 +411,7 @@ class MakController extends Controller
             return response()->json($data, 200);
         } catch (\Throwable $th) {
             DB::rollback();
-            throw $th;
+            // throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
@@ -527,7 +564,7 @@ class MakController extends Controller
             return response()->json($baru, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
+            // throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
@@ -548,7 +585,7 @@ class MakController extends Controller
             "Entri/CreateMak",
             [
                 'identitas_wilayah' => $master_wilayah,
-                'semester' => $request->semester,
+                'semester' => $this->semester,
                 'user' => $user
             ]
         );
@@ -634,7 +671,7 @@ class MakController extends Controller
             return response()->json($data, 200);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
+            // throw $th;
 
             return response()->json(['error' => 'Error processing data'], 500);
         }
@@ -715,14 +752,28 @@ class MakController extends Controller
             }
         }
     }
+    public function has_konsumsi($konsumsiList, $targetIds)
+    {
+        foreach ($konsumsiList as $k) {
+            if (in_array($k->id_komoditas, (array) $targetIds)) {
+                if ($k->volume_beli > 0 || $k->volume_produksi > 0) {
+                    return true;
+                }
+                // return true;
+            }
+        }
+        return false;
+    }
+
     private function cek_isian_new($id_ruta)
     {
         $daftar_error = [];
         $daftar_warning = [];
         $daftar_rule = new DaftarValidasiModel();
-        $data_mak = SusenasMak::where('id', $id_ruta)->first()->toArray();
+        $ruta = SusenasMak::with(['konsumsi_ruta'])->find($id_ruta);
+        $data_mak = $ruta->toArray();
         $jumlah_art = AnggotaRuta::where('id_ruta', $id_ruta)->count();
-        $daftar_art = AnggotaRuta::where('id_ruta', $id_ruta)->get();
+        $daftar_art = AnggotaRuta::with(['konsumsi'])->where('id_ruta', $id_ruta)->get();
 
         $konsumsi_non_makanan_controller = new KonsumsiNonMakananController();
         $sum_konsumsi_non_makanan = $konsumsi_non_makanan_controller->sum_konsumsi_by_ruta($id_ruta);
@@ -1029,13 +1080,33 @@ class MakController extends Controller
 
                     $daftar_warning[] = $pesan;
                 }
-                if ($data_mak['wtf_4'] >= $data_mak['wtf_3']) {
+
+                // Case 1: daftarArt (loop each art)
+                $targetArtKomoditas = [189, 194, 196, 200, 211];
+                $foundArt = false;
+
+                foreach ($daftar_art as $art) {
+                    if ($this->has_konsumsi($art->konsumsi, $targetArtKomoditas)) {
+                        $foundArt = true;
+                        break;
+                    }
+                }
+
+                // $foundArt is true/false
+
+
+                // Case 2: ruta konsumsi
+                $hasRuta79 = $this->has_konsumsi($ruta->konsumsi_ruta, 79);
+
+
+
+                if ($data_mak['wtf_4'] == 1 && (!$foundArt || !$hasRuta79)) {
                     $pesan = [
-                        'variable' => "3. Jumlah ART yang Penerima Program MBG",
-                        'rincian' => "Jumlah ART Penerima Program MBG (Blok XI.A Rincian 1106=1)",
+                        'variable' => "3. Apakah ada ART yang menerima Program MBG",
+                        'rincian' => "Jika MBG terisi, maka salah satu dari R189/R194/R196/R200/R211 harus ada yg terisi, dan R79 harus terisi.",
                         'blok' => "Worksheet",
                         'type' => 'warning',
-                        'pesan' => "Jumlah ART Penerima Program MBG tidak boleh lebih daripada Jumlah ART bersekolah",
+                        'pesan' => "Jika MBG terisi, maka salah satu dari R189/R194/R196/R200/R211 harus ada yg terisi, dan R79 harus terisi.",
                     ];
 
                     $daftar_warning[] = $pesan;
@@ -1304,7 +1375,7 @@ class MakController extends Controller
 
             return $evaluasi_rh;
         } catch (\Exception $ex) {
-            throw new \Exception($ex);
+            // throw new \Exception($ex);
             return response()->json(['error' => 'Error processing data'], 500);
 
 
@@ -1340,14 +1411,11 @@ class MakController extends Controller
             ], 204);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
+            // throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
-    public function maintenance()
-    {
-        return Inertia::render('Maintenance');
-    }
+
     public function change_nks($id_ruta, $nks_baru)
     {
         try {

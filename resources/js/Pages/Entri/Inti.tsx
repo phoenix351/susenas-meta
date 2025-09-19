@@ -272,7 +272,6 @@ const Dashboard = ({
                     columns={columns}
                     scroll={{ x: 1000 }}
                 />
-                ;
             </Space>
         </>
     );

@@ -32,11 +32,31 @@ class AnggotaRutaController extends Controller
 
         return response()->json($data, 200);
     }
+    public function update_art(Request $request)
+    {
+        try {
+            //code...
+            $data_received = $request->all();
+            // dd($data_received);
+            if (!isset($data_received['id_art']) || !isset($data_received['nama'])) {
+                return response()->json(['error' => 'Invalid data'], 400);
+            }
+            $art = AnggotaRuta::where('id', $data_received['id_art']);
+            $art->update(['nama' => $data_received['nama']]);
+            $updated_art = $art->first();
+
+            return response()->json($updated_art, 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['error' => 'Error processing data'], 500);
+        }
+    }
     public function update(Request $request)
     {
         try {
             //code...
             $data_received = $request->all();
+            // dd($data_received);
             $converted = [];
             foreach ($data_received as $key => $value) {
                 $splitted = explode('-', $key);
@@ -59,8 +79,10 @@ class AnggotaRutaController extends Controller
                 }
             }
             $converted = array_values($converted);
+            // dd($converted, $data_received);
             $baru = [];
             DB::beginTransaction();
+
             foreach ($converted as $item) {
                 if (!isset($item['id_art'])) {
                     continue;
@@ -77,6 +99,7 @@ class AnggotaRutaController extends Controller
                 unset($new_item['id_art']);
                 $art->update($new_item);
             }
+
             DB::commit();
 
             return response()->json($baru, 201);
