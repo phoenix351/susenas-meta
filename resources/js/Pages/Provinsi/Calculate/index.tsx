@@ -8,7 +8,8 @@ import { Button, Space, message, Form, Select } from "antd";
 // import { Table } from "ant-table-extensions";
 import { SyncOutlined } from "@ant-design/icons";
 import axios from "axios";
-const API_BASE = "http://localhost:8000";
+
+const API_BASE = "https://susenas-meta.monitoringbps.com";
 
 // Build endpoints here. Update `calculate` to your real route.
 const ENDPOINTS = {
