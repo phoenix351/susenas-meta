@@ -107,3 +107,5 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 public/dist
+*.sql
+*.bat

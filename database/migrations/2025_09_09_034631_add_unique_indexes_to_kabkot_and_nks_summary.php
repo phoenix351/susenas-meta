@@ -30,20 +30,13 @@ return new class extends Migration
         // 3) Deduplicate (keep newest by id)
         // MySQL 8+ / MariaDB 10.2+ (ROW_NUMBER)
         DB::statement("
-            WITH ranked AS (
-              SELECT
-                id,
-                ROW_NUMBER() OVER (
-                  PARTITION BY kode_prov, kode_kabkot
-                  ORDER BY id DESC
-                ) AS rn
-              FROM kabkot_summary
-            )
-            DELETE ks
-            FROM kabkot_summary ks
-            JOIN ranked r ON r.id = ks.id
-            WHERE r.rn > 1
-        ");
+        DELETE ks1
+        FROM kabkot_summary ks1
+        JOIN kabkot_summary ks2
+          ON ks1.kode_prov   = ks2.kode_prov
+         AND ks1.kode_kabkot = ks2.kode_kabkot
+         AND ks1.id          < ks2.id
+    ");
 
         // 4) Add UNIQUE index to match your upsert keys
         Schema::table('kabkot_summary', function (Blueprint $table) {
