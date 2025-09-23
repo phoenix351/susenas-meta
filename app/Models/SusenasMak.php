@@ -120,7 +120,8 @@ class SusenasMak extends Model
         'wtf_23c1',
         'wtf_24c1',
         'users_id',
-        'status_dok'
+        'status_dok',
+        'catatan'
 
     ];
 
@@ -128,25 +129,25 @@ class SusenasMak extends Model
     // {
     //     return $this->attributesToArray();/
     // }
-    public function region():BelongsTo
+    public function region(): BelongsTo
     {
         return $this->belongsTo(MasterWilayah::class, 'nks', 'nks');
         // ->where("kode_kabkot","master_wilayah.kode_kabkot");
     }
     public function konsumsi_ruta(): HasMany
     {
-        return $this->hasMany(Konsumsi::class);
+        return $this->hasMany(Konsumsi::class, "id_ruta", "id");
     }
-    public function anggota_ruta():HasMany
+    public function anggota_ruta(): HasMany
     {
-        return $this->hasMany(AnggotaRuta::class,"id_ruta");
+        return $this->hasMany(AnggotaRuta::class, "id_ruta");
     }
     public function konsumsi_non_makanan(): HasMany
     {
-        return $this->hasMany(KonsumsiNonMakanan::class,"id_ruta","id");
+        return $this->hasMany(KonsumsiNonMakanan::class, "id_ruta", "id");
     }
-    public function user():BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class,"users_id","id");
+        return $this->belongsTo(User::class, "users_id", "id");
     }
 }

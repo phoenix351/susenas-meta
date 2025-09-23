@@ -101,10 +101,12 @@ const Dashboard = ({
                 })
             );
             // Do any synchronous operations relying on the updatedDaftarArt here
-        } catch (error) {
-            // console.error("Error in add function:", error);
+        } catch (error: any) {
+            let errorMessage =
+                error.response.data.error ??
+                "Terjadi kesalahan, silahkan hubungi admin";
             messageApi.open({
-                content: `Terjadi galat ketika menghapus data, tunjukan code ini pada Developer (${error})`,
+                content: errorMessage,
                 type: "error",
                 key: "hapus-ruta",
                 duration: 3,
@@ -265,7 +267,11 @@ const Dashboard = ({
                         <PlusCircleOutlined /> Tambah Ruta
                     </Button>
                 </Space>
-                <Table dataSource={daftarSampel} columns={columns} scroll={{x:1000}} />;
+                <Table
+                    dataSource={daftarSampel}
+                    columns={columns}
+                    scroll={{ x: 1000 }}
+                />
             </Space>
         </>
     );

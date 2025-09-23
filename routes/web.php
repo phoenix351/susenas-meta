@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnggotaRutaController;
 use App\Http\Controllers\CalculateController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\KomoditasController;
 
 use App\Http\Controllers\MakController;
@@ -52,15 +53,12 @@ Route::middleware('auth')->group(function () {
 
 
     route::get('/api/wilayah/kabkot', [MasterWilayahController::class, 'fetch_kabkot'])->name('api.wilayah.kabkot');
-    route::get('/api/entri/semester', function () {
-        $data = [];
-        return response()->json(['data' => $data]);
-    })->name('api.entri.semester');
 
     route::get('/entri/mak/create', [MakController::class, 'create'])->name("entri.mak.create");
     route::post('/entri/mak', [MakController::class, 'store'])->name('entri.mak.store');
     route::post('/entri/mak/art', [AnggotaRutaController::class, 'store'])->name('entri.mak.art.store');
     route::patch('/entri/mak/art', [AnggotaRutaController::class, 'update'])->name('entri.mak.art.update');
+    route::put('/entri/mak/art', [AnggotaRutaController::class, 'update_art'])->name('entri.mak.art.update_art');
     route::get('/entri/mak/art', [AnggotaRutaController::class, 'fetch'])->name('entri.mak.art.fetch');
     route::patch('/entri/mak/konsumsi', [MakController::class, 'konsumsi_store'])->name('entri.mak.konsumsi.store');
     route::patch('/entri/mak/konsumsi/art', [MakController::class, 'konsumsi_art_store'])->name('entri.mak.konsumsi_art.store');
@@ -68,9 +66,9 @@ Route::middleware('auth')->group(function () {
     route::delete('/entri/mak/delete/{id_ruta}', [MakController::class, 'delete'])->name('entri.mak.delete');
 
     route::patch('/entri/mak', [MakController::class, 'update'])->name('entri.mak.update');
-    
+
     route::get('/entri/mak/{id}', [MakController::class, 'edit'])->name('entri.mak.edit');
-      
+
     // route::get('/dashboard', [MakController::class, 'dashboard'])->name('dashboard');
     route::get('/progress', [MonitoringController::class, 'index'])->name('progress');
     route::get('/dashboard', [MonitoringController::class, 'dashboard'])->name('dashboard');
@@ -99,9 +97,9 @@ Route::middleware('auth')->group(function () {
     route::get('/komoditas/sort', [KomoditasController::class, 'sort'])->name('komoditas.sort');
 
     route::get('/panduan', [PanduanController::class, 'index'])->name('panduan.index');
-    
+
     route::get('/calculate/export/{table_name}', [CalculateController::class, 'export'])->name('calculate.export');
-  
+    route::get('/export/konsumsi-art', [ExportController::class, 'konsumsi_art'])->name('export.konsumsi_art');
 });
 
 require __DIR__ . '/auth.php';

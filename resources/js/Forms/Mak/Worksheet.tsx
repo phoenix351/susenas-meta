@@ -77,7 +77,7 @@ const daftarRincian = [
     {
         id: 3,
         nomor: 3,
-        rincian: "Jumlah ART yang masih bersekolah (R611=2)",
+        rincian: "Jumlah ART yang masih bersekolah (R503=2)",
         type: "number",
 
         rules: {
@@ -93,104 +93,8 @@ const daftarRincian = [
         id: 4,
         nomor: 4,
         rincian:
-            "Apakah ART pernah mendapat Program Makan Siang Gratis? (R618)",
-        type: "multi",
-        dependencies: ["wtf_3"],
-        rules: {
-            ruleName: "required if",
-            message:
-                "Isian ini diisi apabila Jumlah ART Bersekolah lebih dari 0",
-            status: "error",
-            dependentName: "wtf_3",
-            dependentValue: 1,
-        },
-        options: [
-            { label: "Ya, Program MBG", value: 1 },
-            { label: "Ya, Program selain MBG", value: 2 },
-            { label: "tidak mendapatkan", value: 3 },
-        ],
-        children: [
-            {
-                id: 9,
-                nomor: 9,
-                rincian:
-                    "Menu Makan Siang Gratis yang paling disukai RT? (Blok Catatan)",
-                type: "multi",
-                dependentValues: [1],
-                options: [
-                    { label: "A", value: 1 },
-                    { label: "B", value: 2 },
-                    { label: "C", value: 3 },
-                    { label: "D", value: 4 },
-                    { label: "E", value: 5 },
-                    { label: "F", value: 6 },
-                    { label: "G", value: 7 },
-                ],
-            },
-        ],
-    },
-    {
-        id: 5,
-        nomor: 5,
-        rincian: (
-            <span>
-                Luas Lantai Bangunan Utama (m<sup>2</sup>) (R1604)
-            </span>
-        ),
-        type: "number",
-    },
-    {
-        id: 6,
-        nomor: 6,
-        rincian: "Sumber air minum (R1610)",
-        type: "multi",
-        options: [
-            { label: "Air kemasan bermerk/isi ulang", value: 1 },
-            { label: "Leding", value: 2 },
-            { label: "Sumur bor/pompa/mata air", value: 3 },
-            { label: "Air sungai/danau/kolam/air hujan/lainnya", value: 4 },
-        ],
-    },
-    {
-        id: 7,
-        nomor: 7,
-        rincian: "Sumber air mandi/cuci/dll (R1614A)",
-        type: "multi",
-        options: [
-            { label: "Air kemasan bermerk/isi ulang", value: 1 },
-            { label: "Leding", value: 2 },
-            { label: "Sumur bor/pompa/mata air", value: 3 },
-            { label: "Air sungai/danau/kolam/air hujan/lainnya", value: 4 },
-        ],
-    },
-
-    {
-        id: 8,
-        nomor: 8,
-        rincian: "Apakah tercatat sebagai menerima PKH? (R2003a)",
+            "Apakah ada ART Penerima Program MBG  (Blok XI.A Rincian 1106=1)?",
         type: "binary",
-        // children: [
-        //     {
-        //         id: 9,
-        //         nomor: 9,
-        //         rincian: "Penggunaan PKH (R2003b)",
-        //         type: "multi",
-        //         dependentValues: [1],
-        //         options: [
-        //             { label: "Belanja Pangan", value: 1 },
-        //             { label: "Biaya Sekolah", value: 2 },
-        //             { label: "Pembayaran Utang/Kredit", value: 3 },
-        //             { label: "Lainnya", value: 99 },
-        //         ],
-        //     },
-        // ],
-    },
-
-    {
-        id: 26,
-        nomor: "10",
-        rincian: "Garis Kemiskinan Maret 2024",
-        type: "rupiah",
     },
 ];
 const Worksheet: React.FC<{
@@ -259,9 +163,7 @@ const Worksheet: React.FC<{
                                     >
                                         Isian Worksheet Template{" "}
                                     </Title>
-                                    <Text>
-                                        RINCIAN (Lihat Dokumen VSEN24.K)
-                                    </Text>
+                                    <Text>RINCIAN (Lihat Dokumen VSEN25M)</Text>
                                 </Space>
                             </td>
                         </tr>

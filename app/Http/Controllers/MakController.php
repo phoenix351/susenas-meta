@@ -20,21 +20,14 @@ use Inertia\Inertia;
 
 class MakController extends Controller
 {
+    private $wtfDependecies = [];
+    private $semester = '2';
     private function eligileToUpdate()
     {
         // dd(App::environment());
-        return false;
-        return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("local"));
+        return true;
+        return auth()->user()->role == "PML" || (auth()->user()->kode_kabkot == "00" && auth()->user()->role == "ADMIN" && App::environment("localx"));
     }
-    private $wtfDependecies = [
-
-        [
-            'target' => 'wtf_4',
-            'fields' => ['wtf_9'],
-            "dependentValues" => ['1']
-        ],
-
-    ];
     public function is_any_zero($a, $b)
     {
         if (!isset($a)) {
@@ -51,12 +44,41 @@ class MakController extends Controller
 
         return ($a != 0 && $b == 0) || ($b != 0 && $a == 0);
     }
+    public function is_variable_filled($vars, $mode = 'all')
+    {
+        // normalize single values into an array
+        if (!is_array($vars)) {
+            $vars = [$vars];
+        }
+
+        $check = function ($v) {
+            return isset($v) && $v !== null && $v !== '';
+        };
+
+        if ($mode === 'any') {
+            foreach ($vars as $v) {
+                if ($check($v)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // default: require all
+        foreach ($vars as $v) {
+            if (!$check($v)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public function cek_nomor_sampel(Request $request)
     {
         $value = $request->input('value');
         $kode_kabkot = $request->input('kode_kabkot');
         $nks = $request->input('nks');
-        $semester = $request->input('semester');
+
         $id = $request->input('currentRecordId');
         // dd($id);
 
@@ -64,12 +86,54 @@ class MakController extends Controller
             ->where('id', '<>', $id)
             ->where('kode_kabkot', $kode_kabkot)
             ->where('nks', $nks)
-            ->where("semester", $semester)
+            ->where("semester", $this->semester)
             ->exists();
         // dd($exists);
 
         return response()->json(['exists' => $exists]);
     }
+    private function nomorUrutAnggota(string $anggotaId): ?int
+    {
+        // get its ruta first
+        $a = DB::table('anggota_ruta')->select('id_ruta')->where('id', $anggotaId)->first();
+        if (!$a) return null;
+
+        $row = DB::selectOne(
+            /** @lang MySQL */
+            "
+        SELECT t.rn, t.total
+        FROM (
+            SELECT
+                ar.id,
+                ROW_NUMBER() OVER (
+                    PARTITION BY ar.id_ruta
+                    ORDER BY ar.created_at, ar.id
+                ) AS rn,
+                COUNT(*) OVER (PARTITION BY ar.id_ruta) AS total
+            FROM anggota_ruta ar
+            WHERE ar.id_ruta = ?
+        ) AS t
+        WHERE t.id = ?
+    ",
+            [$a->id_ruta, $anggotaId]
+        );
+
+        return (int)$row->rn;
+    }
+    public function has_target_konsumsi($daftarArt, $targetIds = [189, 194, 196, 200, 211])
+    {
+        foreach ($daftarArt as $art) {
+            if (!empty($art->konsumsi)) {
+                foreach ($art->konsumsi as $k) {
+                    if (in_array($k->id_komoditas, $targetIds)) {
+                        return true; // found match → no need to continue
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private function get_konsumsi_ruta($id_ruta)
     {
         return Konsumsi::where('id_ruta', $id_ruta)
@@ -92,17 +156,10 @@ class MakController extends Controller
             ->get();
     }
     //* @param Type var Description
-    private function get_ruta($kode_kabkot, $nks, $semester = '1', $id_ruta = '-1')
+    private function get_ruta($kode_kabkot, $nks, $semester, $id_ruta = '-1')
     {
         if ($id_ruta == '-1') {
 
-            // $daftar_ruta = SusenasMak::with(["user","region"])
-            // ->where('kode_kabkot', $kode_kabkot)
-            // ->where('nks', $nks)
-            // // ->where('semester', $semester)
-            // ->get();
-            // dd([$daftar_ruta,$kode_kabkot,$nks,]);
-            // return $daftar_ruta;
             return SusenasMak::where('vsusenas_mak.kode_kabkot', $kode_kabkot)->where('vsusenas_mak.nks', $nks)->where('vsusenas_mak.semester', $semester)
                 ->join('master_wilayah', function ($join) {
                     $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
@@ -131,17 +188,13 @@ class MakController extends Controller
             //code...
             $kode_kabkot = $request->kode_kabkot;
             $nks = $request->nks;
-            $semester = $request->semester;
-            // dd($semester);
-            if (!isset($semester)) {
-                $semester = '1';
-            }
-            $data = $this->get_ruta($kode_kabkot, $nks, $semester);
-            // dd([$data, $kode_kabkot, $nks, $semester]);
-            //  return response()->json($data, 200);
-            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks, 'semester' => $semester]);
+
+            $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
+
+            return Inertia::render('Entri/Inti', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks, 'semester' => $this->semester]);
         } catch (\Throwable $th) {
-            throw $th;
+            // throw $th;
+            return response()->json(['error' => 'Error during fetching data'], 500);
         }
 
         return Inertia::render('Entri/Inti');
@@ -153,11 +206,8 @@ class MakController extends Controller
             //code...
             $kode_kabkot = $request->kode_kabkot;
             $nks = $request->nks;
-            $semester = $request->semester;
-            if (isset($semester)) {
-                $semester = '1';
-            }
-            $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+
+            $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
 
             //  return response()->json($data, 200);
             return Inertia::render('Kelola Entri/Main', ['data_susenas' => $data, 'kode_kabkot' => $kode_kabkot, 'nks' => $nks]);
@@ -214,34 +264,33 @@ class MakController extends Controller
             DB::beginTransaction();
             $created_mak = SusenasMak::create($input);
             // create default art
-            $art = AnggotaRuta::create([
-                'id_ruta' => $created_mak->id,
-                'nama' => 'art default',
-                'nomor_art' => 0,
-            ]);
+            // $art = AnggotaRuta::create([
+            //     'id_ruta' => $created_mak->id,
+            //     'nama' => 'art default',
+            //     'nomor_art' => 0,
+            // ]);
             DB::commit();
 
             return response()->json($created_mak, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
-            return response()->json(['error' => 'Error processing data'], 500);
+            // throw $th;
+            return response()->json(['error' => 'Error during saving data'], 500);
         }
     }
 
     public function fetch(Request $request)
     {
         $kode_kabkot = $request->query('kode_kabkot');
-        $semester = $request->query('semester');
         $provinsi = $request->query('kode_prov');
         $nks = $request->query('nks');
 
-        $data = $this->get_ruta($kode_kabkot, $nks, $semester);
+        $data = $this->get_ruta($kode_kabkot, $nks, $this->semester);
 
         // $data = $query->get();
         return response()->json([
             'data' => $data,
-            'semester' => $semester,
+            'semester' => $this->semester,
             'kabkot' => $kode_kabkot,
             'provinsi' => $provinsi,
             'nks' => $nks
@@ -303,6 +352,7 @@ class MakController extends Controller
     }
     public function update(Request $request)
     {
+        // dd("asdaads");
         if (!$this->eligileToUpdate()) {
             // return Inertia::render('Error/Error_403');
             return abort(403);
@@ -313,33 +363,33 @@ class MakController extends Controller
             $data = $request->all();
             // dd($data);
             // Columns to check and their corresponding form fields
-            $columnsToCheck = $this->wtfDependecies;
-            $fields_check = [];
-            foreach ($columnsToCheck as $column) {
-                if (isset($column['fields'])) {
-                    $fields_check = array_merge($fields_check, $column['fields']);
-                }
-            }
-            if (isset($data['id'])) {
-                $currentWtf = SusenasMak::where('id', $data['id'])->first($fields_check);
-                // dd($currentWtf);
+            // $columnsToCheck = $this->wtfDependecies;
+            // $fields_check = [];
+            // foreach ($columnsToCheck as $column) {
+            //     if (isset($column['fields'])) {
+            //         $fields_check = array_merge($fields_check, $column['fields']);
+            //     }
+            // }
+            // if (isset($data['id'])) {
+            //     $currentWtf = SusenasMak::where('id', $data['id'])->first($fields_check);
+            //     // dd($currentWtf);
 
-                foreach ($columnsToCheck as $dependency) {
+            //     foreach ($columnsToCheck as $dependency) {
 
-                    foreach ($dependency['fields'] as $dependentField) {
-                        // Check if the field exists in $currentWtf and condition is met
-                        if (isset($currentWtf[$dependentField]) && (isset($data[$dependency['target']]) && !in_array($data[$dependency['target']], $dependency['dependentValues']))) {
-                            $data[$dependentField] = null;
-                        }
-                    }
-                }
-            }            // second check 
+            //         foreach ($dependency['fields'] as $dependentField) {
+            //             // Check if the field exists in $currentWtf and condition is met
+            //             if (isset($currentWtf[$dependentField]) && (isset($data[$dependency['target']]) && !in_array($data[$dependency['target']], $dependency['dependentValues']))) {
+            //                 $data[$dependentField] = null;
+            //             }
+            //         }
+            //     }
+            // }            // second check 
 
 
             // Continue with the rest of your code...
 
-
             $data_update = SusenasMak::findOrFail($data['id']);
+
 
             $data_update->update($data);
             // dd($data);
@@ -389,7 +439,7 @@ class MakController extends Controller
             return response()->json($data, 200);
         } catch (\Throwable $th) {
             DB::rollback();
-            throw $th;
+            // throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
@@ -542,23 +592,31 @@ class MakController extends Controller
             return response()->json($baru, 201);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
+            // throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
     public function create(Request $request)
     {
-        // $data = Inti::where('kode_kabkot', $kabkot)->where('semester', $semester)->get();
 
         $user = auth()->user();
         if (!$this->eligileToUpdate()) {
-            // return Inertia::render('Error/Error_403');
             return abort(403);
         }
 
         $identitas_wilayah = $request->all();
-        $master_wilayah = MasterWilayah::where('kode_kabkot', $identitas_wilayah['kode_kabkot'])->where('nks', $identitas_wilayah['nks'])->first();
-        return Inertia::render("Entri/CreateMak", ['identitas_wilayah' => $master_wilayah, 'semester' => $request->semester, 'user' => $user]);
+        $master_wilayah = MasterWilayah::where('kode_kabkot', $identitas_wilayah['kode_kabkot'])
+            ->where('nks', $identitas_wilayah['nks'])
+            ->first();
+
+        return Inertia::render(
+            "Entri/CreateMak",
+            [
+                'identitas_wilayah' => $master_wilayah,
+                'semester' => $this->semester,
+                'user' => $user
+            ]
+        );
     }
     public function calculate_qc($id_ruta)
     {
@@ -641,7 +699,7 @@ class MakController extends Controller
             return response()->json($data, 200);
         } catch (\Throwable $th) {
             DB::rollBack();
-            throw $th;
+            // throw $th;
 
             return response()->json(['error' => 'Error processing data'], 500);
         }
@@ -672,7 +730,7 @@ class MakController extends Controller
             if (sizeof($daftar_error) > 0) {
                 // set dokumen error
                 $status_dok = 'error';
-            } else if (sizeof($evaluasi_rh) > 0 || sizeof($daftar_warning) > 0) {
+            } else if (sizeof($evaluasi_rh["range"]) > 0 || sizeof($daftar_warning) > 0) {
                 // set dokumen warning
                 $status_dok = 'warning';
             } else {
@@ -722,14 +780,52 @@ class MakController extends Controller
             }
         }
     }
+    private function checkTotalConsistency(&$daftar_error, $konsumsi, $nomor = -1)
+    {
+        $total_volume_calculated = $konsumsi['volume_beli'] + $konsumsi['volume_produksi'];
+
+        if ($konsumsi['volume_total'] != $total_volume_calculated) {
+            $message = "Volume Total tidak sesuai Volume Beli + Produksi";
+            if ($nomor > 0) {
+                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - " . $message, $konsumsi, "Konsumsi ART");
+            } else {
+
+                $daftar_error[] = $this->createKomoditasError($message, $konsumsi, "Konsumsi RUTA");
+            }
+        }
+        $total_harga_calculated = $konsumsi['harga_beli'] + $konsumsi['harga_produksi'];
+        if ($konsumsi['harga_total'] != $total_harga_calculated) {
+            $message = "Harga Total tidak sesuai Harga Beli + Produksi";
+            if ($nomor > 0) {
+                $daftar_error[] = $this->createKomoditasError("ART nomor " . $nomor . " - " . $message, $konsumsi, "Konsumsi ART");
+            } else {
+
+                $daftar_error[] = $this->createKomoditasError($message, $konsumsi, "Konsumsi RUTA");
+            }
+        }
+    }
+    public function has_konsumsi($konsumsiList, $targetIds)
+    {
+        foreach ($konsumsiList as $k) {
+            if (in_array($k->id_komoditas, (array) $targetIds)) {
+                if ($k->volume_beli > 0 || $k->volume_produksi > 0) {
+                    return true;
+                }
+                // return true;
+            }
+        }
+        return false;
+    }
+
     private function cek_isian_new($id_ruta)
     {
         $daftar_error = [];
         $daftar_warning = [];
         $daftar_rule = new DaftarValidasiModel();
-        $data_mak = SusenasMak::where('id', $id_ruta)->first()->toArray();
+        $ruta = SusenasMak::with(['konsumsi_ruta'])->find($id_ruta);
+        $data_mak = $ruta->toArray();
         $jumlah_art = AnggotaRuta::where('id_ruta', $id_ruta)->count();
-        $daftar_art = AnggotaRuta::where('id_ruta', $id_ruta)->get();
+        $daftar_art = AnggotaRuta::with(['konsumsi'])->where('id_ruta', $id_ruta)->get();
 
         $konsumsi_non_makanan_controller = new KonsumsiNonMakananController();
         $sum_konsumsi_non_makanan = $konsumsi_non_makanan_controller->sum_konsumsi_by_ruta($id_ruta);
@@ -802,9 +898,12 @@ class MakController extends Controller
                     $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli');
                     $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total');
 
+
+
+
                     // kesesuaian total 
+                    $this->checkTotalConsistency($daftar_error, $konsumsi);
                 }
-                $nomor = 1;
                 foreach ($daftar_art as $key => $art) {
                     # code...
                     $nilai_mak = 0;
@@ -832,20 +931,13 @@ class MakController extends Controller
                         }
 
                         // Check for consistency between price and volume
-                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi', $nomor);
-                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli', $nomor);
-                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total', $nomor);
+                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_produksi', 'volume_produksi', $this->nomorUrutAnggota($konsumsi->id_art));
+                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_beli', 'volume_beli', $this->nomorUrutAnggota($konsumsi->id_art));
+                        $this->checkConsistency($daftar_error, $konsumsi, 'harga_total', 'volume_total', $this->nomorUrutAnggota($konsumsi->id_art));
 
                         // kesesuaian total 
+                        $this->checkTotalConsistency($daftar_error, $konsumsi, $this->nomorUrutAnggota($konsumsi->id_art));
                     }
-                    // if ($nilai_mak == 0) {
-                    //     $konsumsi = [
-                    //         'id_komoditas' => 187,
-                    //         'nama_komoditas' => 'M. MAKANAN DAN MINUMAN JADI [R.188 s.d. R.225]'
-                    //     ];
-                    //     $daftar_warning[] = $this->createKomoditasError("ART nomor " . $nomor . " - Isian harga pembelian/produksi, pemberian dsb harus ada (tidak boleh 0 semua)", $konsumsi, "Konsumsi ART");
-                    // }
-                    $nomor++;
                 }
                 // cek kesesuaian rekap dengan isian
                 $rincian15 = [
@@ -1004,7 +1096,7 @@ class MakController extends Controller
                 if ($data_mak['wtf_1'] < 1) {
                     $pesan = [
                         'variable' => "1. Jumlah ART",
-                        'rincian' => "1. Jumlah ART",
+                        'rincian' => "Jumlah ART (Blok III Rincian 301)",
                         'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah ART minimal satu",
@@ -1013,22 +1105,11 @@ class MakController extends Controller
 
                     $daftar_warning[] = $pesan;
                 }
-                if ($data_mak['wtf_5'] < 2) {
-                    $pesan = [
-                        'variable' => "5. Luas Lantai Bangunan Utama (R1604)",
-                        'rincian' => "Luas lantai tidak wajar kurang dari 2 meter persegi",
-                        'blok' => "Worksheet",
-                        'type' => 'warning',
-                        'pesan' => "Luas lantai tidak wajar kurang dari 2 meter persegi",
 
-                    ];
-
-                    $daftar_warning[] = $pesan;
-                }
                 if ($data_mak['wtf_2'] >= $data_mak['wtf_1']) {
                     $pesan = [
                         'variable' => "2. Jumlah Balita",
-                        'rincian' => "2. Jumlah Balita",
+                        'rincian' => "Jumlah Balita (R302)",
                         'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah Balita tidak boleh sama atau lebih daripada Jumlah ART",
@@ -1039,10 +1120,41 @@ class MakController extends Controller
                 if ($data_mak['wtf_3'] >= $data_mak['wtf_1']) {
                     $pesan = [
                         'variable' => "3. Jumlah ART yang masih bersekolah",
-                        'rincian' => "3. Jumlah ART yang masih bersekolah",
+                        'rincian' => "Jumlah ART yang masih bersekolah (R611=2)",
                         'blok' => "Worksheet",
                         'type' => 'warning',
                         'pesan' => "Jumlah ART bersekolah tidak boleh lebih daripada Jumlah ART",
+                    ];
+
+                    $daftar_warning[] = $pesan;
+                }
+
+                // Case 1: daftarArt (loop each art)
+                $targetArtKomoditas = [189, 194, 196, 200, 211];
+                $foundArt = false;
+
+                foreach ($daftar_art as $art) {
+                    if ($this->has_konsumsi($art->konsumsi, $targetArtKomoditas)) {
+                        $foundArt = true;
+                        break;
+                    }
+                }
+
+                // $foundArt is true/false
+
+
+                // Case 2: ruta konsumsi
+                $hasRuta79 = $this->has_konsumsi($ruta->konsumsi_ruta, 79);
+
+
+
+                if ($data_mak['wtf_4'] == 1 && (!$foundArt || !$hasRuta79)) {
+                    $pesan = [
+                        'variable' => "3. Apakah ada ART yang menerima Program MBG",
+                        'rincian' => "Jika MBG terisi, maka salah satu dari R189/R194/R196/R200/R211 harus ada yg terisi, dan R79 harus terisi.",
+                        'blok' => "Worksheet",
+                        'type' => 'warning',
+                        'pesan' => "Jika MBG terisi, maka salah satu dari R189/R194/R196/R200/R211 harus ada yg terisi, dan R79 harus terisi.",
                     ];
 
                     $daftar_warning[] = $pesan;
@@ -1065,7 +1177,7 @@ class MakController extends Controller
                 if ($jumlah_art != $data_mak['wtf_1']) {
                     $warning = [
                         'rincian' => "Jumlah Art pada Blok IV.1 tidak sama dengan Rincian Worksheet",
-                        'variable' => "Pertanyaan worksheet Nomor 2",
+                        'variable' => "Jumlah ART (Blok III Rincian 301)",
                         'blok' => 'Worksheet',
                         'type' => 'warning'
                     ];
@@ -1119,220 +1231,207 @@ class MakController extends Controller
         // return false
     }
 
-    private function validateRangeKonsumsi($value, $range_harga, $feedback, $nomor_art = 0)
+    private function validateRangeKonsumsi($row, $range_harga, array $feedback, int $nomor_art = 0): array
     {
-        $evaluasi_rh = [];
-        if ($nomor_art > 0) {
-            if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
-                $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
-                if ($harga_satuan > $range_harga->max) {
-                    $feedback['rincian'] = "ART nomor " . $nomor_art . " - harga satuan komoditas dari pembelian diatas range";
-                    $feedback['harga'] = $harga_satuan;
-                    $evaluasi_rh[] = $feedback;
-                } else if ($harga_satuan < $range_harga->min) {
-                    $feedback['rincian'] = "ART nomor " . $nomor_art . " - harga satuan komoditas dari pembelian dibawah range";
-                    $feedback['harga'] = $harga_satuan;
-                    $evaluasi_rh[] = $feedback;
-                }
-            }
-            if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
-                $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
-                if ($harga_satuan > $range_harga->max) {
-                    $feedback['rincian'] = "ART nomor " . $nomor_art . " - harga satuan komoditas dari produksi sendiri, pemberian, dsb. diatas range";
-                    $feedback['harga'] = $harga_satuan;
-                    $evaluasi_rh[] = $feedback;
-                } else if ($harga_satuan < $range_harga->min) {
-                    $feedback['rincian'] = "ART nomor " . $nomor_art . " - harga satuan komoditas dari produksi sendiri, pemberian, dsb. dibawah range";
-                    $feedback['harga'] = $harga_satuan;
-                    $evaluasi_rh[] = $feedback;
-                }
-            }
-        } else {
-            if ($value['harga_beli'] > 0 && $value['volume_beli'] > 0) {
-                $harga_satuan = $value['harga_beli'] / $value['volume_beli'];
-                if ($harga_satuan > $range_harga->max) {
-                    $feedback['rincian'] = "Harga satuan komoditas dari pembelian diatas range";
-                    $feedback['harga'] = $harga_satuan;
-                    $evaluasi_rh[] = $feedback;
-                } else if ($harga_satuan < $range_harga->min) {
-                    $feedback['rincian'] = "Harga satuan komoditas dari pembelian dibawah range";
-                    $feedback['harga'] = $harga_satuan;
-                    $evaluasi_rh[] = $feedback;
-                }
-            }
-            if ($value['harga_produksi'] > 0 && $value['volume_produksi'] > 0) {
-                $harga_satuan = $value['harga_produksi'] / $value['volume_produksi'];
-                if ($harga_satuan > $range_harga->max) {
-                    $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. diatas range";
-                    $feedback['harga'] = $harga_satuan;
-                    $evaluasi_rh[] = $feedback;
-                } else if ($harga_satuan < $range_harga->min) {
-                    $feedback['rincian'] = "Harga satuan komoditas dari produksi sendiri, pemberian, dsb. dibawah range";
-                    $feedback['harga'] = $harga_satuan;
-                    $evaluasi_rh[] = $feedback;
-                }
-            }
+        $out = [];
+
+        // helper to read from array|object|model
+        $get = static function ($x, string $k, $default = 0) {
+            if (is_array($x)) return $x[$k] ?? $default;
+            if ($x instanceof \ArrayAccess && isset($x[$k])) return $x[$k];
+            if (is_object($x) && isset($x->$k)) return $x->$k;
+            return $default;
+        };
+
+        $min = (float) ($range_harga->min ?? 0);
+        $max = (float) ($range_harga->max ?? 0);
+
+        // if both 0 → treat as no-range
+        if ($min == 0.0 && $max == 0.0) {
+            return $out;
         }
-        return $evaluasi_rh;
+
+        $ctxPrefix = $nomor_art > 0 ? ("ART nomor {$nomor_art} - ") : '';
+
+        // small closure to avoid duplicate code
+        $check = function (float $harga, float $vol, string $sourceLabel) use (&$out, $feedback, $min, $max, $ctxPrefix) {
+            if ($harga > 0 && $vol > 0) {
+                $hargaSatuan = $harga / $vol; // safe: vol>0
+                if ($hargaSatuan > $max) {
+                    $fb = $feedback;
+                    $fb['rincian'] = "{$ctxPrefix}harga satuan komoditas dari {$sourceLabel} diatas range";
+                    $fb['harga']   = $hargaSatuan;
+                    $out[] = $fb;
+                } elseif ($hargaSatuan < $min) {
+                    $fb = $feedback;
+                    $fb['rincian'] = "{$ctxPrefix}harga satuan komoditas dari {$sourceLabel} dibawah range";
+                    $fb['harga']   = $hargaSatuan;
+                    $out[] = $fb;
+                }
+            }
+        };
+
+        // beli
+        $check(
+            (float) $get($row, 'harga_beli', 0),
+            (float) $get($row, 'volume_beli', 0),
+            'pembelian'
+        );
+
+        // produksi/pemberian/dsb
+        $check(
+            (float) $get($row, 'harga_produksi', 0),
+            (float) $get($row, 'volume_produksi', 0),
+            'produksi sendiri, pemberian, dsb.'
+        );
+
+        return $out;
     }
+
 
     private function range_harga($id_ruta)
     {
         try {
-            //code...
-            // evaluasi Range harga
             $evaluasi_rh = [];
-            // evaluasi basket komoditas kemiskinan
-            $evaluasi_basket = [];
-
-
-            $komoditas_basket = Komoditas::where('flag_basket', 1)->pluck('id')->toArray();
-
-
-
-            $kode_kabkot = SusenasMak::where('id', $id_ruta)->value('kode_kabkot');
-
-            // $kode_kabkot->value('kode_kabkot');
-
-
-            $konsumsi_ruta = Konsumsi::where('id_ruta', $id_ruta)->where(function ($query) {
-                $query->where('harga_beli', '>', '0')
-                    ->orWhere('harga_produksi', '>', '0');
-            })
-                ->join('komoditas', 'komoditas.id', 'konsumsi.id_komoditas')
-                ->get(['konsumsi.id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi', 'nama_komoditas']);
-
-            $konsumsi_art = KonsumsiArt::where('anggota_ruta.id_ruta', $id_ruta)
-                ->join('anggota_ruta', 'anggota_ruta.id', 'konsumsi_art.id_art')
-                ->where(function ($query) {
-                    $query->where('harga_beli', '>', '0')
-                        ->orWhere('harga_produksi', '>', '0');
-                })
-                ->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')
-                ->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi', 'nama_komoditas']);
-            $daftar_art = AnggotaRuta::where('id_ruta', $id_ruta)->get();
-            foreach ($konsumsi_ruta as $key => $value) {
-                // ketika ada komoditas basket maka unset komdoditas dari array
-                $id_komoditas = $value['id_komoditas'];
-                $nama_komoditas = $value['nama_komoditas'];
-                if (in_array($id_komoditas, $komoditas_basket)) {
-                    $key = array_search($id_komoditas, $komoditas_basket);
-
-                    // Check if the key is valid before unsetting
-                    if ($key !== false) {
-                        // Remove the element from $komoditas_basket
-                        unset($komoditas_basket[$key]);
-                    }
-                }
-                # code...
-
-
-                $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
-
-                $feedback = [
-                    'id_komoditas' => $id_komoditas,
-                    'nama_komoditas' => $nama_komoditas,
-                    'rincian' => '',
-                    'min' => $range_harga->min,
-                    'max' => $range_harga->max,
-                ];
-                if ($range_harga->max == 0 && $range_harga->min == 0) {
-                    continue;
-                }
-                $validasi = $this->validateRangeKonsumsi($value, $range_harga, $feedback);
-                foreach ($validasi as $key => $value) {
-                    # code...
-                    $evaluasi_rh[] = $value;
-                }
-            }
-            $nomor_art = 1;
-            foreach ($daftar_art as $key => $value) {
-                # code...
-                $konsumsi_art = KonsumsiArt::where('id_art', $value['id'])
-                    ->where(function ($query) {
-                        $query->where('harga_beli', '>', '0')
-                            ->orWhere('harga_produksi', '>', '0');
-                    })
-                    ->join('komoditas', 'komoditas.id', 'konsumsi_art.id_komoditas')
-                    ->get(['id_komoditas', 'harga_beli', 'harga_produksi', 'volume_beli', 'volume_produksi', 'nama_komoditas']);
-                foreach ($konsumsi_art as $key => $value) {
-                    # code...
-                    // ambil kalori dari tabel 
-                    $id_komoditas = $value['id_komoditas'];
-                    $nama_komoditas = $value['nama_komoditas'];
-
-
-                    if (in_array($id_komoditas, $komoditas_basket)) {
-                        $key = array_search($id_komoditas, $komoditas_basket);
-
-                        // Check if the key is valid before unsetting
-                        if ($key !== false) {
-                            // Remove the element from $komoditas_basket
-                            unset($komoditas_basket[$key]);
-                        }
-                    }
-
-                    $range_harga = DB::table('range_harga_komoditas')->where('id_komoditas', $id_komoditas)->where('kode_kabkot', $kode_kabkot)->first(['min', 'max']);
-                    if (is_null($range_harga)) {
-                        continue;
-                    }
-                    $feedback = [
-                        'id_komoditas' => $id_komoditas,
-                        'nama_komoditas' => $nama_komoditas,
-                        'rincian' => '',
-                        'min' => $range_harga->min,
-                        'max' => $range_harga->max,
-
-                    ];
-                    if ($range_harga->max == 0 && $range_harga->min == 0) {
-                        continue;
-                    }
-                    $validasi = $this->validateRangeKonsumsi($value, $range_harga, $feedback, $nomor_art);
-                    foreach ($validasi as $key => $value) {
-                        # code...
-                        $evaluasi_rh[] = $value;
-                    }
-                }
-                $nomor_art++;
-            }
-
             $feedback_basket = [];
 
-            foreach ($komoditas_basket as $key => $value) {
-                # code...
+            // 1) Basket IDs (set)
+            $komoditas_basket = Komoditas::where('flag_basket', 1)->pluck('id')->all();
+            $basketLeft = array_fill_keys($komoditas_basket, true);
+
+            // 2) Kab/kot for this ruta
+            $kode_kabkot = SusenasMak::whereKey($id_ruta)->value('kode_kabkot');
+
+            // 3) Load all konsumsi rows (ruta + art) ONCE with aliases
+            $konsumsiRuta = Konsumsi::query()
+                ->join('komoditas as m', 'm.id', '=', 'konsumsi.id_komoditas')
+                ->where('konsumsi.id_ruta', $id_ruta)
+                ->where(function ($q) {
+                    $q->where('harga_beli', '>', 0)->orWhere('harga_produksi', '>', 0);
+                })
+                ->get([
+                    'konsumsi.id_komoditas as id_komoditas',
+                    'm.nama_komoditas as nama_komoditas',
+                    'konsumsi.harga_beli',
+                    'konsumsi.harga_produksi',
+                    'konsumsi.volume_beli',
+                    'konsumsi.volume_produksi',
+                ]);
+
+            $konsumsiArt = KonsumsiArt::query()
+                ->join('anggota_ruta as a', 'a.id', '=', 'konsumsi_art.id_art')
+                ->join('komoditas as m', 'm.id', '=', 'konsumsi_art.id_komoditas')
+                ->where('a.id_ruta', $id_ruta)
+                ->where(function ($q) {
+                    $q->where('konsumsi_art.harga_beli', '>', 0)
+                        ->orWhere('konsumsi_art.harga_produksi', '>', 0);
+                })
+                ->get([
+                    'konsumsi_art.id_komoditas as id_komoditas',
+                    'm.nama_komoditas as nama_komoditas',
+                    'konsumsi_art.harga_beli',
+                    'konsumsi_art.harga_produksi',
+                    'konsumsi_art.volume_beli',
+                    'konsumsi_art.volume_produksi',
+                    'a.id as id_art',
+                ]);
+
+            // 4) Preload range_harga for all komoditas used (avoid N+1)
+            $komoditasIds = array_values(array_unique(array_merge(
+                $konsumsiRuta->pluck('id_komoditas')->all(),
+                $konsumsiArt->pluck('id_komoditas')->all()
+            )));
+
+            $rangeMap = DB::table('range_harga_komoditas')
+                ->where('kode_kabkot', $kode_kabkot)
+                ->whereIn('id_komoditas', $komoditasIds)
+                ->get(['id_komoditas', 'min', 'max'])
+                ->keyBy('id_komoditas'); // ->get($id) returns {min,max}
+
+            // 5) Validate route-level konsumsi
+            foreach ($konsumsiRuta as $row) {
+                $idKomo = (int)$row->id_komoditas;
+                unset($basketLeft[$idKomo]); // mark as present in any form
+
+                $range = $rangeMap->get($idKomo);
+                if (!$range) continue; // no configured range → skip
+                if ((float)$range->min == 0.0 && (float)$range->max == 0.0) continue;
+
                 $feedback = [
-                    'id_komoditas' => $value,
-                    'rincian' => "Komoditas termasuk 52 Basket komoditas pembentuk kemiskinan, tetapi tidak terisi"
+                    'id_komoditas'   => $idKomo,
+                    'nama_komoditas' => $row->nama_komoditas,
+                    'rincian'        => '',
+                    'min'            => (float)$range->min,
+                    'max'            => (float)$range->max,
                 ];
-                $feedback_basket[] = $feedback;
+                $results = $this->validateRangeKonsumsi($row, $range, $feedback);
+                foreach ($results as $r) $evaluasi_rh[] = $r;
             }
 
+            // 6) Validate art-level konsumsi
+            foreach ($konsumsiArt as $row) {
+                $idKomo = (int)$row->id_komoditas;
+                unset($basketLeft[$idKomo]); // present at ART level too
 
+                $range = $rangeMap->get($idKomo);
+                if (!$range) continue;
+                if ((float)$range->min == 0.0 && (float)$range->max == 0.0) continue;
 
-            return $evaluasi_rh;
-        } catch (\Exception $ex) {
-            throw new \Exception($ex);
-            return response()->json(['error' => 'Error processing data'], 500);
+                $feedback = [
+                    'id_komoditas'   => $idKomo,
+                    'nama_komoditas' => $row->nama_komoditas,
+                    'rincian'        => '',
+                    'min'            => (float)$range->min,
+                    'max'            => (float)$range->max,
+                ];
+                $results = $this->validateRangeKonsumsi($row, $range, $feedback, $this->nomorUrutAnggota($row->id_art));
+                foreach ($results as $r) $evaluasi_rh[] = $r;
+            }
 
+            // 7) Build “52 basket not filled” feedback
+            foreach (array_keys($basketLeft) as $idKomoMissing) {
+                $feedback_basket[] = [
+                    'id_komoditas' => $idKomoMissing,
+                    'rincian'      => 'Komoditas termasuk 52 basket kemiskinan, tetapi tidak terisi.',
+                ];
+            }
 
-            // return response()->json(['id_ruta' => $id_ruta,], 404);
+            // 8) Return consistent type (no JSON here)
+            return [
+                'range'           => $evaluasi_rh,
+                'missing_basket'  => $feedback_basket,
+            ];
+        } catch (\Throwable $ex) {
+            report($ex);
+            // Return empty, or rethrow and let controller handle JSON
+            return [
+                'range' => [],
+                'missing_basket' => [],
+            ];
         }
     }
+
     public function delete($id_ruta)
     {
+
         try {
+
             //code...
+            if (!$this->eligileToUpdate()) {
+                // return Inertia::render('Error/Error_403');
+                return response()->json(['error' => 'Anda tidak memiliki cukup hak akses'], 403);
+            }
             DB::beginTransaction();
-            $mak = SusenasMak::where('id', $id_ruta);
-            $mak->konsumsi()->delete();
+            $mak = SusenasMak::findOrFail($id_ruta);
+            $mak->konsumsi_ruta()->delete();
             // $mak->konsumsi_art()->delete();
             $daftar_art = $mak->anggota_ruta();
             foreach ($daftar_art as  $art) {
                 # code...
-                $art->konsumsi()->delete();
+                $art->konsumsi_ruta()->delete();
                 $art->delete();
             }
-            $mak->konsumsi_non_makanan()->delete();            
+            $mak->konsumsi_non_makanan()->delete();
             $mak->delete();
             DB::commit();
             return response()->json([
@@ -1341,13 +1440,11 @@ class MakController extends Controller
             ], 204);
         } catch (\Throwable $th) {
             DB::rollBack();
+            // throw $th;
             return response()->json(['error' => 'Error processing data'], 500);
         }
     }
-    public function maintenance()
-    {
-        return Inertia::render('Maintenance');
-    }
+
     public function change_nks($id_ruta, $nks_baru)
     {
         try {

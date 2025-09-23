@@ -81,129 +81,211 @@ class MonitoringController extends Controller
         return response()->json(['rekap_user' => $rekap_user], 200);
     }
 
+
     public function update()
     {
-        $last_update = DB::table('monitoring_update')->latest('created_at')->first();
-        if (is_null($last_update)) {
-        } else {
-            $minutes = Carbon::parse($last_update->created_at)->diffInMinutes();
+        // Cooldown: skip heavy work if recently updated
+        $last = DB::table('monitoring_update')->latest('created_at')->first();
+        if ($last) {
+            $minutes = Carbon::parse($last->created_at)->diffInMinutes(now());
             if ($minutes < 30) {
-                return response()->json(["status" => "SUdah diupdate dalam waktu dekat"], 200);
+                return response()->json(["status" => "Sudah diupdate dalam 30 menit terakhir"], 200);
             }
         }
+
+        // ---- Build fast, pre-aggregated sources --------------------------------
+
+        // Target & name per kab/kot taken from master_wilayah
+        $mwKabkot = DB::table('master_wilayah')
+            ->select(
+                'kode_prov',
+                'kode_kabkot',
+                DB::raw('MAX(kabkot) as kabkot'),
+                DB::raw('COUNT(DISTINCT nks) as target_nks')
+            )
+            ->groupBy('kode_prov', 'kode_kabkot');
+
+        // Documents summary per kab/kot from vsusenas_mak
+        $makKabkot = DB::table('vsusenas_mak')
+            ->select(
+                'kode_prov',
+                'kode_kabkot',
+                DB::raw('COUNT(DISTINCT id) as jumlah_dok'),
+                DB::raw('COUNT(DISTINCT CASE WHEN status_dok = "error" THEN id END) as dok_error'),
+                DB::raw('COUNT(DISTINCT CASE WHEN status_dok = "warning" THEN id END) as dok_warning'),
+                DB::raw('COUNT(DISTINCT CASE WHEN status_dok = "clean" THEN id END) as dok_clean')
+            )
+            ->groupBy('kode_prov', 'kode_kabkot');
+
+        // Join the two pre-aggregations
+        $rekap_kabkot = DB::query()
+            ->fromSub($mwKabkot, 'mw')
+            ->leftJoinSub($makKabkot, 'mk', function ($j) {
+                $j->on('mw.kode_prov', '=', 'mk.kode_prov')
+                    ->on('mw.kode_kabkot', '=', 'mk.kode_kabkot');
+            })
+            ->select(
+                'mw.kode_prov',
+                'mw.kode_kabkot',
+                'mw.kabkot',
+                DB::raw('mw.target_nks'),
+                DB::raw('COALESCE(mk.jumlah_dok, 0) as jumlah_dok'),
+                DB::raw('COALESCE(mk.dok_error, 0) as dok_error'),
+                DB::raw('COALESCE(mk.dok_warning, 0) as dok_warning'),
+                DB::raw('COALESCE(mk.dok_clean, 0) as dok_clean')
+            )
+            ->get()
+            ->map(fn($r) => (array) $r)
+            ->all();
+
+        // NKS-level: target “universe” from master_wilayah (distinct NKS with a kabkot name)
+        $mwNks = DB::table('master_wilayah')
+            ->select(
+                'kode_prov',
+                'kode_kabkot',
+                'nks',
+                DB::raw('MAX(kabkot) as kabkot')
+            )
+            ->groupBy('kode_prov', 'kode_kabkot', 'nks');
+
+        // NKS-level documents summary
+        $makNks = DB::table('vsusenas_mak')
+            ->select(
+                'kode_prov',
+                'kode_kabkot',
+                'nks',
+                DB::raw('COUNT(DISTINCT id) as jumlah_dok'),
+                DB::raw('COUNT(DISTINCT CASE WHEN status_dok = "error" THEN id END) as dok_error'),
+                DB::raw('COUNT(DISTINCT CASE WHEN status_dok = "warning" THEN id END) as dok_warning'),
+                DB::raw('COUNT(DISTINCT CASE WHEN status_dok = "clean" THEN id END) as dok_clean')
+            )
+            ->groupBy('kode_prov', 'kode_kabkot', 'nks');
+
+        $rekap_nks = DB::query()
+            ->fromSub($mwNks, 'mw')
+            ->leftJoinSub($makNks, 'mk', function ($j) {
+                $j->on('mw.kode_prov', '=', 'mk.kode_prov')
+                    ->on('mw.kode_kabkot', '=', 'mk.kode_kabkot')
+                    ->on('mw.nks', '=', 'mk.nks');
+            })
+            ->select(
+                'mw.kode_prov',
+                'mw.kode_kabkot',
+                'mw.nks',
+                'mw.kabkot',
+                DB::raw('COALESCE(mk.jumlah_dok, 0) as jumlah_dok'),
+                DB::raw('COALESCE(mk.dok_error, 0) as dok_error'),
+                DB::raw('COALESCE(mk.dok_warning, 0) as dok_warning'),
+                DB::raw('COALESCE(mk.dok_clean, 0) as dok_clean')
+            )
+            ->get()
+            ->map(fn($r) => (array) $r)
+            ->all();
+
+        // ---- Persist atomically --------------------------------------------------
+
+        // Helper: chunked upsert
+        $upsertChunked = function (string $table, array $rows, array $uniqueBy, array $updateCols, int $size = 1000) {
+            foreach (array_chunk($rows, $size) as $chunk) {
+                DB::table($table)->upsert($chunk, $uniqueBy, $updateCols);
+            }
+        };
+        // ---- Normalize helpers (NO LPAD in SQL) -----------------------------------
+        $normalizeKabkotRow = function (array $r): array {
+            // prov -> 2 digits; kabkot -> last 2 digits, then left-pad to 2
+            $r['kode_prov']   = str_pad(trim((string)$r['kode_prov']), 2, '0', STR_PAD_LEFT);
+            $kab              = substr(trim((string)$r['kode_kabkot']), -2);  // '0001' -> '01'
+            $r['kode_kabkot'] = str_pad($kab, 2, '0', STR_PAD_LEFT);          // '1' -> '01'
+            $r['kabkot']      = isset($r['kabkot']) ? trim((string)$r['kabkot']) : null;
+            // numeric defaults
+            foreach (['target_nks', 'jumlah_dok', 'dok_error', 'dok_warning', 'dok_clean'] as $c) {
+                $r[$c] = (float)($r[$c] ?? 0);
+            }
+            return $r;
+        };
+
+        $normalizeNksRow = function (array $r): array {
+            $r['kode_prov']   = str_pad(trim((string)$r['kode_prov']), 2, '0', STR_PAD_LEFT);
+            $kab              = substr(trim((string)$r['kode_kabkot']), -2);
+            $r['kode_kabkot'] = str_pad($kab, 2, '0', STR_PAD_LEFT);
+            $r['nks']         = trim((string)$r['nks']);
+            $r['kabkot']      = isset($r['kabkot']) ? trim((string)$r['kabkot']) : null;
+            foreach (['jumlah_dok', 'dok_error', 'dok_warning', 'dok_clean'] as $c) {
+                $r[$c] = (float)($r[$c] ?? 0);
+            }
+            return $r;
+        };
+
+        // Collapse rows that became identical after normalization (sum the metrics)
+        $collapse = function (array $rows, array $keys, array $sumCols): array {
+            $acc = [];
+            foreach ($rows as $r) {
+                $k = implode('|', array_map(fn($c) => $r[$c], $keys));
+                if (!isset($acc[$k])) {
+                    $acc[$k] = $r;
+                } else {
+                    foreach ($sumCols as $c) {
+                        $acc[$k][$c] += (float)$r[$c];
+                    }
+                    // keep the first kabkot name (or choose MAX/trim if you prefer)
+                    if (isset($r['kabkot']) && $r['kabkot'] && empty($acc[$k]['kabkot'])) {
+                        $acc[$k]['kabkot'] = $r['kabkot'];
+                    }
+                }
+            }
+            return array_values($acc);
+        };
+
+        // ---- Apply normalization + collapse before UPSERT --------------------------
+        $rekap_kabkot = array_map($normalizeKabkotRow, $rekap_kabkot);
+        $rekap_kabkot = $collapse(
+            $rekap_kabkot,
+            ['kode_prov', 'kode_kabkot'],
+            ['target_nks', 'jumlah_dok', 'dok_error', 'dok_warning', 'dok_clean']
+        );
+
+        $rekap_nks = array_map($normalizeNksRow, $rekap_nks);
+        $rekap_nks = $collapse(
+            $rekap_nks,
+            ['kode_prov', 'kode_kabkot', 'nks'],
+            ['jumlah_dok', 'dok_error', 'dok_warning', 'dok_clean']
+        );
+
+
         try {
-            // penghitungan rekap kabkot
-            $rekap_kabkot = DB::table('master_wilayah')
-                ->select(
-                    'master_wilayah.kode_prov',
-                    'master_wilayah.kode_kabkot',
-                    'master_wilayah.kabkot',
-                    DB::raw('COALESCE(COUNT(DISTINCT master_wilayah.nks), 0) as target_nks'),
-                    DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok'),
-                    // DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "entri" THEN vsusenas_mak.id END) as dok_entri'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
-                )
-                ->leftJoin('vsusenas_mak', function ($join) {
-                    $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
-                        ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot');
-                })
-                ->groupBy(
-                    'master_wilayah.kode_prov',
-                    'master_wilayah.kode_kabkot',
-                    'master_wilayah.kabkot'
-                )
-                ->get()->toArray();
-            $rekap_kabkot = array_map(function ($item) {
-                return (array) $item;
-            }, $rekap_kabkot);
-            // dd($rekap_kabkot);
-            $rekap_nks = DB::table('master_wilayah')
-                ->select(
-                    'master_wilayah.kode_prov',
-                    'master_wilayah.kode_kabkot',
-                    'master_wilayah.nks',
-                    'master_wilayah.kabkot',
-                    DB::raw('COALESCE(COUNT(DISTINCT vsusenas_mak.id), 0) as jumlah_dok'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
-                    DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
-                )
-                ->leftJoin('vsusenas_mak', function ($join) {
-                    $join->on('master_wilayah.kode_prov', '=', 'vsusenas_mak.kode_prov')
-                        ->on('master_wilayah.kode_kabkot', '=', 'vsusenas_mak.kode_kabkot')
-                        ->on('master_wilayah.nks', '=', 'vsusenas_mak.nks');
-                })
-                ->groupBy(
-                    'master_wilayah.kode_prov',
-                    'master_wilayah.kode_kabkot',
-                    'master_wilayah.kabkot',
-                    'master_wilayah.desa',
-                    'master_wilayah.nks',
+            DB::transaction(function () use ($rekap_kabkot, $rekap_nks, $upsertChunked) {
+                // Ensure you have UNIQUE indexes that match the keys below
+                // kabkot_summary UNIQUE (kode_prov, kode_kabkot)
+                // nks_summary    UNIQUE (kode_prov, kode_kabkot, nks)
 
-                )
-                // ->where('master_wilayah.kode_kabkot', $kode_kabkot)
+                $upsertChunked(
+                    'kabkot_summary',
+                    $rekap_kabkot,
+                    ['kode_prov', 'kode_kabkot'],
+                    ['kabkot', 'target_nks', 'jumlah_dok', 'dok_error', 'dok_warning', 'dok_clean']
+                );
 
-                ->distinct()
-                ->get()->toArray();
-            $rekap_nks = array_map(function ($item) {
-                return (array) $item;
-            }, $rekap_nks);
-            // dd($rekap_nks);
+                $upsertChunked(
+                    'nks_summary',
+                    $rekap_nks,
+                    ['kode_prov', 'kode_kabkot', 'nks'],
+                    ['kabkot', 'jumlah_dok', 'dok_error', 'dok_warning', 'dok_clean']
+                );
 
-            //rekap user
-            // $usersQuery = User::join('vsusenas_mak', 'vsusenas_mak.users_id', 'users.id')->join('master_wilayah', 'master_wilayah.kode_kabkot', 'users.kode_kabkot');
-
-            // // Add the condition only if $kode_kabkot is not "00"
-
-            // // Select the columns
-            // $rekap_user = $usersQuery->select(
-            //     'users.id',
-            //     'users.nama_lengkap',
-            //     'users.username',
-            //     'users.kode_kabkot',
-            //     'master_wilayah.kabkot',
-            //     DB::raw('count(distinct vsusenas_mak.id) as jumlah_dokumen'),
-            //     DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "error" THEN vsusenas_mak.id END) as dok_error'),
-            //     DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "warning" THEN vsusenas_mak.id END) as dok_warning'),
-            //     DB::raw('COUNT(DISTINCT CASE WHEN vsusenas_mak.status_dok = "clean" THEN vsusenas_mak.id END) as dok_clean'),
-            // )
-
-            //     ->groupBy('users.id', 'users.nama_lengkap', 'users.username', 'users.kode_kabkot', 'master_wilayah.kabkot')
-            //     ->get()->toArray();
-            // if (sizeof($rekap_user) > 0) {
-            //     // insert
-            //     DB::beginTransaction();
-            //     DB::table('user_summary')->delete();
-            //     DB::table('user_summary')->insert($rekap_user);
-            //     DB::commit();
-            // }
-            // dd($rekap_user);
-            if (sizeof($rekap_kabkot) > 0) {
-                // insert
-                DB::beginTransaction();
-                DB::table('kabkot_summary')->delete();
-                DB::table('kabkot_summary')->insert($rekap_kabkot);
-                DB::commit();
-            }
-            if (sizeof($rekap_nks) > 0) {
-                // insert
-                DB::beginTransaction();
-                DB::table('nks_summary')->delete();
-                DB::table('nks_summary')->insert($rekap_nks);
                 DB::table('monitoring_update')->insert([
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
-                DB::commit();
-            }
+            }, 3); // up to 3 retries on deadlocks
+
             return response()->json(['message' => 'Berhasil mengupdate data pada monitoring'], 201);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
+        } catch (\Throwable $e) {
+            // If anything fails, the transaction is rolled back automatically
+            report($e);
+            return response()->json(['message' => 'Gagal mengupdate monitoring', 'error' => $e->getMessage()], 500);
         }
     }
+
 
     public function get_rekap_wilayah($tipe, $kode)
     {
@@ -253,127 +335,73 @@ class MonitoringController extends Controller
         return response()->json([], 200);
     }
 
-    private function get_total_kapita($kode_kabkot)
+    private function get_total_kapita(string $kode_kabkot): float
     {
-        $total_kapita = SusenasMak::where("status_dok", "like", "clean")
+        $query = SusenasMak::where('status_dok', 'clean');
 
-            ->where("kode_kabkot", $kode_kabkot)
-            ->selectRaw("sum(wtf_1) as jumlah_kapita")
-            ->first();
-        // dd($total_kapita->jumlah_kapita);
-        return $total_kapita ? (float)$total_kapita->jumlah_kapita : (float)0;
+        if ($kode_kabkot !== '00') {
+            $query->where('kode_kabkot', $kode_kabkot);
+        }
+
+        return (float) $query->sum('wtf_1');
     }
 
-    private function get_konsumsi_total($model, $relationship, $kode_kabkot, $nestedRelationship = null)
-    {
-        $query = $model::with(["komoditas"])
-            ->whereHas($relationship, function (Builder $query_) use ($kode_kabkot, $nestedRelationship) {
-                if ($nestedRelationship) {
-                    $query_->whereHas($nestedRelationship, function (Builder $query__) use ($kode_kabkot) {
-                        $query__->where("status_dok", "like", "clean")
-                            ->where("kode_kabkot", $kode_kabkot);
-                    });
-                } else {
-                    $query_->where("status_dok", "like", "clean")
-                        ->where("kode_kabkot", $kode_kabkot);
-                }
-            })
-            ->where("volume_total", ">", "0");
-        $total_kalori = $query->get()->sum(function ($konsumsi) {
-            return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
-        });
 
-        $total_kalori_basket = $query->clone()
-            ->whereHas("komoditas", function (Builder $query) {
-                $query->where("flag_basket", true);
-            })
-            ->get()
-            ->sum(function ($konsumsi) {
-                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
-            });
+
+    private function get_konsumsi_ruta_total(string $kode_kabkot): array
+    {
+        // Resolve table names from models to avoid hardcoding
+        $konsumsiTbl = (new \App\Models\Konsumsi)->getTable();   // e.g. 'konsumsi'
+        $komoditasTbl = (new \App\Models\Komoditas)->getTable(); // e.g. 'komoditas'
+        $rutaTbl      = (new \App\Models\SusenasMak())->getTable();      // e.g. 'ruta' / 'susenas_mak'
+
+        $row = DB::table("$konsumsiTbl as k")
+            ->join("$komoditasTbl as m", 'm.id', '=', 'k.id_komoditas')
+            ->join("$rutaTbl as r", 'r.id', '=', 'k.id_ruta')
+            ->where('k.volume_total', '>', 0)
+            ->where('r.status_dok', 'clean')               // exact match (faster than LIKE)
+            ->when($kode_kabkot !== '00', fn($q) => $q->where('r.kode_kabkot', $kode_kabkot))
+            ->selectRaw('
+            COALESCE(SUM(k.volume_total * m.kalori), 0) AS total,
+            COALESCE(SUM(CASE WHEN m.flag_basket = 1 THEN k.volume_total * m.kalori ELSE 0 END), 0) AS basket
+        ')
+            ->first();
+
         return [
-            "total" => $total_kalori,
-            "basket" => $total_kalori_basket
+            'total'  => (float) ($row->total ?? 0),
+            'basket' => (float) ($row->basket ?? 0),
         ];
     }
-    private function get_konsumsi_ruta_total($kode_kabkot)
+
+
+
+    private function get_konsumsi_art_total(string $kode_kabkot): array
     {
-        $total_konsumsi_ruta_kalori = Konsumsi::with(["komoditas"])
-            ->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
-                if ($kode_kabkot == "00") {
-                    $query->where("status_dok", "like", "clean");
-                } else {
-                    $query->where("status_dok", "like", "clean")
-                        ->where("kode_kabkot", $kode_kabkot);
-                }
-            })
-            ->where("volume_total", ">", 0)
-            ->get()
-            ->sum(function ($konsumsi) {
-                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
-            });
-        $total_konsumsi_ruta_kalori_basket = Konsumsi::with(["komoditas"])
-            ->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
-                if ($kode_kabkot == "00") {
-                    $query->where("status_dok", "like", "clean");
-                } else {
-                    $query->where("status_dok", "like", "clean")
-                        ->where("kode_kabkot", $kode_kabkot);
-                }
-            })
-            ->where("volume_total", ">", 0)
-            ->whereHas("komoditas", function (Builder $query) {
-                $query->where("flag_basket", true);
-            })
-            ->get()
-            ->sum(function ($konsumsi) {
-                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
-            });
+        // Resolve actual table names from the models
+        $kaTbl = (new \App\Models\KonsumsiArt)->getTable();   // e.g. 'konsumsi_art'
+        $komTbl = (new \App\Models\Komoditas)->getTable();    // e.g. 'komoditas'
+        $angTbl = (new \App\Models\AnggotaRuta)->getTable();  // e.g. 'anggota_ruta'
+        $rutaTbl = (new \App\Models\SusenasMak())->getTable();        // e.g. 'ruta' / 'susenas_mak'
 
+        $row = DB::table("$kaTbl as k")
+            ->join("$komTbl as m", 'm.id', '=', 'k.id_komoditas')
+            ->join("$angTbl as a", 'a.id', '=', 'k.id_art')
+            ->join("$rutaTbl as r", 'r.id', '=', 'a.id_ruta')
+            ->where('k.volume_total', '>', 0)
+            ->where('r.status_dok', 'clean') // exact match lets indexes work
+            ->when($kode_kabkot !== '00', fn($q) => $q->where('r.kode_kabkot', $kode_kabkot))
+            ->selectRaw('
+            COALESCE(SUM(k.volume_total * m.kalori), 0) AS total,
+            COALESCE(SUM(CASE WHEN m.flag_basket = 1 THEN k.volume_total * m.kalori ELSE 0 END), 0) AS basket
+        ')
+            ->first();
 
-        return ["total" => $total_konsumsi_ruta_kalori, "basket" => $total_konsumsi_ruta_kalori_basket];
+        return [
+            'total'  => (float) ($row->total ?? 0),
+            'basket' => (float) ($row->basket ?? 0),
+        ];
     }
 
-    private function get_konsumsi_art_total($kode_kabkot)
-    {
-        $total_konsumsi_art_kalori = KonsumsiArt::with(["komoditas"])
-            ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
-                $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
-                    if ($kode_kabkot == "00") {
-                        $query_2->where("status_dok", "like", "clean");
-                    } else {
-                        $query_2->where("status_dok", "like", "clean")
-                            ->where("kode_kabkot", $kode_kabkot);
-                    }
-                });
-            })
-            ->where("volume_total", ">", 0)
-            ->get()
-            ->sum(function ($konsumsi) {
-                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
-            });
-        $total_konsumsi_art_kalori_basket = KonsumsiArt::with(["komoditas"])
-            ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
-                $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
-                    if ($kode_kabkot == "00") {
-                        $query_2->where("status_dok", "like", "clean");
-                    } else {
-                        $query_2->where("status_dok", "like", "clean")
-                            ->where("kode_kabkot", $kode_kabkot);
-                    }
-                });
-            })
-            ->where("volume_total", ">", 0)
-            ->whereHas("komoditas", function (Builder $query) {
-                $query->where("flag_basket", true);
-            })
-            ->get()
-            ->sum(function ($konsumsi) {
-                return $konsumsi->volume_total * $konsumsi->komoditas->kalori;
-            });
-
-        return ["total" => $total_konsumsi_art_kalori, "basket" => $total_konsumsi_art_kalori_basket];
-    }
 
     private function konsumsi_perkapita_total($kode_kabkot)
     {
@@ -393,206 +421,239 @@ class MonitoringController extends Controller
         ];
     }
 
-    private function komoditas_summary_c($kode_kabkot)
+
+
+    private function komoditas_summary(string $kode_kabkot)
     {
-        // volume, 
-        // kalori
-        // harga per satuan
-        $komoditas_summary_ruta = Konsumsi::with("komoditas")
-            ->join('komoditas', 'konsumsi.id_komoditas', '=', 'komoditas.id') // Join with the komoditas table
-            ->whereHas("ruta", function (Builder $query) use ($kode_kabkot) {
-                $query->where("status_dok", "like", "clean")
-                    ->where("kode_kabkot", "like", $kode_kabkot);
-            })
-            ->where("konsumsi.volume_total", ">", 0) // Specify the table name for clarity
-            ->selectRaw("
-        konsumsi.id_komoditas,
-        sum(konsumsi.volume_total) as sum_volume,
-        sum(komoditas.kalori * konsumsi.volume_total) as sum_kalori, 
-        avg(konsumsi.harga_total / konsumsi.volume_total) as average_harga_satuan
-    ")
-            ->groupBy("konsumsi.id_komoditas")
+        // ---- Subquery 1: konsumsi (per-Ruta) -----------------------------------
+        $qKonsumsi = DB::table('konsumsi as k')
+            ->join('komoditas as m', 'm.id', '=', 'k.id_komoditas')
+            ->join('vsusenas_mak as r', 'r.id', '=', 'k.id_ruta')
+            ->where('k.volume_total', '>', 0)
+            ->where('r.status_dok', '=', 'clean')
+            ->when($kode_kabkot !== '00', fn($q) => $q->where('r.kode_kabkot', $kode_kabkot))
+            ->groupBy('k.id_komoditas')
+            ->selectRaw('
+            k.id_komoditas,
+            SUM(k.volume_total)                                 AS sum_volume,
+            SUM(m.kalori * k.volume_total)                      AS sum_kalori,
+            SUM(k.harga_total)                                  AS sum_harga_total
+        ');
+
+        // ---- Subquery 2: konsumsi_art (per-Anggota) -----------------------------
+        $qKonsumsiArt = DB::table('konsumsi_art as ka')
+            ->join('komoditas as m', 'm.id', '=', 'ka.id_komoditas')
+            ->join('anggota_ruta as a', 'a.id', '=', 'ka.id_art')
+            ->join('vsusenas_mak as r', 'r.id', '=', 'a.id_ruta')
+            ->where('ka.volume_total', '>', 0)
+            ->where('r.status_dok', '=', 'clean')
+            ->when($kode_kabkot !== '00', fn($q) => $q->where('r.kode_kabkot', $kode_kabkot))
+            ->groupBy('ka.id_komoditas')
+            ->selectRaw('
+            ka.id_komoditas,
+            SUM(ka.volume_total)                                AS sum_volume,
+            SUM(m.kalori * ka.volume_total)                     AS sum_kalori,
+            SUM(ka.harga_total)                                 AS sum_harga_total
+        ');
+
+        // ---- Union + final aggregation with weighted avg ------------------------
+        $rows = DB::query()
+            ->fromSub(
+                $qKonsumsi->unionAll($qKonsumsiArt),
+                'u'
+            )
+            ->groupBy('u.id_komoditas')
+            ->selectRaw('
+            u.id_komoditas,
+            SUM(u.sum_volume)                        AS sum_volume,
+            SUM(u.sum_kalori)                        AS sum_kalori,
+            CASE WHEN SUM(u.sum_volume) > 0
+                 THEN SUM(u.sum_harga_total) / SUM(u.sum_volume)
+                 ELSE 0 END                          AS average_harga_satuan
+        ')
             ->get();
 
-        $komoditas_summary_art = KonsumsiArt::with("komoditas")
-            ->join('komoditas', 'konsumsi_art.id_komoditas', '=', 'komoditas.id') // Join with the komoditas table
-            ->whereHas("anggota_ruta", function (Builder $query) use ($kode_kabkot) {
-                $query->whereHas("ruta", function (Builder $query_2) use ($kode_kabkot) {
-                    $query_2->where("status_dok", "like", "clean")
-                        ->where("kode_kabkot", $kode_kabkot);
-                });
-            })
-            ->where("konsumsi_art.volume_total", ">", 0) // Specify the table name for clarity
-            ->selectRaw("
-        konsumsi_art.id_komoditas,
-        sum(konsumsi_art.volume_total) as sum_volume,
-        sum(komoditas.kalori * konsumsi_art.volume_total) as  sum_kalori, 
-        avg(konsumsi_art.harga_total / konsumsi_art.volume_total) as average_harga_satuan
-    ")
-            ->groupBy("konsumsi_art.id_komoditas")
-            ->get();
-        // dd($komoditas_summary_ruta);
-        // return response()->json($komoditas_summary_ruta, 200);
-        dd([$komoditas_summary_ruta, $komoditas_summary_art]);
-        return [$komoditas_summary_ruta, $komoditas_summary_art];
-    }
-    private function komoditas_summary($kode_kabkot)
-    {
-        $komoditas_summary = DB::table(function ($query) use ($kode_kabkot) {
-            $query->selectRaw("
-            konsumsi.id_komoditas,
-            sum(konsumsi.volume_total) as sum_volume,
-            sum(komoditas.kalori * konsumsi.volume_total) as sum_kalori, 
-            avg(konsumsi.harga_total / konsumsi.volume_total) as average_harga_satuan
-        ")
-                ->from("konsumsi")
-                ->join("komoditas", "konsumsi.id_komoditas", "=", "komoditas.id")
-                ->whereExists(function ($subquery) use ($kode_kabkot) {
-                    if ($kode_kabkot != "00") {
-                        $subquery->select(DB::raw(1))
-                            ->from("vsusenas_mak")
-                            ->whereColumn("vsusenas_mak.id", "konsumsi.id_ruta")
-                            ->where("vsusenas_mak.status_dok", "clean")
-                            ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
-                    } else {
-                        $subquery->select(DB::raw(1))
-                            ->from("vsusenas_mak")
-                            ->whereColumn("vsusenas_mak.id", "konsumsi.id_ruta")
-                            ->where("vsusenas_mak.status_dok", "clean");
-                    }
-                })
-                ->where("konsumsi.volume_total", ">", 0)
-                ->groupBy("konsumsi.id_komoditas")
-
-                ->unionAll(
-                    DB::table("konsumsi_art")
-                        ->selectRaw("
-                    konsumsi_art.id_komoditas,
-                    sum(konsumsi_art.volume_total) as sum_volume,
-                    sum(komoditas.kalori * konsumsi_art.volume_total) as sum_kalori, 
-                    avg(konsumsi_art.harga_total / konsumsi_art.volume_total) as average_harga_satuan
-                ")
-                        ->join("komoditas", "konsumsi_art.id_komoditas", "=", "komoditas.id")
-                        ->whereExists(function ($subquery) use ($kode_kabkot) {
-                            $subquery->select(DB::raw(1))
-                                ->from("anggota_ruta")
-                                ->whereColumn("anggota_ruta.id", "konsumsi_art.id_art")
-                                ->whereExists(function ($subquery2) use ($kode_kabkot) {
-                                    if ($kode_kabkot != "00") {
-                                        $subquery2->select(DB::raw(1))
-                                            ->from("vsusenas_mak")
-                                            ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
-                                            ->where("vsusenas_mak.status_dok", "clean")
-                                            ->where("vsusenas_mak.kode_kabkot", $kode_kabkot);
-                                    } else {
-                                        $subquery2->select(DB::raw(1))
-                                            ->from("vsusenas_mak")
-                                            ->whereColumn("vsusenas_mak.id", "anggota_ruta.id_ruta")
-                                            ->where("vsusenas_mak.status_dok", "clean");
-                                    }
-                                });
-                        })
-                        ->where("konsumsi_art.volume_total", ">", 0)
-                        ->groupBy("konsumsi_art.id_komoditas")
-                );
-        }, 'komoditas_summary')
-            ->selectRaw("
-        id_komoditas,
-        sum(sum_volume) as sum_volume,
-        sum(sum_kalori) as sum_kalori,
-        avg(average_harga_satuan) as average_harga_satuan
-    ")
-            ->groupBy("id_komoditas")
-            ->get();
-        // dd($komoditas_summary);
-        return $komoditas_summary;
+        return $rows;
     }
 
-    public function hitung_summary_kabupaten_kota($kode_kabkot)
+
+    public function hitung_summary_kabupaten_kota(string $kode_kabkot)
     {
-        $jumlah_ruta = SusenasMak::selectRaw("count(id) as jumlah_ruta")->where("status_dok", "clean");
-        if ($kode_kabkot != "00") {
-            $jumlah_ruta = $jumlah_ruta->where("kode_kabkot", $kode_kabkot);
-        }
-        $jumlah_ruta = $jumlah_ruta->first()->toArray()["jumlah_ruta"];
-        // dd($jumlah_ruta);
-        if ($jumlah_ruta == 0) {
-            return;
+        // 1) Count clean docs
+        $jumlah_ruta = DB::table('vsusenas_mak')
+            ->where('status_dok', 'clean')
+            ->when($kode_kabkot !== '00', fn($q) => $q->where('kode_kabkot', $kode_kabkot))
+            ->count('id');
+
+        if ($jumlah_ruta === 0) {
+            return; // nothing to update
         }
 
+        // 2) Per-kapita metrics
+        $konsumsi            = $this->konsumsi_perkapita_total($kode_kabkot);
 
-        // dd($jumlah_ruta);
-        $konsumsi_perkapita = $this->konsumsi_perkapita_total($kode_kabkot);
-        $konsumsi_perkapita_total = $konsumsi_perkapita["total"];
-        $konsumsi_perkapita_basket_komoditas = $konsumsi_perkapita["basket"];
-        if ($kode_kabkot == "00") {
-            $upsertProvinsi = [
-                "kode_prov" => "00",
-                "kode_prov" => "00",
-                "kabkot" => "PROVINSI SULAWESI UTARA",
-                "jumlah_dok" => 0,
-                "target_nks" => 0,
-                "dok_error" => 0,
-                "dok_clean" => 0,
-                "dok_warning" => 0,
-                "konsumsi_perkapita_total" => round($konsumsi_perkapita_total, 3),
-                "konsumsi_perkapita_basket_komoditas" => round($konsumsi_perkapita_basket_komoditas, 3),
-                "jumlah_individu" => $konsumsi_perkapita["jumlah_individu"],
-                "jumlah_ruta" => $jumlah_ruta
-            ];
-            DB::table('komoditas_kabkot_summary')->upsert(
-                $upsertProvinsi,
-                ['kode_kabkot'], // Unique constraints for conflict resolution
-                ['konsumsi_perkapita_total', 'konsumsi_perkapita_basket_komoditas', 'jumlah_individu', 'jumlah_ruta'] // Fields to update if conflict occurs
-            );
-        } else {
-            DB::table("kabkot_summary")->where("kode_kabkot", "like", $kode_kabkot)->update([
-                "konsumsi_perkapita_total" => round($konsumsi_perkapita_total, 3),
-                "konsumsi_perkapita_basket_komoditas" => round($konsumsi_perkapita_basket_komoditas, 3),
-                "jumlah_individu" => $konsumsi_perkapita["jumlah_individu"],
-                "jumlah_ruta" => $jumlah_ruta
-            ]);
-        }
-        $upsertData = [];
+        // dd($konsumsi);
+        $konsumsi_total      = round((float)($konsumsi['total']  ?? 0), 3);
+        $konsumsi_basket     = round((float)($konsumsi['basket'] ?? 0), 3);
+        $jumlah_individu     = (int)  ($konsumsi['jumlah_individu'] ?? 0);
+        // dd([
+        //     $kode_kabkot,
+        //     $jumlah_ruta,
+        //     $jumlah_individu,
+        //     $konsumsi_total,
+        //     $konsumsi_basket
+        // ]);
+
+        // 3) Aggregate row (id_komoditas = 0 sentinel)
+        $aggRow = [
+            'kode_kabkot'                           => $kode_kabkot,
+            'id_komoditas'                          => 0, // sentinel for TOTAL row
+            'sum_volume'                            => 0,  // keep numeric defaults; optional
+            'sum_kalori'                            => 0,
+            'average_harga'                         => 0,
+            'created_at'                            => now(),
+            'updated_at'                            => now(),
+        ];
+
+        // 4) Per-komoditas rows
         $komoditas_summary = $this->komoditas_summary($kode_kabkot);
         // dd($komoditas_summary);
-        foreach ($komoditas_summary as $komoditas) {
-            # code...
-            $upsertData[] = [
-                "kode_kabkot" => $kode_kabkot,
-                "id_komoditas" => $komoditas->id_komoditas,
-                "sum_volume" => $komoditas->sum_volume,
-                "sum_kalori" => $komoditas->sum_kalori,
-                "average_harga" => $komoditas->average_harga_satuan,
-                "created_at" => now(),
-                "updated_at" => now(),
+        $now = now();
+        $detailRows = [];
+        foreach ($komoditas_summary as $k) {
+            $detailRows[] = [
+                'kode_kabkot'   => $kode_kabkot,
+                'id_komoditas'  => (int)$k->id_komoditas,
+                'sum_volume'    => (float)$k->sum_volume,
+                'sum_kalori'    => (float)$k->sum_kalori,
+                'average_harga' => (float)$k->average_harga_satuan,
+                'created_at'    => $now,
+                'updated_at'    => $now,
             ];
         }
-        // Perform bulk upsert
-        // dd($upsertData);
-        DB::table('komoditas_kabkot_summary')->upsert(
-            $upsertData,
-            ['kode_kabkot', 'id_komoditas'], // Unique constraints for conflict resolution
-            ['sum_volume', 'sum_kalori', 'average_harga', 'updated_at'] // Fields to update if conflict occurs
-        );
+
+        // 5) Optionally mirror headline numbers to kabkot_summary (non-"00")
+        $kabkotRow = [
+            'konsumsi_perkapita_total'            => $konsumsi_total,
+            'konsumsi_perkapita_basket_komoditas' => $konsumsi_basket,
+            'jumlah_individu'                     => $jumlah_individu,
+            'jumlah_ruta'                         => $jumlah_ruta,
+            'jumlah_dok'                          => $jumlah_ruta,
+            'target_nks'                         => DB::table('master_wilayah')->where('kode_kabkot', $kode_kabkot)->count('nks') ?? 0,
+            'kode_prov'                           => '71',
+            'kode_kabkot'                         => $kode_kabkot,
+            'kabkot'                              => Kabkot::where('kode', $kode_kabkot)->value('nama') ?? null,
+        ];
+
+        // 6) Atomic save
+        DB::transaction(function () use ($kode_kabkot, $aggRow, $detailRows, $kabkotRow) {
+            // Upsert TOTAL row (id_komoditas = 0) into komoditas_kabkot_summary
+            DB::table('komoditas_kabkot_summary')->upsert(
+                [$aggRow],
+                ['kode_kabkot', 'id_komoditas'],
+                [
+                    'sum_volume',
+                    'sum_kalori',
+                    'average_harga',
+                    'updated_at'
+                ]
+            );
+
+            // Upsert per-komoditas rows (chunked)
+            if (!empty($detailRows)) {
+                foreach (array_chunk($detailRows, 1000) as $chunk) {
+                    DB::table('komoditas_kabkot_summary')->upsert(
+                        $chunk,
+                        ['kode_kabkot', 'id_komoditas'],
+                        ['sum_volume', 'sum_kalori', 'average_harga', 'updated_at']
+                    );
+                }
+            }
+
+            // Mirror to kabkot_summary (optional, only if kab/kot != "00")
+
+            // dd($kabkotRow);
+            DB::table('kabkot_summary')->upsert($kabkotRow, ['kode_kabkot'], array_keys($kabkotRow));
+        });
+        // dd($kabkotRow, $kode_kabkot);
     }
+
+    public function calculate_ruta_summary($kode_kabkot)
+    {
+        DB::connection()->disableQueryLog();
+
+        // Restrict to the current kab/kota routes
+        $rutaBase = DB::table('vsusenas_mak')
+            ->select('id')
+            ->where('status_dok', 'clean')
+            ->when($kode_kabkot !== '00', fn($q) => $q->where('kode_kabkot', $kode_kabkot));
+
+        // Aggregate kalori from ruta-level konsumsi
+        $kaloriRuta = DB::table('konsumsi as kr')
+            ->join('komoditas as k', 'k.id', '=', 'kr.id_komoditas')
+            ->select('kr.id_ruta as id_ruta', DB::raw('SUM(kr.volume_total * k.kalori) as kalori_ruta'))
+            ->whereIn('kr.id_ruta', $rutaBase)
+            ->groupBy('kr.id_ruta');
+
+        // Aggregate kalori from anggota-level konsumsi
+        $kaloriArt = DB::table('konsumsi_art as ka')
+            ->join('komoditas as k', 'k.id', '=', 'ka.id_komoditas')
+            ->join('anggota_ruta as ar', 'ar.id', '=', 'ka.id_art')
+            ->select('ar.id_ruta as id_ruta', DB::raw('SUM(ka.volume_total * k.kalori) as kalori_art'))
+            ->whereIn('ar.id_ruta', $rutaBase)
+            ->groupBy('ar.id_ruta');
+
+        // Count anggota per ruta
+        $jumlahArt = DB::table('anggota_ruta as ar')
+            ->select('ar.id_ruta as id_ruta', DB::raw('COUNT(*) as jumlah_art'))
+            ->whereIn('ar.id_ruta', $rutaBase)
+            ->groupBy('ar.id_ruta');
+
+        // Merge the aggregates and upsert
+        $rows = DB::query()
+            ->fromSub($rutaBase, 'r')
+            ->leftJoinSub($kaloriRuta, 'kr', 'kr.id_ruta', '=', 'r.id')
+            ->leftJoinSub($kaloriArt, 'ka', 'ka.id_ruta', '=', 'r.id')
+            ->leftJoinSub($jumlahArt, 'ja', 'ja.id_ruta', '=', 'r.id')
+            ->selectRaw('r.id as id_ruta, COALESCE(kr.kalori_ruta,0)+COALESCE(ka.kalori_art,0) as kalori, COALESCE(ja.jumlah_art,0) as jumlah_art')
+            ->get()
+            ->map(fn($x) => (array)$x)
+            ->all();
+
+        if (!empty($rows)) {
+            DB::table('temp_ruta_summary')->upsert($rows, ['id_ruta'], ['kalori', 'jumlah_art']);
+        }
+    }
+
+
 
     public function update_dashboard()
     {
         // Disable the execution time limit for this request
         set_time_limit(0);
 
-        $daftar_kabkot = Kabkot::where("kode", "<>", "00")->get();
+        // $this->hitung_summary_kabupaten_kota("06");
+        $daftar_kabkot = DB::table('kabkot')
+            ->selectRaw("LPAD(kode, 2, '0') as kode")
+            ->where('kode', '!=', '00') // exclude "00" (Provinsi)
+            ->get();
+        // dd($daftar_kabkot[0]->kode);
+        $up = [];
         foreach ($daftar_kabkot as $kabkot) {
             # code...
+            // if (!$kabkot->kode == "06") {
+            //     continue;
+            // }
 
-            $kode_kabkot = $kabkot->kode;
 
-            $this->hitung_summary_kabupaten_kota($kode_kabkot);
+            $this->hitung_summary_kabupaten_kota($kabkot->kode);
+            $this->calculate_ruta_summary($kabkot->kode);
+            $up[] = $kabkot->kode;
             // continue;
         }
         return response()->json([
-            "message" => "selesai menghitung summary"
+            "message" => "selesai menghitung summary",
+            "updated" => $up
         ], 200);
     }
 }

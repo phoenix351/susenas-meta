@@ -116,16 +116,7 @@ const Blok1_2: React.FC<{
         setKabkot(data.kode_kabkot);
         setDaftarKabKot(daftarKabkot);
     };
-    const fetchSemester = async () => {
-        const url = route("api.entri.semester");
 
-        const { data } = await axios.get(url);
-        const daftarKabkot = data.map((item: any) => ({
-            label: item.label,
-            value: item.value,
-        }));
-        setDaftarKabKot(daftarKabkot);
-    };
     const fetchNks = async (value: string) =>
         // kodeProv: string,
         // kodeKabkot: string,
@@ -200,6 +191,7 @@ const Blok1_2: React.FC<{
     useEffect(() => {
         try {
             // fetchProvinsi();
+            // console.log(form.getFieldsValue());
             fetchKabkot();
             form.setFieldValue("kode_prov", "71");
             if (identitas_wilayah) {
@@ -216,9 +208,9 @@ const Blok1_2: React.FC<{
                         value: identitas_wilayah["kode_desa"],
                     },
                 ]);
+
                 form.setFieldsValue(identitas_wilayah);
             }
-            // fetchSemester();
         } catch (error) {}
     }, []);
     useEffect(() => {
@@ -226,9 +218,6 @@ const Blok1_2: React.FC<{
             fetchKecamatan(kabkot);
         }
     }, [kabkot]);
-    useEffect(() => {
-        // console.log({ formvalues: form.getFieldsValue() });
-    }, [form]);
 
     const debouncedSetDaftarArt = _debounce((value) => {
         setDaftarArt((prev: any) => {
@@ -242,8 +231,8 @@ const Blok1_2: React.FC<{
         debouncedSetDaftarArt(value);
     };
     const debounceCekNomorSampel = _debounce(
-        async (value, currentRecordId, kode_kabkot, nks,semester) =>
-            cekNomorSampel(value, currentRecordId, kode_kabkot, nks,semester),
+        async (value, currentRecordId, kode_kabkot, nks, semester) =>
+            cekNomorSampel(value, currentRecordId, kode_kabkot, nks, semester),
         400
     );
 
@@ -256,10 +245,13 @@ const Blok1_2: React.FC<{
             value,
             currentRecordId,
             kode_kabkot,
-            nks, 
+            nks,
             form.getFieldValue("semester")
         );
         // console.log({ isUnique, value });
+        // if (value > 10) {
+        //     return Promise.reject("Nomor Sampel maksimal 10");
+        // }
 
         return isUnique
             ? Promise.resolve()
@@ -281,7 +273,9 @@ const Blok1_2: React.FC<{
                 >
                     <Image {...imageProps} src="/images/garuda.png" />
                     <Title level={5}>
-                        SURVEI SOSIAL EKONOMI NASIONAL SEMESTER I 2025
+                        SURVEI SOSIAL EKONOMI NASIONAL SEMESTER{" "}
+                        {identitas_wilayah["semester"] > 1 ? "II" : "I"}{" "}
+                        {new Date().getFullYear()}
                     </Title>
                     <Text>KETERANGAN KONSUMSI MAKANAN RUMAH TANGGA</Text>
                 </Space>
@@ -321,8 +315,8 @@ const Blok1_2: React.FC<{
                                         BLOK I. KETERANGAN TEMPAT
                                     </Title>
                                     <Text>
-                                        [ disalin dari Blok I kuesioner Seruti
-                                        Inti (VSUSENAS.INTI) ]
+                                        [ disalin dari Blok I kuesioner Susenas
+                                        Modul (VSUSENAS25.M) ]
                                     </Text>
                                 </Space>
                             </td>
@@ -335,6 +329,9 @@ const Blok1_2: React.FC<{
                             <td style={cellStyle}>
                                 <Form.Item name="id" label={null}>
                                     <InputNumber readOnly={editable} />
+                                </Form.Item>
+                                <Form.Item name="semester" label={null}>
+                                    <Input />
                                 </Form.Item>
                             </td>
                         </tr>
@@ -493,7 +490,9 @@ const Blok1_2: React.FC<{
                         </tr>
                         <tr>
                             <td style={cellStyle}>106</td>
-                            <td style={cellStyle}>Nomor Blok Sensus</td>
+                            <td style={cellStyle}>
+                                Kode Satuan Lingkungan Setempat (SLS)
+                            </td>
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
@@ -517,7 +516,7 @@ const Blok1_2: React.FC<{
                         </tr>
                         <tr>
                             <td style={cellStyle}>107</td>
-                            <td style={cellStyle}>Nomor Kode Sampel</td>
+                            <td style={cellStyle}>Nomor Kode Sampel (NKS)</td>
                             {/* <td style={cellStyle}>Sulawesi Utara</td> */}
                             <td style={cellStyle}>
                                 <Form.Item
@@ -649,8 +648,8 @@ const Blok1_2: React.FC<{
                                         BLOK II. KETERANGAN PENCACAH
                                     </Title>
                                     <Text>
-                                        [ disalin dari Blok II kuesioner Seruti
-                                        Inti (VSUSENAS.INTI) ]
+                                        [ disalin dari Blok II kuesioner Susenas
+                                        Modul (VSUSENAS25.M) ]
                                     </Text>
                                 </Space>
                             </td>
@@ -793,6 +792,93 @@ const Blok1_2: React.FC<{
                                         },
                                     ]}
                                 />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style={cellStyle}>500.</td>
+                            <td style={cellStyle}>Catatan</td>
+
+                            {/* <td>Sulawesi Utara</td> */}
+                            <td style={cellStyle} colSpan={4}>
+                                <Form.Item
+                                    noStyle
+                                    shouldUpdate={(prev, cur) =>
+                                        prev.r203 !== cur.r203
+                                    }
+                                >
+                                    {({ getFieldValue }) => {
+                                        const r203 = getFieldValue("r203");
+
+                                        if (r203 > 1) {
+                                            return (
+                                                <Form.Item
+                                                    name="catatan"
+                                                    label={null}
+                                                    preserve={false} // <- drop state & errors when unmounted
+                                                    dependencies={["r203"]} // revalidate if r203 flips while mounted
+                                                    validateFirst
+                                                    rules={[
+                                                        ({
+                                                            getFieldValue,
+                                                        }) => ({
+                                                            validator(
+                                                                _,
+                                                                value
+                                                            ) {
+                                                                const r =
+                                                                    getFieldValue(
+                                                                        "r203"
+                                                                    );
+                                                                if (r > 1) {
+                                                                    const len =
+                                                                        (
+                                                                            value ||
+                                                                            ""
+                                                                        ).trim()
+                                                                            .length;
+                                                                    if (
+                                                                        len < 25
+                                                                    ) {
+                                                                        return Promise.reject(
+                                                                            new Error(
+                                                                                "Catatan wajib diisi (≥ 25 karakter) saat r203 > 1"
+                                                                            )
+                                                                        );
+                                                                    }
+                                                                }
+                                                                return Promise.resolve();
+                                                            },
+                                                        }),
+                                                    ]}
+                                                    validateTrigger={[
+                                                        "onChange",
+                                                        "onBlur",
+                                                    ]}
+                                                >
+                                                    <Input.TextArea
+                                                        rows={3}
+                                                        placeholder="Masukkan catatan jika ada status pencacahan selain [1]"
+                                                        allowClear
+                                                        autoSize={{
+                                                            minRows: 3,
+                                                            maxRows: 6,
+                                                        }}
+                                                    />
+                                                </Form.Item>
+                                            );
+                                        }
+
+                                        // r203 ≤ 1 → show read-only UI, not registered to the form (no name)
+                                        return (
+                                            <Input.TextArea
+                                                rows={3}
+                                                placeholder="Tidak perlu catatan saat r203 = 1"
+                                                disabled
+                                                value={""}
+                                            />
+                                        );
+                                    }}
+                                </Form.Item>
                             </td>
                         </tr>
                     </tbody>

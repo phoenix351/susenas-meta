@@ -1,6 +1,7 @@
 import exportTableAsCsv from "@/Functions/ExportTable";
 import { KomoditasDataType, KomoditasSummary } from "@/types";
-import { Button, Space, Table } from "antd";
+import { ExportOutlined } from "@ant-design/icons";
+import { Button, Space, Table, Tag } from "antd";
 import {
     ColumnProps,
     ColumnType,
@@ -84,9 +85,11 @@ const PengeluaranTable = ({
             key: "flag_kemiskinan",
 
             render: (value: number, record) =>
-                record.pengeluaran_perkapita < garisKemiskinanSementara
-                    ? "miskin"
-                    : "tidak miskin",
+                record.pengeluaran_perkapita < garisKemiskinanSementara ? (
+                    <Tag color="error">Miskin</Tag>
+                ) : (
+                    <Tag color="success">Tidak Miskin</Tag>
+                ),
         },
     ];
     function handleChange(
@@ -105,6 +108,7 @@ const PengeluaranTable = ({
             <Space style={{ display: "flex", justifyContent: "space-between" }}>
                 <h2>Daftar Rumah Tangga kondisi clean dan warning</h2>
                 <Button
+                    icon={<ExportOutlined />}
                     onClick={() =>
                         exportTableAsCsv(KomoditasColumns, dataSource)
                     }

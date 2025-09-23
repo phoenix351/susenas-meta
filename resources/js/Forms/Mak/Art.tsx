@@ -48,8 +48,8 @@ const Art: React.FC<{
     // });
 
     const konsumsiArtFinish = async (values: any) => {
-        values = {...values,id_art,id_ruta}
-        
+        values = { ...values, id_art, id_ruta };
+
         try {
             setLoading(true);
             const url = route("entri.mak.konsumsi_art.store");
@@ -171,49 +171,42 @@ const Art: React.FC<{
     const handleValueChange = _debounce(() => {
         calculateRekap();
         form.submit();
-        
+
         calculateKalori(form.getFieldsValue()).then((totalKalori) => {
             let newDaftarArt = [...daftarArt];
-            console.log(newDaftarArt,id_art);
+            console.log(newDaftarArt, id_art);
             newDaftarArt[nomor_art]["kalori"] = totalKalori;
         });
     }, 1000);
     // kumpulan useeffect
     useEffect(() => {
         const fetchKonsumsiArt = async (id_art: string) => {
+            if (!id_art) return;
             setLoading(true);
             const { data } = await axios.get(
                 route("api.konsumsi.art.fetch", { id_art: id_art })
             );
 
             // const daftarSub: number[] = [187, 220];
-            let konsumsiArt = data.map(
-                (item: any) => {
-                    return {
-                        [`${
-                            (item.komoditas.type=="sub")
-                                ? "jumlah"
-                                : ""
-                        }${item.id_komoditas}_beli_harga${item.komoditas.id_kelompok}`]:
-                            item.harga_beli,
-                        [`${
-                            (item.komoditas.type=="sub")
-                                ? "jumlah"
-                                : ""
-                        }${item.id_komoditas}_produksi_harga${
-                            item.komoditas.id_kelompok
-                        }`]: item.harga_produksi,
-                        [`${item.id_komoditas}_total_harga`]: item.harga_total,
-                        [`${item.id_komoditas}_item`]: item.item,
-                        [`${item.id_komoditas}_satuan`]: item.satuan,
-                        [`${item.id_komoditas}_beli_volume`]: item.volume_beli,
-                        [`${item.id_komoditas}_produksi_volume`]:
-                            item.volume_produksi,
-                        [`${item.id_komoditas}_total_volume`]:
-                            item.volume_total,
-                    };
-                }
-            );
+            let konsumsiArt = data.map((item: any) => {
+                return {
+                    [`${item.komoditas.type == "sub" ? "jumlah" : ""}${
+                        item.id_komoditas
+                    }_beli_harga${item.komoditas.id_kelompok}`]:
+                        item.harga_beli,
+                    [`${item.komoditas.type == "sub" ? "jumlah" : ""}${
+                        item.id_komoditas
+                    }_produksi_harga${item.komoditas.id_kelompok}`]:
+                        item.harga_produksi,
+                    [`${item.id_komoditas}_total_harga`]: item.harga_total,
+                    [`${item.id_komoditas}_item`]: item.item,
+                    [`${item.id_komoditas}_satuan`]: item.satuan,
+                    [`${item.id_komoditas}_beli_volume`]: item.volume_beli,
+                    [`${item.id_komoditas}_produksi_volume`]:
+                        item.volume_produksi,
+                    [`${item.id_komoditas}_total_volume`]: item.volume_total,
+                };
+            });
             const konsumsiArtValues = konsumsiArt.reduce(
                 (
                     result: { [x: string]: any },
@@ -234,11 +227,13 @@ const Art: React.FC<{
             konsumsiArtValues[`blok4_31_${nomor_art}_id_art`] = id_art;
             form.setFieldsValue(konsumsiArtValues);
             // setLoading(false);
-            console.log({konsumsiArtValues});
-            
+            // console.log({ konsumsiArtValues });
+
             setLoading(false);
         };
         fetchKonsumsiArt(id_art);
+        console.log({ art });
+
         // calculateRekap();
     }, [id_art]);
 
@@ -246,7 +241,7 @@ const Art: React.FC<{
         form.setFieldsValue({ id_ruta, id_art });
         calculateKalori(form.getFieldsValue()).then((totalKalori) => {
             let newDaftarArt = [...daftarArt];
-            
+
             newDaftarArt[nomor_art]["kalori"] = totalKalori;
         });
     }, [form]);
@@ -271,8 +266,6 @@ const Art: React.FC<{
                     <Space style={{ display: loading ? "" : "none" }}>
                         Menyimpan... <Spin />
                     </Space>
-
-                    
                 </Space>
 
                 <TabelBlok

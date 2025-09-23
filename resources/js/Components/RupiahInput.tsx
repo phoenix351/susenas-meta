@@ -14,7 +14,7 @@ interface RupiahInputProps {
     style?: React.CSSProperties;
     disabled?: boolean;
     validateStatus?: ValidateStatus;
-    rules?:Rule[]
+    rules?: Rule[];
 }
 
 const RupiahInput: React.FC<RupiahInputProps> = ({
@@ -26,7 +26,8 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
     style,
     disabled,
     validateStatus,
-    rules
+    help,
+    rules,
 }) => {
     const [value, setValue] = useState(0);
     const handleChange = (nilai: any) => {
@@ -49,6 +50,7 @@ const RupiahInput: React.FC<RupiahInputProps> = ({
             style={{ marginBottom: "4px" }}
             validateStatus={validateStatus}
             rules={rules}
+            help={help}
         >
             <InputNumber
                 disabled={disabled}

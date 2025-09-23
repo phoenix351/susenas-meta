@@ -43,16 +43,26 @@ const ProgressChart = () => {
             const { data } = await axios.get(
                 route("api.monitoring.wilayah", { tipe, kode })
             );
-            let addedEmptyData = data.map((kabkot: any) => ({
-                ...kabkot,
-                empty:
-                    tipe == "kabkot"
-                        ? kabkot.target -
-                          kabkot.warning -
-                          kabkot.clean -
-                          kabkot.error
-                        : 10 - kabkot.warning - kabkot.clean - kabkot.error,
-            }));
+            let addedEmptyData = data.map((kabkot: any) => {
+                // Tentukan total sampel. Gunakan kabkot.target jika ada, jika tidak, gunakan 10.
+                if (tipe == "nks") {
+                    kabkot.target = 10;
+                }
+                const totalSamples = kabkot.target ?? 10;
+
+                // Hitung jumlah sampel yang sudah terisi (warning, clean, error)
+                const processedSamples =
+                    kabkot.warning + kabkot.clean + kabkot.error;
+
+                // Hitung sisa sampel yang 'empty'
+                const emptyCount = totalSamples - processedSamples;
+
+                return {
+                    ...kabkot,
+                    // Pastikan nilai 'empty' tidak negatif, minimal 0
+                    empty: Math.max(0, emptyCount),
+                };
+            });
             // if (tipe == "kabkot") {
             // } else {
             // }

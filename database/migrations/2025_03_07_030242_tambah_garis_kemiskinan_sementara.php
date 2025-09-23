@@ -13,9 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('kabkot', function (Blueprint $table) {
-        //     $table->integer("garis_kemiskinan_sementara")->default(0)->change();
-        // });
+        // return;
+        Schema::table('kabkot', function (Blueprint $table) {
+            $table->integer("garis_kemiskinan_sementara")->default(0);
+        });
         $daftar_inflasi = [
             ["kode_kabkot" => "00", "inflasi" => 0.15],
             ["kode_kabkot" => "01", "inflasi" => 0],
@@ -43,7 +44,7 @@ return new class extends Migration
             $kabkot->garis_kemiskinan_sementara = $garis_kemiskinan_sementara;
             $kabkot->save();
         }
-        dd([$kabkot, $garis_kemiskinan_sementara]);
+        // dd([$kabkot, $garis_kemiskinan_sementara]);
         // DB::commit();
     }
 

@@ -1,26 +1,8 @@
-import {
-    Button,
-    Divider,
-    Form,
-    Image,
-    Input,
-    InputNumber,
-    Select,
-    Space,
-    Table,
-    Tabs,
-    Typography,
-    message,
-} from "antd";
-import { useEffect, useRef, useState } from "react";
+import { Form, Input, Tabs, Typography, message } from "antd";
+import { useEffect } from "react";
 import _debounce from "lodash/debounce";
 // import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
-import axios from "axios";
-import Blok4_1_hal10 from "./Blok4_1_hal10";
-import Blok4_1_hal2 from "./Blok4_1_hal2";
-import Blok4_1_hal4 from "./Blok4_1_hal4";
-import Blok4_1_hal6 from "./Blok4_1_hal6";
-import Blok4_1_hal8 from "./Blok4_1_hal8";
+
 import { RekapMak, SubTotal } from "@/types";
 import Blok4_1Tab from "./Blok4_1Tab";
 
