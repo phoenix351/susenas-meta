@@ -4,24 +4,62 @@ import { useEffect, useState } from "react";
 import { Head } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { ReactElement, JSXElementConstructor, ReactPortal } from "react";
-import {
-    Button,
-    Table,
-    Space,
-    Typography,
-    message,
-    Progress,
-    Form,
-    Checkbox,
-    Select,
-} from "antd";
+import { Button, Space, message, Form, Select } from "antd";
 // import { Table } from "ant-table-extensions";
-import { ExportOutlined, SyncOutlined } from "@ant-design/icons";
-import { CompareFn } from "antd/es/table/interface";
-import TextRupiah from "@/Components/TextRupiah";
-import { createNumberSorter } from "@/Functions/ColumnSorter";
+import { SyncOutlined } from "@ant-design/icons";
 import axios from "axios";
-const { Title } = Typography;
+const API_BASE = "http://localhost:8000";
+
+// Build endpoints here. Update `calculate` to your real route.
+const ENDPOINTS = {
+    revalidasi: (id: string) => `${API_BASE}/mak/revalidasi/${id}`,
+    calculate: (id: string) => `${API_BASE}/mak/qc/${id}`, // TODO: change if different
+};
+
+async function runWithConcurrency<T>(
+    items: T[],
+    limit: number,
+    worker: (item: T, idx: number) => Promise<any>
+) {
+    const results: PromiseSettledResult<any>[] = [];
+    let i = 0;
+
+    async function next(): Promise<void> {
+        if (i >= items.length) return;
+        const idx = i++;
+        try {
+            const res = await worker(items[idx], idx);
+            results[idx] = {
+                status: "fulfilled",
+                value: res,
+            } as PromiseFulfilledResult<any>;
+        } catch (e) {
+            results[idx] = {
+                status: "rejected",
+                reason: e,
+            } as PromiseRejectedResult;
+        }
+        return next();
+    }
+
+    const runners = Array.from({ length: Math.min(limit, items.length) }, () =>
+        next()
+    );
+    await Promise.all(runners);
+    return results;
+}
+
+function pct(done: number, total: number) {
+    if (total === 0) return 100;
+    return Math.round((done / total) * 10000) / 100; // 2 decimals
+}
+
+function normalizeIds(id_rutas: string[]) {
+    // keep only plausible UUIDs (your original length>10)
+    return (id_rutas || []).filter(
+        (s) => typeof s === "string" && s.length > 10
+    );
+}
 
 const index = ({
     data,
@@ -45,99 +83,133 @@ const index = ({
     ];
 
     const calculateQc = async (id_rutas: string[]) => {
-        try {
+        const ids = normalizeIds(id_rutas);
+        const total = ids.length;
+        if (total === 0) {
             messageApi.open({
-                content: `sedang menghitung blok QC ruta 0 dari ${data.length}`,
-                duration: 0,
-                type: "loading",
-                key: "calculate-qc",
+                content: "Tidak ada ID ruta yang valid untuk dihitung.",
+                type: "warning",
             });
-            id_rutas = id_rutas.filter((id_ruta) => id_ruta.length > 10);
+            return;
+        }
 
-            // Define the batch size and concurrency limit
-            const batchSize = 5;
+        setUpdateLoading(true);
+        let done = 0,
+            ok = 0,
+            fail = 0;
 
-            // Helper function to process a batch of requests
+        messageApi.open({
+            content: `Mulai kalkulasi QC: 0/${total} (0%)`,
+            duration: 0,
+            type: "loading",
+            key: "calculate-qc",
+        });
 
-            // Process requests in batches with concurrency control
-            for (let i = 0; i < id_rutas.length; i += batchSize) {
-                // Handle results if needed
-                setCurrent(i);
+        try {
+            const CONCURRENCY = 5;
+
+            await runWithConcurrency(ids, CONCURRENCY, async (id) => {
+                const url = ENDPOINTS.calculate(id);
+                const resp = await axios.get(url); // adjust to POST if your API expects it
+                ok++;
+                done++;
+                setCurrent(done);
                 messageApi.open({
-                    content: `sedang menghitung blok QC ruta ${i} dari ${
-                        data.length
-                    } (${Math.round(((i * 100) / data.length) * 100) / 100} %)`,
+                    content: `Kalkulasi QC ${done}/${total} (${pct(
+                        done,
+                        total
+                    )}%) — sukses:${ok} gagal:${fail}`,
                     duration: 0,
                     type: "loading",
-                    icon: "",
                     key: "calculate-qc",
                 });
-                // break;
-            }
-        } catch (error) {
-            console.log("Something went wrong", { error });
+                return resp;
+            });
+
             messageApi.open({
-                content: `terjadi kesalahan pada ruta ${data.length} dari ${data.length}`,
-                duration: 1,
+                content: `Selesai kalkulasi QC: ${ok}/${total} sukses, ${fail} gagal`,
+                duration: 2,
+                type: "success",
+                key: "calculate-qc",
+            });
+        } catch (e) {
+            // We also count failures in the worker above; this is a last-resort catch.
+            messageApi.open({
+                content: `Kalkulasi QC gagal: ${ok}/${total} sukses, ${fail} gagal`,
+                duration: 2,
                 type: "error",
                 key: "calculate-qc",
             });
         } finally {
             setUpdateLoading(false);
-            messageApi.open({
-                content: `selesai menghitung blok QC ruta ${data.length} dari ${data.length}`,
-                duration: 1,
-                type: "success",
-                key: "calculate-qc",
-            });
         }
     };
+
     const revalidasi = async (id_rutas: string[]) => {
-        try {
+        const ids = normalizeIds(id_rutas);
+        const total = ids.length;
+        if (total === 0) {
             messageApi.open({
-                content: `sedang revalidasi ruta 0 dari ${data.length}`,
-                duration: 0,
-                type: "loading",
-                key: "calculate-qc",
+                content: "Tidak ada ID ruta yang valid untuk direvalidasi.",
+                type: "warning",
             });
-            id_rutas = id_rutas.filter((id_ruta) => id_ruta.length > 10);
+            return;
+        }
 
-            // Define the batch size and concurrency limit
-            const batchSize = 5;
+        setUpdateLoading(true);
+        let done = 0,
+            ok = 0,
+            fail = 0;
 
-            // Helper function to process a batch of requests
+        messageApi.open({
+            content: `Mulai revalidasi: 0/${total} (0%)`,
+            duration: 0,
+            type: "loading",
+            key: "revalidasi",
+        });
 
-            // Process requests in batches with concurrency control
-            for (let i = 0; i < id_rutas.length; i += batchSize) {
-                // Handle results if needed
-                setCurrent(i);
-                messageApi.open({
-                    content: `sedang revalidasi ruta ${i} dari ${
-                        data.length
-                    } (${Math.round(((i * 100) / data.length) * 100) / 100} %)`,
+        try {
+            const CONCURRENCY = 5;
 
-                    duration: 0,
-                    type: "loading",
-                    icon: "",
-                    key: "calculate-qc",
-                });
-                // break;
-            }
-        } catch (error) {
+            await runWithConcurrency(ids, CONCURRENCY, async (id) => {
+                const url = ENDPOINTS.revalidasi(id);
+                try {
+                    const resp = await axios.get(url); // adjust to POST if needed
+                    ok++;
+                    return resp;
+                } catch (err) {
+                    fail++;
+                    throw err;
+                } finally {
+                    done++;
+                    setCurrent(done);
+                    messageApi.open({
+                        content: `Revalidasi ${done}/${total} (${pct(
+                            done,
+                            total
+                        )}%) — sukses:${ok} gagal:${fail}`,
+                        duration: 0,
+                        type: "loading",
+                        key: "revalidasi",
+                    });
+                }
+            });
+
             messageApi.open({
-                content: `terjadi kesalahan pada ruta ${data.length} dari ${data.length}`,
-                duration: 1,
+                content: `Selesai revalidasi: ${ok}/${total} sukses, ${fail} gagal`,
+                duration: 2,
+                type: "success",
+                key: "revalidasi",
+            });
+        } catch (e) {
+            messageApi.open({
+                content: `Revalidasi selesai dengan error: ${ok}/${total} sukses, ${fail} gagal`,
+                duration: 2,
                 type: "error",
-                key: "calculate-qc",
+                key: "revalidasi",
             });
         } finally {
             setUpdateLoading(false);
-            messageApi.open({
-                content: `selesai menghitung blok QC ruta ${data.length} dari ${data.length}`,
-                duration: 1,
-                type: "success",
-                key: "calculate-qc",
-            });
         }
     };
     async function handleExport(values: any) {

@@ -538,6 +538,11 @@ class MonitoringController extends Controller
             'konsumsi_perkapita_basket_komoditas' => $konsumsi_basket,
             'jumlah_individu'                     => $jumlah_individu,
             'jumlah_ruta'                         => $jumlah_ruta,
+            'jumlah_dok'                          => $jumlah_ruta,
+            'target_nks'                         => DB::table('master_wilayah')->where('kode_kabkot', $kode_kabkot)->count('nks') ?? 0,
+            'kode_prov'                           => '71',
+            'kode_kabkot'                         => $kode_kabkot,
+            'kabkot'                              => Kabkot::where('kode', $kode_kabkot)->value('nama') ?? null,
         ];
 
         // 6) Atomic save
@@ -566,13 +571,11 @@ class MonitoringController extends Controller
             }
 
             // Mirror to kabkot_summary (optional, only if kab/kot != "00")
-            if ($kode_kabkot !== '00') {
-                // dd($kabkotRow);
-                DB::table('kabkot_summary')
-                    ->where('kode_kabkot', $kode_kabkot)
-                    ->update($kabkotRow);
-            }
+
+            // dd($kabkotRow);
+            DB::table('kabkot_summary')->upsert($kabkotRow, ['kode_kabkot'], array_keys($kabkotRow));
         });
+        // dd($kabkotRow, $kode_kabkot);
     }
 
     public function calculate_ruta_summary($kode_kabkot)
@@ -643,7 +646,7 @@ class MonitoringController extends Controller
             // }
 
 
-            // $this->hitung_summary_kabupaten_kota($kabkot->kode);
+            $this->hitung_summary_kabupaten_kota($kabkot->kode);
             $this->calculate_ruta_summary($kabkot->kode);
             $up[] = $kabkot->kode;
             // continue;

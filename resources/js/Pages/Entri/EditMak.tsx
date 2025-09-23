@@ -49,7 +49,12 @@ import ScrollToTopButton from "@/Components/SmoothScrollToTop";
 import { useEnterAsTab } from "@/Hooks/useEnterAsTab";
 
 // types coming from your project
-import type { AnggotaRumahTangga, PageProps, Rincian } from "@/types";
+import type {
+    AnggotaRumahTangga,
+    PageProps,
+    Rincian,
+    WarningRangeHarga,
+} from "@/types";
 import Blok_QC from "@/Forms/Mak/Blok_QC";
 import axios from "axios";
 
@@ -129,7 +134,10 @@ const Mak = ({
     const [openModal, setOpenModal] = useState(false);
     const [loadingReval, setLoadingReval] = useState(false);
     const [warningList, setWarningList] = useState<any[]>([]);
-    const [warningRHList, setWarningRHList] = useState<any[]>([]);
+    const [warningRHList, setWarningRHList] = useState<WarningRangeHarga>({
+        range: [],
+        missing_basket: [],
+    });
     const [errorList, setErrorList] = useState<any[]>([]);
     const [statusCacah, setStatusCacah] = useState(true);
 
@@ -376,6 +384,10 @@ const Mak = ({
                                     setLoadingReval,
                                     ({ err, warn, warnRH }) => {
                                         setErrorList(err);
+                                        warn = [
+                                            ...warn,
+                                            // ...warnRH.missing_basket,
+                                        ];
                                         setWarningList(warn);
                                         setWarningRHList(warnRH);
                                     },
@@ -659,7 +671,7 @@ const Mak = ({
                                 {
                                     label: (
                                         <Badge
-                                            count={warningRHList.length}
+                                            count={warningRHList.range.length}
                                             color="rgb(255, 204, 0)"
                                         >
                                             Warning Range Harga
@@ -670,12 +682,12 @@ const Mak = ({
                                         <>
                                             <Space>
                                                 Jumlah warning range harga:{" "}
-                                                {warningRHList.length}
+                                                {warningRHList.range.length}
                                             </Space>
                                             <Table
                                                 bordered
                                                 columns={rangeHargaColumns}
-                                                dataSource={warningRHList}
+                                                dataSource={warningRHList.range}
                                                 style={{ width: "100%" }}
                                             />
                                         </>

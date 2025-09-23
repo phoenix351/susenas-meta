@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { message } from "antd";
 import { api } from "./api";
 import { calculateQc, recalcRekapMak, sumHargaByPattern } from "./qc";
+import { WarningRangeHarga } from "@/types";
 
 export function useCtrlSSubmit(form: any) {
     useEffect(() => {
@@ -34,16 +35,14 @@ export function useSubTotalCalculator(blok41Form: any, setRekapMak: any) {
                     next[sub].total = next[sub].beli + next[sub].produksi;
             });
             // subtotal/averages
-            next[14] = next
-                .slice(0, 14)
-                .reduce(
-                    (p, c) => ({
-                        beli: p.beli + (c?.beli || 0),
-                        produksi: p.produksi + (c?.produksi || 0),
-                        total: p.total + (c?.total || 0),
-                    }),
-                    { beli: 0, produksi: 0, total: 0 }
-                );
+            next[14] = next.slice(0, 14).reduce(
+                (p, c) => ({
+                    beli: p.beli + (c?.beli || 0),
+                    produksi: p.produksi + (c?.produksi || 0),
+                    total: p.total + (c?.total || 0),
+                }),
+                { beli: 0, produksi: 0, total: 0 }
+            );
             next[15].total = Math.round((next[14].total * 30) / 7);
             next[17].total = next[15].total + next[16].total;
             return next;
@@ -117,7 +116,11 @@ export function useSimpanAll({
 export async function doRevalidasi(
     id_ruta: string,
     setLoading: any,
-    setLists: (x: { err: any[]; warn: any[]; warnRH: any[] }) => void,
+    setLists: (x: {
+        err: any[];
+        warn: any[];
+        warnRH: WarningRangeHarga;
+    }) => void,
     messageApi: any
 ) {
     try {

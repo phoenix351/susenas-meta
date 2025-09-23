@@ -135,3 +135,8 @@ interface KomoditasSummary {
     type: string;
     updated_at: Date;
 }
+
+interface WarningRangeHarga {
+    range: any[];
+    missing_basket: any[];
+}
